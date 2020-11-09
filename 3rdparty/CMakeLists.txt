@@ -5,3 +5,5 @@
 option(DOCTEST_NO_INSTALL  "Skip the installation process" ON)
 add_subdirectory(doctest)
 add_subdirectory(justrx)
+
+add_subdirectory(libaco)
