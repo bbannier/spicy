@@ -100,9 +100,6 @@ private:
     std::optional<std::any> _result;
     std::exception_ptr _exception;
 
-    jmp_buf _fiber{};
-    jmp_buf _parent{};
-
     aco_t* co = nullptr;
     aco_share_stack_t* sstk = nullptr;
 

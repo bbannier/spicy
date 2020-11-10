@@ -44,25 +44,20 @@ void _Trampoline() {
 
         assert(fiber->_state == Fiber::State::Running);
 
-        {
-            // In parent.
-            try {
-                HILTI_RT_DEBUG("fibers", "NOPE");
-                fiber->_result = (*fiber->_function)(fiber);
-            } catch ( ... ) {
-                HILTI_RT_DEBUG("fibers", fmt("[%p] got exception, forwarding", fiber));
-                fiber->_exception = std::current_exception();
-            }
-
-            fiber->_state = Fiber::State::Finished;
+        try {
+            fiber->_result = (*fiber->_function)(fiber);
+        } catch ( ... ) {
+            HILTI_RT_DEBUG("fibers", fmt("[%p] got exception, forwarding", fiber));
+            fiber->_exception = std::current_exception();
         }
 
-        {
-            fiber->_function = {};
-            fiber->_state = Fiber::State::Idle;
-            fiber->_startSwitchFiber("trampoline-loop");
-            aco_yield();
-        }
+        fiber->_state = Fiber::State::Finished;
+
+        fiber->_function = {};
+        fiber->_state = Fiber::State::Idle;
+
+        fiber->_startSwitchFiber("trampoline-loop");
+        aco_yield();
 
         fiber->_finishSwitchFiber("trampoline-loop");
     }
@@ -77,7 +72,7 @@ Fiber::Fiber() : sstk(aco_share_stack_new(0)) {
 
     auto* main_co = globalState()->main_co;
     assert(main_co);
-    co = aco_create(main_co, sstk, 4096, (void (*)())_Trampoline, this);
+    co = aco_create(main_co, sstk, 4096, _Trampoline, this);
 
     ++_total_fibers;
     ++_current_fibers;
@@ -98,35 +93,31 @@ Fiber::~Fiber() {
 }
 
 void Fiber::run() {
-    auto init = (_state == State::Init);
-
     if ( _state != State::Aborting )
         _state = State::Running;
 
     _startSwitchFiber("run", co->save_stack.ptr, co->save_stack.sz);
-    // FIXME(bbannier): need to set up stack like with `setcontext`?
 
-    if ( ! init )
-        aco_resume(co);
+    aco_resume(co);
 
     _finishSwitchFiber("run");
 
     switch ( _state ) {
         case State::Yielded:
         case State::Idle: return;
-
-        default: internalError("fiber: unexpected case");
+        case State::Aborting:
+        case State::Finished:
+        case State::Init:
+        case State::Running: internalError("fiber: unexpected case");
     }
 }
 
 void Fiber::yield() {
     assert(_state == State::Running);
 
-    if ( ! _setjmp(_fiber) ) {
-        _state = State::Yielded;
-        _startSwitchFiber("yield");
-        _longjmp(_parent, 1);
-    }
+    _state = State::Yielded;
+    _startSwitchFiber("yield");
+    aco_yield();
 
     _finishSwitchFiber("yield");
 
