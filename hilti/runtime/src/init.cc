@@ -2,9 +2,11 @@
 
 #include "hilti/rt/init.h"
 
+#include <libaco/aco.h>
 #include <sys/resource.h>
 #include <unistd.h>
 
+#include <cinttypes>
 #include <clocale>
 
 #include <hilti/rt/configuration.h>
@@ -18,6 +20,10 @@ using namespace hilti::rt::detail;
 void hilti::rt::init() {
     if ( globalState()->runtime_is_initialized )
         return;
+
+    // Initialize libaco state.
+    aco_thread_init(nullptr);
+    globalState()->main_co = aco_create(nullptr, nullptr, 0, nullptr, nullptr);
 
     if ( ! setlocale(LC_CTYPE, "") )
         fatalError("cannot set locale");

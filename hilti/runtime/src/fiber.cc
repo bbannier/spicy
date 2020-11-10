@@ -5,6 +5,8 @@
 #undef _FORTIFY_SOURCE
 #endif
 
+#include <cassert>
+
 #include <hilti/rt/autogen/config.h>
 #include <hilti/rt/context.h>
 #include <hilti/rt/exception.h>
@@ -25,13 +27,9 @@ std::size_t _main_thread_size = 0;
 
 extern "C" {
 
-void _Trampoline(unsigned int y, unsigned int x) {
-    // Magic from from libtask/task.c to turn the two words back into a pointer.
-    unsigned long z; // NOLINT
-    z = (x << 16U);
-    z <<= 16U;
-    z |= y;
-    auto fiber = (Fiber*)z; // NOLINT
+void _Trampoline() {
+    auto* fiber = reinterpret_cast<Fiber*>(aco_get_arg()); // NOLINT
+    assert(fiber);
 
     HILTI_RT_DEBUG("fibers", fmt("[%p] entering trampoline loop", fiber));
     fiber->_finishSwitchFiber("trampoline-init");
@@ -46,9 +44,10 @@ void _Trampoline(unsigned int y, unsigned int x) {
 
         assert(fiber->_state == Fiber::State::Running);
 
-        if ( ! _setjmp(fiber->_trampoline) ) {
+        {
             // In parent.
             try {
+                HILTI_RT_DEBUG("fibers", "NOPE");
                 fiber->_result = (*fiber->_function)(fiber);
             } catch ( ... ) {
                 HILTI_RT_DEBUG("fibers", fmt("[%p] got exception, forwarding", fiber));
@@ -58,38 +57,27 @@ void _Trampoline(unsigned int y, unsigned int x) {
             fiber->_state = Fiber::State::Finished;
         }
 
-        if ( ! _setjmp(fiber->_fiber) ) {
+        {
             fiber->_function = {};
             fiber->_state = Fiber::State::Idle;
             fiber->_startSwitchFiber("trampoline-loop");
-            _longjmp(fiber->_parent, 1);
+            aco_yield();
         }
 
         fiber->_finishSwitchFiber("trampoline-loop");
     }
 
     HILTI_RT_DEBUG("fibers", fmt("[%p] finished trampoline loop", fiber));
+
+    aco_exit();
 }
 
-Fiber::Fiber() {
+Fiber::Fiber() : sstk(aco_share_stack_new(0)) {
     HILTI_RT_DEBUG("fibers", fmt("[%p] allocated new fiber", this));
 
-    if ( getcontext(&_uctx) < 0 )
-        internalError("fiber: getcontext failed");
-
-    _uctx.uc_link = nullptr;
-    _uctx.uc_stack.ss_size = StackSize;
-    _uctx.uc_stack.ss_sp = new char[StackSize];
-    _uctx.uc_stack.ss_flags = 0;
-
-    // Magic from from libtask/task.c to turn the pointer into two words.
-    // TODO(robin): Probably not portable ...
-    unsigned long z = (unsigned long)this; // NOLINT
-    unsigned int y = z;
-    z >>= 16U;
-    unsigned int x = (z >> 16U);
-
-    makecontext(&_uctx, (void (*)())_Trampoline, 2, y, x); // NOLINT (cppcoreguidelines-pro-type-cstyle-cast)
+    auto* main_co = globalState()->main_co;
+    assert(main_co);
+    co = aco_create(main_co, sstk, 4096, (void (*)())_Trampoline, this);
 
     ++_total_fibers;
     ++_current_fibers;
@@ -104,7 +92,8 @@ class AbortException : public std::exception {};
 Fiber::~Fiber() {
     HILTI_RT_DEBUG("fibers", fmt("[%p] deleting fiber", this));
 
-    delete[] static_cast<char*>(_uctx.uc_stack.ss_sp);
+    aco_destroy(co);
+    aco_share_stack_destroy(sstk);
     --_current_fibers;
 }
 
@@ -114,17 +103,11 @@ void Fiber::run() {
     if ( _state != State::Aborting )
         _state = State::Running;
 
-    if ( ! _setjmp(_parent) ) {
-        _startSwitchFiber("run", _uctx.uc_stack.ss_sp, _uctx.uc_stack.ss_size);
+    _startSwitchFiber("run", co->save_stack.ptr, co->save_stack.sz);
+    // FIXME(bbannier): need to set up stack like with `setcontext`?
 
-        if ( init )
-            setcontext(&_uctx);
-        else {
-            _longjmp(_fiber, 1);
-        }
-
-        internalError("fiber: unreachable reached");
-    }
+    if ( ! init )
+        aco_resume(co);
 
     _finishSwitchFiber("run");
 

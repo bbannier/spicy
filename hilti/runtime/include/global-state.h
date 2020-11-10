@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <libaco/aco.h>
 #include <sys/resource.h>
 
 #include <memory>
@@ -69,6 +70,8 @@ struct GlobalState {
      * still need this information.
      */
     std::vector<hilti::rt::detail::HiltiModule> hilti_modules;
+
+    aco_t* main_co = nullptr;
 };
 
 /**
