@@ -51,8 +51,6 @@ void _Trampoline() {
             fiber->_exception = std::current_exception();
         }
 
-        fiber->_state = Fiber::State::Finished;
-
         fiber->_function = {};
         fiber->_state = Fiber::State::Idle;
 
@@ -63,11 +61,12 @@ void _Trampoline() {
     }
 
     HILTI_RT_DEBUG("fibers", fmt("[%p] finished trampoline loop", fiber));
+    assert(false);
 
     aco_exit();
 }
 
-Fiber::Fiber() : sstk(aco_share_stack_new(0)) {
+Fiber::Fiber() : sstk(aco_share_stack_new(4096)) {
     HILTI_RT_DEBUG("fibers", fmt("[%p] allocated new fiber", this));
 
     auto* main_co = globalState()->main_co;
