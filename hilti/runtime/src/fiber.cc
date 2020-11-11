@@ -39,6 +39,8 @@ void _Trampoline() {
     // function, and expects a new run function once it's resumed.
     ++Fiber::_initialized;
 
+    std::cerr << "NOPE: " << fiber << '\n';
+
     while ( true ) {
         HILTI_RT_DEBUG("fibers", fmt("[%p] new iteration of trampoline loop", fiber));
 
@@ -61,17 +63,16 @@ void _Trampoline() {
     }
 
     HILTI_RT_DEBUG("fibers", fmt("[%p] finished trampoline loop", fiber));
-    assert(false);
 
     aco_exit();
 }
 
-Fiber::Fiber() : sstk(aco_share_stack_new(4096)) {
+Fiber::Fiber() : private_sstk(aco_share_stack_new(4096)) {
     HILTI_RT_DEBUG("fibers", fmt("[%p] allocated new fiber", this));
 
     auto* main_co = globalState()->main_co;
     assert(main_co);
-    co = aco_create(main_co, sstk, 4096, _Trampoline, this);
+    co = aco_create(main_co, private_sstk, 4096, _Trampoline, this);
 
     ++_total_fibers;
     ++_current_fibers;
@@ -87,7 +88,7 @@ Fiber::~Fiber() {
     HILTI_RT_DEBUG("fibers", fmt("[%p] deleting fiber", this));
 
     aco_destroy(co);
-    aco_share_stack_destroy(sstk);
+    aco_share_stack_destroy(private_sstk);
     --_current_fibers;
 }
 

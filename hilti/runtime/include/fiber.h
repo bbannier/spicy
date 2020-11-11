@@ -101,7 +101,7 @@ private:
     std::exception_ptr _exception;
 
     aco_t* co = nullptr;
-    aco_share_stack_t* sstk = nullptr;
+    aco_share_stack_t* private_sstk = nullptr;
 
 #ifdef HILTI_HAVE_SANITIZER
     struct {
