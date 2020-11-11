@@ -28,7 +28,7 @@ std::size_t _main_thread_size = 0;
 extern "C" {
 
 void _Trampoline() {
-    auto* fiber = reinterpret_cast<Fiber*>(aco_get_arg()); // NOLINT
+    auto* fiber = reinterpret_cast<Fiber*>(aco_get_arg());
     assert(fiber);
 
     HILTI_RT_DEBUG("fibers", fmt("[%p] entering trampoline loop", fiber));
@@ -38,8 +38,6 @@ void _Trampoline() {
     // this trampoline is really a loop that yields after it has finished its
     // function, and expects a new run function once it's resumed.
     ++Fiber::_initialized;
-
-    std::cerr << "NOPE: " << fiber << '\n';
 
     while ( true ) {
         HILTI_RT_DEBUG("fibers", fmt("[%p] new iteration of trampoline loop", fiber));

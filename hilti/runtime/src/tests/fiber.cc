@@ -1,6 +1,7 @@
 // Copyright (c) 2020 by the Zeek Project. See LICENSE for details.
 
 #include <exception>
+#include <memory>
 #include <sstream>
 
 #include <hilti/rt/doctest.h>
@@ -11,7 +12,10 @@
 class TestDtor { //NOLINT
 public:
     explicit TestDtor(std::string& c) : c(c) { c += "ctor"; } //NOLINT
-    ~TestDtor() { c += "dtor"; }
+    ~TestDtor() {
+        std::cerr << "dtr\n";
+        c += "dtor";
+    }
     std::string& c;
 };
 
@@ -157,15 +161,15 @@ TEST_CASE("resume-result") {
 TEST_CASE("exception") {
     hilti::rt::init();
 
-    std::string x;
-    std::string c1;
-    std::string c2;
+    auto x = std::make_shared<std::string>();
+    auto c1 = std::make_shared<std::string>();
+    auto c2 = std::make_shared<std::string>();
 
-    auto f1 = [&](hilti::rt::resumable::Handle* r) {
-        TestDtor t(c1);
-        x = "Hello";
+    auto f1 = [=](hilti::rt::resumable::Handle* r) {
+        TestDtor t(*c1);
+        *x = "Hello";
         throw std::runtime_error("kaputt");
-        x += " from fiber!";
+        *x += " from fiber!";
         return hilti::rt::Nothing();
     };
 
@@ -173,29 +177,33 @@ TEST_CASE("exception") {
         auto r = hilti::rt::fiber::execute(f1);
         REQUIRE(false);
     } catch ( const std::exception& e ) {
-        REQUIRE(e.what() == std::string("kaputt"));
+        REQUIRE_EQ(e.what(), std::string("kaputt"));
         // REQUIRE(r);
-        REQUIRE(x == "Hello");
-        REQUIRE(c1 == "ctordtor");
+        REQUIRE(x);
+        REQUIRE_EQ(*x, "Hello");
+        REQUIRE(c1);
+        REQUIRE_EQ(*c1, "ctordtor");
     }
 
-    auto f2 = [&](hilti::rt::resumable::Handle* r) {
-        TestDtor t(c2);
-        x = "Hello";
+    auto f2 = [=](hilti::rt::resumable::Handle* r) {
+        TestDtor t(*c2);
+        *x = "Hello";
         r->yield();
-        x += " from";
+        *x += " from";
         throw std::runtime_error("kaputt");
-        x += " fiber!";
+        *x += " fiber!";
         return hilti::rt::Nothing();
     };
 
     auto r2 = hilti::rt::fiber::execute(f2);
-    REQUIRE(! r2);
+    REQUIRE_FALSE(r2);
 
     REQUIRE_THROWS_WITH(r2.resume(), "kaputt");
     REQUIRE(r2);
-    REQUIRE(x == "Hello from");
-    REQUIRE(c2 == "ctordtor");
+    REQUIRE(x);
+    REQUIRE_EQ(*x, "Hello from");
+    REQUIRE(c2);
+    REQUIRE_EQ(*c2, "ctordtor");
 }
 
 TEST_CASE("abort") {
