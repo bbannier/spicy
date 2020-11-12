@@ -49,7 +49,7 @@ foreach ( lib hilti-rt hilti-rt-debug )
     add_library(${lib}-objects OBJECT ${SOURCES})
     add_dependencies(${lib}-objects version)
     target_compile_options(${lib}-objects PRIVATE "-fPIC")
-    target_link_libraries(${lib}-objects PRIVATE Threads::Threads ${CMAKE_DL_LIBS} aco)
+    target_link_libraries(${lib}-objects PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
     target_include_directories(${lib}-objects BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
     target_include_directories(${lib}-objects BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>)
     target_include_directories(${lib}-objects BEFORE PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdparty>)
@@ -57,6 +57,7 @@ foreach ( lib hilti-rt hilti-rt-debug )
     # The following should instead just be:
     #
     #    target_link_libraries(${lib}-objects PRIVATE jrx-objects)
+    #    target_link_libraries(${lib}-objects PRIVATE aco)
     #
     # but does not pull in the object files for some reason. Since at least
     # with cmake-3.16.5 depending on some `TARGET_OBJECTS` does not ensure the
@@ -65,6 +66,9 @@ foreach ( lib hilti-rt hilti-rt-debug )
     add_dependencies(${lib}-objects jrx-objects)
     target_include_directories(${lib}-objects BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/3rdparty/justrx/include)
     target_link_libraries(${lib}-objects      PRIVATE $<TARGET_OBJECTS:jrx-objects>)
+
+    add_dependencies(${lib}-objects aco)
+    target_link_libraries(${lib}-objects PRIVATE $<TARGET_OBJECTS:aco>)
 
     add_library(${lib} STATIC)
     target_link_libraries(${lib} ${lib}-objects)
