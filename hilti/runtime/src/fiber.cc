@@ -68,9 +68,7 @@ void _Trampoline() {
 Fiber::Fiber() : private_sstk(aco_share_stack_new(4096)) {
     HILTI_RT_DEBUG("fibers", fmt("[%p] allocated new fiber", this));
 
-    auto* main_co = globalState()->main_co;
-    assert(main_co);
-    co = aco_create(main_co, private_sstk, 4096, _Trampoline, this);
+    co = aco_create(globalState()->main_co, private_sstk, private_sstk->sz, _Trampoline, this);
 
     ++_total_fibers;
     ++_current_fibers;
