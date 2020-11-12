@@ -8,4 +8,5 @@ add_subdirectory(justrx)
 
 # CMake setup for libaco.
 add_library(aco OBJECT libaco/acosw.S libaco/aco.c)
+set_target_properties(aco PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(aco PUBLIC libaco)
