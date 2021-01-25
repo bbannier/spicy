@@ -11,8 +11,9 @@ jobs:
         fetch-depth: 0
     - name: Checkout submodules
       run: git submodule update --init --recursive
+    - name: Get version
+      run: echo ::save-state name=RELEASE_VERSION::$(./scripts/autogen-version --short)
     - name: Publish to Registry
-      pre: echo ::save-state name=RELEASE_VERSION::$(./scripts/autogen-version --short)
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: bbannier/spicy
