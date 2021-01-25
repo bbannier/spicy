@@ -7,7 +7,8 @@ jobs:
     - uses: actions/checkout@master
     - name: Checkout repository
       uses: actions/checkout@v2
-      fetch-depth: 0
+      with:
+        fetch-depth: 0
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Publish to Registry
