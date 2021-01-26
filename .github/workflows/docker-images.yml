@@ -12,7 +12,7 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Get version
-      run: echo ::set-output name=RELEASE_VERSION::$(./scripts/autogen-version --short)
+      run: echo "::set-output name=RELEASE_VERSION::$(./scripts/autogen-version --short)"
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
