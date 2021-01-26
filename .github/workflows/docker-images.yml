@@ -11,8 +11,10 @@ jobs:
         fetch-depth: 0
     - name: Checkout submodules
       run: git submodule update --init --recursive
-    - name: Get version
-      run: echo "::set-output name=RELEASE_VERSION::$(./scripts/autogen-version --short)"
+    - name: Version
+      run: |
+        RELEASE_VERSION="$(./scripts/autogen-version --short)" && echo ${RELEASE_VERSION}
+        echo "::set-output name=RELEASE_VERSION::$(./scripts/autogen-version --short)"
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
@@ -29,5 +31,5 @@ jobs:
         file: ci/Dockerfile
         push: true
         tags: |
-          bbannier/spicy:latest
-          bbannier/spicy:${{ steps.get_version.output.RELEASE_VERSION }}
+          ${{ secrets.DOCKER_USERNAME }}/spicy:latest
+          ${{ secrets.DOCKER_USERNAME }}/spicy:${{ steps.version.outputs.RELEASE_VERSION }}
