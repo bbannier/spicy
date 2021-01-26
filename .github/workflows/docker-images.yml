@@ -30,4 +30,4 @@ jobs:
         push: true
         tags: |
           bbannier/spicy:latest
-          bbannier/spicy:${{ steps.get_version.outputs.RELEASE_VERSION }}
+          bbannier/spicy:${{ steps.get_version.output.RELEASE_VERSION }}
