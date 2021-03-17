@@ -1,6 +1,6 @@
 FROM fedora:32
 
-ARG ZEEK_VERSION=3.0.11-2.1
+ARG ZEEK_VERSION=4.0.0-0
 
 RUN echo 'LC_CTYPE="C"' >> /etc/locale.conf \
  && echo 'LC_ALL="C"' >> /etc/locale.conf \

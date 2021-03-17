@@ -62,7 +62,7 @@ clang10_zeek_lts_ubuntu_release_task:
     dockerfile: ci/Dockerfile
     docker_arguments:
       - ZEEK_LTS: 1
-      - ZEEK_VERSION: 3.0.11-0
+      - ZEEK_VERSION: 4.0.0-0
     cpu: 4
     memory: 8G
 
@@ -110,7 +110,7 @@ clang9_zeek_lts_ubuntu_release_static_task:
     dockerfile: ci/Dockerfile
     docker_arguments:
       - ZEEK_LTS: 1
-      - ZEEK_VERSION: 3.0.11-0
+      - ZEEK_VERSION: 4.0.0-0
     cpu: 4
     memory: 8G
 
@@ -225,7 +225,7 @@ no_toolchain_task:
     dockerfile: ci/Dockerfile
     docker_arguments:
       - ZEEK_LTS: 1
-      - ZEEK_VERSION: 3.0.11-0
+      - ZEEK_VERSION: 4.0.0-0
     cpu: 4
     memory: 12G
 

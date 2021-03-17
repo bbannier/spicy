@@ -1,6 +1,6 @@
 FROM alpine:3.12
 
-ARG zeek_version=v3.0.3
+ARG zeek_version=v4.0.0
 
 WORKDIR /root
 

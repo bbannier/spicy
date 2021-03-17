@@ -1,6 +1,6 @@
 FROM centos:8
 
-ARG ZEEK_VERSION=3.0.11-2.2
+ARG ZEEK_VERSION=4.0.0-0
 
 ENV PATH="/opt/zeek/bin:/opt/rh/gcc-toolset-9/root/bin:${PATH}"
 

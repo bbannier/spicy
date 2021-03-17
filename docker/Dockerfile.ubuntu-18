@@ -1,6 +1,6 @@
 FROM ubuntu:bionic
 
-ARG ZEEK_VERSION=3.0.11-0
+ARG ZEEK_VERSION=4.0.0-0
 ENV BISON_VERSION "3.6.2"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
