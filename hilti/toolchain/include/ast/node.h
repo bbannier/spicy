@@ -98,6 +98,7 @@ class Node final : public node::detail::Node {
 public:
     /** Constructs a node from an instance of a class implementing the `Node` interface. */
     template<typename T, typename std::enable_if_t<std::is_base_of<trait::isNode, T>::value>* = nullptr>
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     Node(T t) : node::detail::Node(std::move(t)) {}
 
     Node(const Node& other) : node::detail::Node::Node(other), _scope(other._scope) {}
@@ -116,8 +117,10 @@ public:
     explicit Node(IntrusivePtr<hilti::node::detail::Concept> data) : node::detail::Node(std::move(data)) {}
 
     ~Node() final {
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
         if ( _control_ptr )
             _control_ptr->_node = nullptr;
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
     /**
@@ -562,6 +565,7 @@ std::vector<Node> nodes(std::vector<std::pair<T, U>> t) {
 template<typename T>
 std::vector<Node> nodes(T t) {
     return {to_node(std::move(t))};
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 /**

@@ -1691,28 +1691,34 @@ static Expression _filters(const ParserState& state) {
 
 Expression ParserBuilder::waitForInputOrEod() {
     return builder::call("spicy_rt::waitForInputOrEod", {state().data, state().cur, _filters(state())});
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 Expression ParserBuilder::atEod() {
     return builder::call("spicy_rt::atEod", {state().data, state().cur, _filters(state())});
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 void ParserBuilder::waitForInput(const std::string& error_msg, const Meta& location) {
     builder()->addCall("spicy_rt::waitForInput", {state().data, state().cur, builder::string(error_msg),
                                                   builder::expression(location), _filters(state())});
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 Expression ParserBuilder::waitForInputOrEod(const Expression& min) {
     return builder::call("spicy_rt::waitForInputOrEod", {state().data, state().cur, min, _filters(state())});
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 void ParserBuilder::waitForInput(const Expression& min, const std::string& error_msg, const Meta& location) {
     builder()->addCall("spicy_rt::waitForInput", {state().data, state().cur, min, builder::string(error_msg),
                                                   builder::expression(location), _filters(state())});
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 void ParserBuilder::waitForEod() {
     builder()->addCall("spicy_rt::waitForEod", {state().data, state().cur, _filters(state())});
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 void ParserBuilder::parseError(const Expression& error_msg, const Meta& location) {

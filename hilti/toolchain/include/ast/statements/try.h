@@ -51,6 +51,7 @@ public:
 /** AST node for a "try" statement. */
 class Try : public NodeBase, public hilti::trait::isStatement {
 public:
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     Try(hilti::Statement body, std::vector<try_::Catch> catches, Meta m = Meta())
         : NodeBase(nodes(std::move(body), std::move(catches)), std::move(m)) {}
 

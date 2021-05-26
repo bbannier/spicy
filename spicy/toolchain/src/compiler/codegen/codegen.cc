@@ -222,6 +222,7 @@ struct VisitorPassIterate : public hilti::visitor::PreOrder<void, VisitorPassIte
     result_t operator()(const operator_::unit::Backtrack& n, position_t p) {
         auto x = builder::call("spicy_rt::backtrack", {});
         replaceNode(&p, std::move(x));
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
     result_t operator()(const operator_::unit::ConnectFilter& n, position_t p) {
@@ -345,6 +346,7 @@ struct VisitorPassIterate : public hilti::visitor::PreOrder<void, VisitorPassIte
         b.addAssign(builder::id("__stop"), builder::bool_(true), n.meta());
         b.addReturn(n.meta());
         replaceNode(&p, b.block());
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
     void operator()(const type::ResolvedID& n, position_t p) {
@@ -362,6 +364,7 @@ struct VisitorPassIterate : public hilti::visitor::PreOrder<void, VisitorPassIte
         // instances doesn't copy the sink.
         auto sink = hilti::type::StrongReference(builder::typeByID("spicy_rt::Sink", n.meta()));
         replaceNode(&p, Type(sink));
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 };
 

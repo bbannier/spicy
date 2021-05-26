@@ -140,6 +140,7 @@ struct Normalizer : public hilti::visitor::PostOrder<void, Normalizer> {
             ops[0] = hilti::expression::UnresolvedOperator(hilti::operator_::Kind::Deref, {ops[0]}, ops[0].meta());
             Expression x = hilti::expression::UnresolvedOperator(u.kind(), std::move(ops), u.meta());
             replaceNode(&p, std::move(x));
+            // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
         };
 
         switch ( u.kind() ) {

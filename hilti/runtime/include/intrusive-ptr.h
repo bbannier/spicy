@@ -123,6 +123,7 @@ public:
     }
 
     ~IntrusivePtr() {
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
         if ( ptr_ )
             Unref(ptr_);
     }

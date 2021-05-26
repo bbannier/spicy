@@ -44,6 +44,7 @@ using ctor::detail::to_node;
 /** Constructs an AST node from any class implementing the `Ctor` interface. */
 template<typename T, typename std::enable_if_t<std::is_base_of<trait::isCtor, T>::value>* = nullptr>
 inline Node to_node(T t) {
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return Node(Ctor(std::move(t)));
 }
 

@@ -940,7 +940,10 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
 
     void operator()(const type::Time& n) { out << const_(n) << "time"; }
 
-    void operator()(const type::Type_& n) { out << const_(n) << fmt("type<%s>", n.typeValue()); }
+    void operator()(const type::Type_& n) {
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+        out << const_(n) << fmt("type<%s>", n.typeValue());
+    }
 
     void operator()(const type::union_::Field& n) {
         out << "    " << n.type() << ' ' << n.id();

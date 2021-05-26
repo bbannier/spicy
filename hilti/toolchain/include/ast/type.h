@@ -211,6 +211,7 @@ inline hilti::Type removeFlags(const Type& t, const type::Flags& flags) {
  * @return new type with the constness changed as requested
  */
 inline hilti::Type setConstant(const Type& t, bool const_) {
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     auto x = t._clone();
     x._state().flags.set(type::Flag::Constant, const_);
     return x;
@@ -360,6 +361,7 @@ inline bool sameExceptForConstness(const Type& t1, const Type& t2) { return t1.i
 /** Constructs an AST node from any class implementing the `Type` interface. */
 template<typename T, typename std::enable_if_t<std::is_base_of<trait::isType, T>::value>* = nullptr>
 inline Node to_node(T t) {
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return Node(Type(std::move(t)));
 }
 

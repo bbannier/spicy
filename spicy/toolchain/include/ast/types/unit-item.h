@@ -40,6 +40,7 @@ namespace item {
 /** Constructs an AST node from any class implementing the `Item` interface. */
 template<typename T, typename std::enable_if_t<std::is_base_of<trait::isUnitItem, T>::value>* = nullptr>
 inline Node to_node(T t) {
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return Node(Item(std::move(t)));
 }
 

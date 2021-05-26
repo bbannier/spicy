@@ -74,6 +74,7 @@ using declaration::detail::to_node;
 /** Constructs an AST node from any class implementing the `Declaration` interface. */
 template<typename T, typename std::enable_if_t<std::is_base_of<trait::isDeclaration, T>::value>* = nullptr>
 inline Node to_node(T t) {
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return Node(Declaration(std::move(t)));
 }
 
