@@ -37,6 +37,15 @@ std::optional<std::pair<ModuleID, StructID>> typeID(T&& x) {
     return {{id->sub(-2), id->sub(-1)}};
 }
 
+// Helper function to determine whether a hook should be stored.
+bool goodHook(const std::tuple<ModuleID, StructID, FieldID>& hook) {
+    // To collect both declaration of member functions and free
+    // functions we allow `struct_id` to be empty; all other
+    // identifiers are required so we can distinguish different
+    // functions.
+    return ! std::get<0>(hook).empty() && ! std::get<2>(hook).empty();
+}
+
 struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
     Visitor(GlobalOptimizer::Hooks* hooks) : _hooks(hooks) {}
 
@@ -96,37 +105,44 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
         auto type_ = p.findParent<declaration::Type>();
         bool is_cxx = type_ && AttributeSet::find(type_->get().attributes(), "&cxxname");
 
-        auto ids = std::make_tuple(module_id, struct_id, field_id);
+        auto hook_id = std::make_tuple(module_id, struct_id, field_id);
+
+        if ( ! goodHook(hook_id) )
+            return false;
 
         switch ( _stage ) {
             case Stage::COLLECT: {
+                auto& hook = (*_hooks)[hook_id];
+
                 auto fn = x.childsOfType<Function>();
                 assert(fn.size() <= 1);
 
                 bool is_always_emit = ! fn.empty() && AttributeSet::find(fn.front().attributes(), "&always-emit");
 
                 // Record a declaration for this member.
-                (*_hooks)[ids].declared = true;
+                hook.declared = true;
 
                 // If the member declaration is marked `&always-emit` mark it as implemented.
                 if ( is_always_emit )
-                    (*_hooks)[ids].defined = true;
+                    hook.defined = true;
 
                 // If the member declaration includes a body mark it as implemented.
                 if ( ! fn.empty() && fn.front().body() )
-                    (*_hooks)[ids].defined = true;
+                    hook.defined = true;
 
                 // If the unit is wrapped in a type with a `&cxxname`
                 // attribute its members are defined in C++ as well.
                 if ( is_cxx )
-                    (*_hooks)[ids].defined = true;
+                    hook.defined = true;
 
                 break;
             }
 
             case Stage::PRUNE: {
+                const auto& hook = _hooks->at(hook_id);
+
                 // Remove hooks without implementation.
-                if ( auto hook = _hooks->at(ids); ! hook.defined ) {
+                if ( ! hook.defined ) {
                     HILTI_DEBUG(logging::debug::GlobalOptimizer,
                                 util::fmt("removing field for unused hook %s::%s::%s", module_id, struct_id, field_id));
                     removeNode(p);
@@ -142,25 +158,30 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
     }
 
     result_t operator()(const declaration::Function& x, position_t p) {
+        auto module_id = x.id().sub(-3);
+        if ( module_id.empty() ) {
+            // HILTI hook functions do not include the name their module in their ID.
+            if ( auto module = p.findParent<Module>() )
+                module_id = module->get().id();
+        }
+
+        auto struct_id = x.id().sub(-2);
+        auto field_id = x.id().sub(-1);
+
+        auto hook_id = std::make_tuple(std::move(module_id), std::move(struct_id), std::move(field_id));
+
+        if ( ! goodHook(hook_id) )
+            return false;
+
         switch ( _stage ) {
             case Stage::COLLECT: {
-                auto module_id = x.id().sub(-3);
-                if ( module_id.empty() ) {
-                    // HILTI hook functions do not include the name their module in their ID.
-                    if ( auto module = p.findParent<Module>() )
-                        module_id = module->get().id();
-                }
+                // Record this hook as declared if it is not already known.
+                auto& hook = (*_hooks)[hook_id];
+                hook.declared = true;
 
                 auto struct_id = x.id().sub(-2);
                 auto field_id = x.id().sub(-1);
 
-                if ( module_id.empty() || struct_id.empty() ||
-                     field_id.empty() ) // Declaration does not look like for a member.
-                    return false;
-
-                // Record this hook if it is not already known.
-                auto hook_id = std::make_tuple(std::move(module_id), std::move(struct_id), std::move(field_id));
-                (*_hooks)[hook_id].defined = true;
                 break;
             }
 
@@ -190,15 +211,22 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
 
         auto hook_id = std::make_tuple(module_id, struct_id, member->id());
 
+        if ( ! goodHook(hook_id) )
+            return false;
+
         switch ( _stage ) {
             case Stage::COLLECT: {
-                (*_hooks)[hook_id].referenced = true;
+                auto& hook = (*_hooks)[hook_id];
+
+                hook.referenced = true;
                 return false;
             }
 
             case Stage::PRUNE: {
+                const auto& hook = _hooks->at(hook_id);
+
                 // Replace call node referencing unimplemented hook with default value.
-                if ( auto hook = _hooks->at(hook_id); ! hook.defined ) {
+                if ( ! hook.defined ) {
                     if ( auto fn = member->memberType()->tryAs<type::Function>() ) {
                         HILTI_DEBUG(logging::debug::GlobalOptimizer,
                                     util::fmt("replacing call to unimplemented hook %s::%s::%s with default value",
