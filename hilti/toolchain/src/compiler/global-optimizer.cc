@@ -3,6 +3,7 @@
 #include "hilti/compiler/global-optimizer.h"
 
 #include <optional>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 
@@ -11,6 +12,7 @@
 #include <hilti/ast/detail/visitor.h>
 #include <hilti/ast/expressions/ctor.h>
 #include <hilti/ast/node.h>
+#include <hilti/ast/statements/block.h>
 #include <hilti/ast/types/struct.h>
 #include <hilti/base/logger.h>
 #include <hilti/base/timing.h>
@@ -37,6 +39,8 @@ std::optional<std::pair<ModuleID, StructID>> typeID(T&& x) {
     return {{id->sub(-2), id->sub(-1)}};
 }
 
+std::pair<StructID, FieldID> declID(const ID& id) { return {id.sub(-2), id.sub(-1)}; }
+
 // Helper function to determine whether a hook should be stored.
 bool goodHook(const std::tuple<ModuleID, StructID, FieldID>& hook) {
     // To collect both declaration of member functions and free
@@ -49,9 +53,15 @@ bool goodHook(const std::tuple<ModuleID, StructID, FieldID>& hook) {
 struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
     Visitor(GlobalOptimizer::Hooks* hooks) : _hooks(hooks) {}
 
-    static void removeNode(position_t& p) { p.node = node::none; }
+    template<typename T>
+    static void replaceNode(const position_t& p, T&& n) {
+        p.node = std::forward<T>(n);
+    }
+
+    static void removeNode(position_t& p) { replaceNode(p, node::none); }
 
     Stage _stage = Stage::COLLECT;
+    GlobalOptimizer::Hooks* _hooks = nullptr;
 
     void collect(Node& node) {
         _stage = Stage::COLLECT;
@@ -64,6 +74,8 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
         _stage = Stage::PRUNE;
 
         for ( auto&& [hook_id, uses] : *_hooks ) {
+            std::cerr << "NOPE: " << std::get<0>(hook_id) << ' ' << std::get<1>(hook_id) << ' ' << std::get<2>(hook_id)
+                      << '\n';
             // Linker joins are implemented via functions, so if we remove all
             // functions data dependencies (e.g., needed for subunits) might
             // get broken. Leave at least one function in unit so it gets emitted.
@@ -87,8 +99,6 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
                 break;
         }
     }
-
-    // TODO(bbannier): Also collect global hooks (outside of a struct) as well.
 
     result_t operator()(const type::struct_::Field& x, position_t p) {
         if ( auto type_ = x.type().tryAs<type::Function>(); ! type_ )
@@ -168,7 +178,7 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
         auto struct_id = x.id().sub(-2);
         auto field_id = x.id().sub(-1);
 
-        auto hook_id = std::make_tuple(std::move(module_id), std::move(struct_id), std::move(field_id));
+        auto hook_id = std::make_tuple(module_id, struct_id, field_id);
 
         if ( ! goodHook(hook_id) )
             return false;
@@ -179,14 +189,55 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
                 auto& hook = (*_hooks)[hook_id];
                 hook.declared = true;
 
-                auto struct_id = x.id().sub(-2);
-                auto field_id = x.id().sub(-1);
+                // If the declaration contains a body mark the function as defined.
+                if ( ! x.childsOfType<statement::Block>().empty() )
+                    hook.defined = true;
 
                 break;
             }
 
             case Stage::PRUNE:
-                // Nothing.
+                const auto& hook = _hooks->at(hook_id);
+
+                auto module = p.findParent<Module>();
+
+                if ( ! module ) {
+                    const auto& root = p.parent(p.pathLength() - 1);
+                    for ( auto&& child : root.childs() ) {
+                        if ( auto module_ = child.tryAs<Module>() ) {
+                            module = module_;
+                            break;
+                        }
+                    }
+                }
+
+                assert(module);
+
+                // Defer ourself until the declaration is removed.
+                //
+                // FIXME(bbannier):: This should become unnecessary once we remove uses of `NodeRef`.
+                for ( auto&& decl : module->get().declarations() ) {
+                    if ( module_id == module->get().id() && field_id == decl.id() )
+                        return true;
+                }
+
+
+                if ( ! hook.defined ) {
+                    if ( ! struct_id.empty() ) {
+                        HILTI_DEBUG(logging::debug::GlobalOptimizer,
+                                    util::fmt("removing function declaration for unused hook %s::%s::%s", module_id,
+                                              struct_id, field_id));
+                    }
+                    else {
+                        HILTI_DEBUG(logging::debug::GlobalOptimizer,
+                                    util::fmt("removing function declaration for unused hook %s::%s", module_id,
+                                              field_id));
+                    }
+
+                    removeNode(p);
+                    return true;
+                }
+
                 break;
         }
 
@@ -245,7 +296,97 @@ struct Visitor : hilti::visitor::PreOrder<bool, Visitor> {
         return false;
     }
 
-    GlobalOptimizer::Hooks* _hooks = nullptr;
+    result_t operator()(const operator_::function::Call& call, position_t p) {
+        if ( ! call.hasOp0() )
+            return false;
+
+        auto id = call.op0().tryAs<expression::ResolvedID>();
+
+        if ( ! id )
+            return false;
+
+        auto [module_id, fn_id] = declID(id->id());
+
+        if ( module_id.empty() ) {
+            // Functions declared in this module do not include a module name in their ID.
+            if ( auto module = p.findParent<Module>() )
+                module_id = module->get().id();
+        }
+
+        auto hook_id = std::make_tuple(module_id, "", fn_id);
+
+        if ( ! goodHook(hook_id) )
+            return false;
+
+
+        switch ( _stage ) {
+            case Stage::COLLECT: {
+                auto& hook = (*_hooks)[hook_id];
+
+                hook.referenced = true;
+                return false;
+            }
+
+            case Stage::PRUNE: {
+                const auto& hook = _hooks->at(hook_id);
+
+                // Replace call node referencing unimplemented hook with default value.
+                if ( ! hook.defined ) {
+                    // FIXME(bbannier): this can run after the declaration is removeed at which point the result type
+                    // becomes inaccessible. This should go away once `NodeRef` got phased out.
+                    if ( auto fn = id->declaration().tryAs<declaration::Function>() ) {
+                        HILTI_DEBUG(logging::debug::GlobalOptimizer,
+                                    util::fmt("replacing call to unimplemented hook %s::%s with default value",
+                                              module_id, fn_id));
+
+                        p.node = Expression(expression::Ctor(ctor::Default(fn->function().type().result().type())));
+
+                        return true;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    result_t operator()(const Module& module, position_t p) {
+        switch ( _stage ) {
+            case Stage::COLLECT:
+                // Nothing.
+                break;
+            case Stage::PRUNE: {
+                auto new_module = module;
+
+                bool modified = false;
+
+                for ( const auto& decl : module.declarations() ) {
+                    if ( decl.isA<declaration::Function>() ) {
+                        const auto& [struct_id, fn_id] = declID(decl.id());
+
+                        auto hook_id = std::make_tuple(module.id(), struct_id, fn_id);
+
+                        if ( ! goodHook(hook_id) )
+                            continue;
+
+                        if ( const auto& hook = _hooks->at(hook_id); ! hook.defined ) {
+                            new_module.removeDeclaration(decl.id());
+                            modified = true;
+                        }
+                    }
+                }
+
+                if ( modified )
+                    replaceNode(p, std::move(new_module));
+
+                return modified;
+            }
+        }
+
+        return false;
+    }
 };
 
 void GlobalOptimizer::run() {
