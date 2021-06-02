@@ -1,5 +1,7 @@
 // Copyright (c) 2020-2021 by the Zeek Project. See LICENSE for details.
 
+#include <algorithm>
+
 #include <hilti/ast/detail/visitor.h>
 #include <hilti/ast/module.h>
 #include <hilti/compiler/detail/visitors.h>
@@ -43,4 +45,17 @@ std::vector<declaration::Property> Module::moduleProperties(const ID& id) const 
     }
 
     return props;
+}
+
+void Module::removeDeclaration(const ID& id) {
+    auto& children = childs();
+
+    children.erase(std::remove_if(children.begin() + 2, children.end(),
+                                  [&id](const Node& child) {
+                                      const auto& decl = child.tryAs<Declaration>();
+                                      return decl && decl->id() == id;
+                                  }),
+                   children.end());
+
+    clearCache();
 }

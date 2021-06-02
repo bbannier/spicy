@@ -77,6 +77,9 @@ public:
      */
     void add(Declaration n) { addChild(std::move(n)); }
 
+    // FIXME(bbannier): document.
+    void removeDeclaration(const ID& id);
+
     /**
      * Adds a top-level statement to the module. It will be appended to the
      * end of the current list of statements and execute at module initialize
