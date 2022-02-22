@@ -66,9 +66,16 @@ extlinks = {
     "package-release-deb": ("https://github.com/zeek/spicy/releases/download/v%s/spicy_%%s.deb" % release, ""),
 }
 
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = "sphinx_rtd_theme"
+if not on_rtd:
+    # Only import and set the theme if we are building docs locally.
+    import sphinx_rtd_theme
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 html_logo = "_static/spicy-logo.png"
 html_favicon = "_static/spicy-favicon.ico"
 html_title = "Spicy v" + version
@@ -83,8 +90,7 @@ linkcheck_ignore = [
     r'http://download.zeek.org',
     r'https://download.zeek.org']
 
-read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
-if read_the_docs_build:
+if on_rtd:
     # Generate Doxygen output if we are building in readthedocs. Outside of
     # readthedocs this is done by `docs/Makefile`.
     subprocess.run(['doxygen'], shell=True)
