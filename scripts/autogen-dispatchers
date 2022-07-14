@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import argparse
-import hashlib
 import sys
 
 # Main
@@ -63,13 +62,11 @@ for (btrait, bcls) in traits.items():
         if trait != btrait:
             continue
 
-        cls_hash = int(hashlib.sha1(cls.encode()).hexdigest(), 16) % (2**64)
-
         def output(msg):
-            print(msg.format(cls_hash=cls_hash) + " \\", file=out)
+            print(msg.format(cls=cls) + " \\", file=out)
 
         output(
-            "    if ( auto r = do_dispatch_one<Result, {cls_hash}ULL, Erased, Dispatcher, Iterator>(n, tn, d, i, no_match_so_far) ) return r;")
+            "    if ( auto r = do_dispatch_one<Result, {cls}, Erased, Dispatcher, Iterator>(n, tn, d, i, no_match_so_far) ) return r;")
 
     print("  } \\", file=out)
     output("")

@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import argparse
-import hashlib
 import string
 import sys
 import re
@@ -17,8 +16,8 @@ public:
     $concept_operators
     virtual $class _clone() const = 0;
     virtual hilti::IntrusivePtr<Concept> _clone_ptr() const = 0;
-protected:
-    $concept_protected_attrs
+private:
+    $concept_private_attrs
 };
 
 template<typename T>
@@ -339,9 +338,7 @@ model_methods_impl += ["template<typename T>\nbool Model<T>::{}() const {{ {} }}
                        for t in trait_methods]
 
 ctor_attrs = ["_{}(std::move({}))".format(v.name, v.name) for v in attrs]
-concept_protected_attrs = ["{} _{};".format(v.type, v.name) for v in attrs]
-concept_protected_attrs.append("constexpr inline static uint64_t _typeid = {}ULL; // {}".format(
-    int(hashlib.sha1(class_.encode()).hexdigest(), 16) % (2**64), class_))
+concept_private_attrs = ["{} _{};".format(v.type, v.name) for v in attrs]
 
 if attrs:
     concept_ctors = ["Concept({}){} {{}}".format(
@@ -374,7 +371,7 @@ vals = {
     "class_members": "\n    ".join(class_members),
     "concept_ctors": "\n    ".join(concept_ctors),
     "concept_operators": "\n    ".join(concept_operators),
-    "concept_protected_attrs": "\n    ".join(concept_protected_attrs),
+    "concept_private_attrs": "\n    ".join(concept_private_attrs),
     "attrs_types": attrs_types,
     "template_addl": (TemplateAddlConst.strip() if args.constant else TemplateAddlNonConst.strip())
 }
