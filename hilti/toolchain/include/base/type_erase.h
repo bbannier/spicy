@@ -45,7 +45,7 @@ struct Counters {
 };
 
 inline auto& instance_counters() {
-    static std::unordered_map<std::string, Counters> global_counters;
+    static std::unordered_map<size_t, Counters> global_counters;
     return global_counters;
 }
 #endif
@@ -57,7 +57,7 @@ extern void summary(std::ostream& out);
 /** Internal base class defining the type-erased interface. */
 class ConceptBase : public intrusive_ptr::ManagedObject {
 public:
-    virtual const std::type_info& typeid_() const = 0;
+    virtual size_t typeid_() const = 0;
     virtual std::string typename_() const = 0;
     virtual uintptr_t identity() const = 0; // Returns unique identity of current value
 
@@ -72,13 +72,13 @@ class ModelBase : public Concept {
 public:
     ModelBase(T data, ConceptArgs&&... args) : Concept(std::forward<ConceptArgs>(args)...), _data(std::move(data)) {
 #ifdef HILTI_TYPE_ERASURE_PROFILE
-        detail::instance_counters()[typeid(T).name()].increment();
+        detail::instance_counters()[typeid_()].increment();
 #endif
     }
 
     ~ModelBase() override {
 #ifdef HILTI_TYPE_ERASURE_PROFILE
-        detail::instance_counters()[typeid(T).name()].decrement();
+        detail::instance_counters()[typeid_].decrement();
 #endif
     }
 
@@ -99,7 +99,10 @@ public:
         return reinterpret_cast<uintptr_t>(&_data);
     }
 
-    const std::type_info& typeid_() const final { return typeid(T); }
+    size_t typeid_() const final {
+        static const auto id = std::hash<std::string>()(typeid(T).name());
+        return id;
+    }
 
     std::string typename_() const final {
         // Get the inner name if we store a type erased type in turn.
@@ -163,7 +166,7 @@ public:
      * type-erased objects are nested, it will return the information for the
      * inner-most type.
      */
-    const std::type_info& typeid_() const {
+    size_t typeid_() const {
         assert(_data);
         return _data->typeid_();
     }

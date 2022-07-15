@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -35,9 +36,10 @@ DispatchResult<Result> do_dispatch(Erased& n, Dispatcher& d, typename Iterator::
                                    bool& no_match_so_far);                                   // NOLINT
 
 template<typename Result, typename Type, typename Erased, typename Dispatcher, typename Iterator>
-DispatchResult<Result> do_dispatch_one(Erased& n, const std::type_info& ti, Dispatcher& d,
-                                       typename Iterator::Position& i, bool& no_match_so_far) { // NOLINT
-    if ( ti != typeid(Type) )
+DispatchResult<Result> do_dispatch_one(Erased& n, size_t ti, Dispatcher& d, typename Iterator::Position& i,
+                                       bool& no_match_so_far) { // NOLINT
+    static const auto th = std::hash<std::string>()(typeid(Type).name());
+    if ( ti != th )
         return {};
 
     using T = std::conditional_t<std::is_const_v<Erased>, const Type, Type>;
@@ -90,7 +92,7 @@ DispatchResult<Result> do_dispatch_one(Erased& n, const std::type_info& ti, Disp
 template<typename Result, typename Erased, typename Dispatcher, typename Iterator>
 DispatchResult<Result> do_dispatch(Erased& n, Dispatcher& d, typename Iterator::Position& i, // NOLINT
                                    bool& no_match_so_far) {                                  // NOLINT
-    auto& tn = n.typeid_();
+    auto&& tn = n.typeid_();
 
 #ifdef VISITOR_DISPATCHERS
     VISITOR_DISPATCHERS
