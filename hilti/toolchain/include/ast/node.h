@@ -291,7 +291,8 @@ public:
     template<typename T>
     void assertIsA() {
         if ( ! isA<T>() ) {
-            std::cerr << "Assertion failure: unexpected node type\n"; // FIXME(bbannier): print actual name.
+            std::cerr << "Assertion failure: Node expected to be a " << typeid(T).name() << " but is a " << typename_()
+                      << '\n';
             util::abort_with_backtrace();
         }
     }
