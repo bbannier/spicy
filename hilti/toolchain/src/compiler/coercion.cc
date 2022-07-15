@@ -599,7 +599,7 @@ static Result<Type> _coerceParameterizedType(const Type& src, const Type& dst, b
     if ( src == dst )
         return dst;
 
-    if ( src.typename_() != dst.typename_() )
+    if ( src.typeid_() != dst.typeid_() )
         return {};
 
     if ( dst.isWildcard() )
