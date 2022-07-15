@@ -153,11 +153,12 @@ public:
 
     template<typename T, IF_DERIVED_FROM(T, Trait)>
     ErasedBase(T t, ConceptArgs&&... args)
-        : _data(make_intrusive<Model<T>>(std::move(t), std::forward<ConceptArgs>(args)...)) {}
+        : _data(make_intrusive<Model<T>>(std::move(t), std::forward<ConceptArgs>(args)...)),
+          _typeid(_data->typeid_()) {}
 
     ErasedBase& operator=(IntrusivePtr<Concept> data) {
         _data = std::move(data);
-        ;
+        _typeid = _data->typeid_();
         return *this;
     }
 
@@ -166,10 +167,7 @@ public:
      * type-erased objects are nested, it will return the information for the
      * inner-most type.
      */
-    size_t typeid_() const {
-        assert(_data);
-        return _data->typeid_();
-    }
+    size_t typeid_() const { return _typeid; }
 
     /**
      * Returns C++ type name for the contained type. If multiple type-erased
@@ -278,6 +276,8 @@ private:
 
     // See https://stackoverflow.com/questions/18709647/shared-pointer-to-an-immutable-type-has-value-semantics
     IntrusivePtr<Concept> _data;
+
+    size_t _typeid = 0;
 };
 
 } // namespace hilti::util::type_erasure
