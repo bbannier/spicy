@@ -896,9 +896,11 @@ std::vector<Node> Visitor::matchOverloads(const std::vector<Operator>& candidate
             if ( ! (style & CoercionStyle::DisallowTypeChanges) ) {
                 // If any of the operands is a reference type, try the derefed operands, too.
                 for ( const auto& op : ops ) {
-                    if ( type::isReferenceType(op.type()) )
+                    if ( type::isReferenceType(op.type()) ) {
                         nops =
                             coerceOperands(node::Range<Expression>(deref_operands(ops)), candidate.operands(), style);
+                        break;
+                    }
                 }
             }
         }
@@ -936,7 +938,9 @@ std::vector<Node> Visitor::matchOverloads(const std::vector<Operator>& candidate
                     // Not looking at operators of this priority right now.
                     continue;
 
-                if ( priority == operator_::Priority::Low && kinds_resolved->count(c.kind()) )
+                const auto kind = c.kind();
+
+                if ( priority == operator_::Priority::Low && kinds_resolved->count(kind) )
                     // Already have a higher priority match for this operator kind.
                     continue;
 
@@ -944,22 +948,22 @@ std::vector<Node> Visitor::matchOverloads(const std::vector<Operator>& candidate
                 logging::DebugPushIndent _(logging::debug::Operator);
 
                 if ( auto r = try_candidate(c, operands, style, "candidate matches") ) {
-                    kinds_resolved->insert(c.kind());
+                    kinds_resolved->insert(kind);
                     resolved->emplace_back(std::move(*r));
                 }
                 else {
                     // Try to swap the operators for commutative operators.
-                    if ( operator_::isCommutative(c.kind()) && operands.size() == 2 ) {
+                    if ( operator_::isCommutative(kind) && operands.size() == 2 ) {
                         if ( auto r = try_candidate(c, node::Range<Expression>({operands[1], operands[0]}), style,
                                                     "candidate matches with operands swapped") ) {
-                            kinds_resolved->insert(c.kind());
+                            kinds_resolved->insert(kind);
                             resolved->emplace_back(std::move(*r));
                         }
                     }
                 }
             }
 
-            if ( resolved->size() )
+            if ( ! resolved->empty() )
                 return;
         }
     };
