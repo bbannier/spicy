@@ -9,7 +9,7 @@ using namespace hilti;
 
 bool type::isResolved(const Type& t) {
     ResolvedState rstate;
-    return isResolved(t, &rstate);
+    return true; // FIXME(bbannier)
 }
 
 bool type::detail::isResolved(const hilti::Type& t, ResolvedState* rstate) {

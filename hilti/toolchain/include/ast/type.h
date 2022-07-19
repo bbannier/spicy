@@ -4,6 +4,7 @@
 
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include <hilti/ast/id.h>
 #include <hilti/ast/node.h>
@@ -155,9 +156,178 @@ struct State {
 
 } // namespace type
 
-class Type : public type::detail::Type {
+/**
+ * Base class for classes implementing the `Type` interface. This class
+ * provides implementations for some interface methods shared that are shared
+ * by all types.
+ */
+class TypeBase : public NodeBase, public hilti::trait::isType {
 public:
-    using type::detail::Type::Type;
+    using NodeBase::NodeBase;
+
+    virtual ~TypeBase() = default;
+};
+
+class Type : public TypeBase {
+public:
+    Type(const TypeBase&) {} // FIXME(bbannier)
+    Type(TypeBase&&) {}      // FIXME(bbannier)
+
+    Type() = default;
+
+    Type _clone() const { return *this; }
+
+    template<typename T>
+    bool isA() const {
+        return dynamic_cast<const T*>(this);
+    }
+
+    template<typename T>
+    T& as() {
+        return *dynamic_cast<T*>(this);
+    }
+
+    template<typename T>
+    const T& as() const {
+        return *dynamic_cast<const T*>(this);
+    }
+
+    template<typename T>
+    optional_ref<const T> tryAs() const {
+        if ( auto* p = dynamic_cast<const T*>(this) )
+            return *p;
+        return {};
+    }
+
+    template<typename T>
+    optional_ref<T> tryAs() {
+        if ( auto* p = dynamic_cast<T*>(this) )
+            return *p;
+        return {};
+    }
+
+    virtual const char* typename_() const {
+        return "hilti::Type"; // FIXME(bbannier)
+    }
+
+    virtual size_t typeid_() const {
+        return 0; // FIXME(bbannier)
+    }
+
+    virtual uintptr_t identity() const {
+        return 0; // FIXME(bbannier)
+    }
+
+
+    /** Returns true if the type is equivalent to another HILTI type. */
+    bool isEqual(const hilti::Type& other) const {
+        // node::isEqual(this, &other);
+        return false; // FIXME(bbannier)
+    }
+
+    /**
+     * Returns any parameters associated with type. If a type is declared as
+     * `T<A,B,C>` this returns a vector of the AST nodes for `A`, `B`, and
+     * `C`.
+     */
+    std::vector<Node> typeParameters() const { // NOTE: if hilti::type::trait::isParameterized else {};
+        return {};
+    }
+
+    /**
+     * Returns true if all instances of the same type class can be coerced
+     * into the current instance, independent of their pararameters. In HILTI
+     * source code, this typically corresponds to a type `T<*>`.
+     */
+    bool isWildcard() const { // NOTE: if hilti::type::trait::isParameterized else false;
+        return false;         /* FIXME(bbannier)*/
+    }
+
+    /** Returns the type of an iterator for this type. */
+    const hilti::Type& iteratorType(
+        bool const_) const { // NOTE: if hilti::type::trait::isIterable or hilti::type::trait::isView
+        static Type _x;      /* FIXME(bbannier) */
+        return _x;
+    }
+
+    /** Returns the type of an view for this type. */
+    const hilti::Type& viewType() const { // NOTE: if hilti::type::trait::isViewable
+        static Type _x;                   /* FIXME(bbannier) */
+        return _x;
+    }
+
+    /** Returns the type of elements the iterator traverse. */
+    const hilti::Type& dereferencedType() const { // NOTE: if hilti::type::trait::isDereferenceable
+        static Type _x;                           /* FIXME(bbannier) */
+        return _x;
+    }
+
+    /** Returns the type of elements the container stores. */
+    const hilti::Type& elementType() const { // NOTE: if hilti::type::trait::isIterable
+        static Type _x;                      /* FIXME(bbannier) */
+        return _x;
+    }
+
+    /** Returns any parameters the type expects. */
+    hilti::node::Set<type::function::Parameter> parameters() const { // NOTE: if hilti::type::trait::takesArguments;
+        return {};                                                   // FIXME(bbannier)
+    }
+
+    /** For internal use. Use ``type::isAllocable` instead. */
+    bool _isAllocable() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isDereferenceable` instead. */
+    bool _isDereferenceable() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isIterable` instead. */
+    bool _isIterable() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isViewable` instead. */
+    bool _isViewable() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isIterator` instead. */
+    bool _isIterator() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isView` instead. */
+    bool _isView() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isParameterized` instead. */
+    bool _isParameterized() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isReferenceType` instead. */
+    bool _isReferenceType() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isMutable` instead. */
+    bool _isMutable() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
+    bool _isRuntimeNonTrivial() const { return false; /* FIXME(bbannier) */ }
+
+    /** For internal use. Use ``type::isResolved` instead. */
+    bool _isResolved(type::ResolvedState* rstate) const { return false; /* FIXME(bbannier) */ }
+
+    /** Internal state managed by derived class. */
+    type::detail::State _state_;
+
+    /** For internal use. Use ``type::takesArguments` instead. */
+    bool _takesArguments() const { return false; /* FIXME(bbannier) */ }
+
+    /** Implements the `Node` interface. */
+    hilti::node::Properties properties() const { return {}; /* FIXME(bbannier) */ }
+
+    /** Implements the `Node` interface. */
+    std::vector<hilti::Node>& children() const {
+        static std::vector<hilti::Node> _children; // FIXME(bbannier)
+        return _children;
+    }
+
+    /** Implements the `Node` interface. */
+    const Meta& meta() const { return _meta; }
+
+    /** Implements the `Node` interface. */
+    void setMeta(Meta m) { _meta = std::move(m); }
+    Meta _meta;
+
 
     std::optional<ID> resolvedID() const { return _state().resolved_id; }
 
@@ -183,21 +353,39 @@ public:
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
 };
 
+// class Type : public type::detail::Type {
+// public:
+//     using type::detail::Type::Type;
+
+//     std::optional<ID> resolvedID() const { return _state().resolved_id; }
+
+//     void setCxxID(ID id) { _state().cxx = std::move(id); }
+//     void setTypeID(ID id) { _state().id = std::move(id); }
+//     void addFlag(type::Flag f) { _state().flags += f; }
+
+//     /** Implements the `Type` interface. */
+//     bool hasFlag(type::Flag f) const { return _state().flags.has(f); }
+//     /** Implements the `Type` interface. */
+//     const type::Flags& flags() const { return _state().flags; }
+//     /** Implements the `Type` interface. */
+//     bool _isConstant() const { return _state().flags.has(type::Flag::Constant); }
+//     /** Implements the `Type` interface. */
+//     const std::optional<ID>& typeID() const { return _state().id; }
+//     /** Implements the `Type` interface. */
+//     const std::optional<ID>& cxxID() const { return _state().cxx; }
+//     /** Implements the `Type` interface. */
+//     const type::detail::State& _state() const { return _state_; }
+//     /** Implements the `Type` interface. */
+//     type::detail::State& _state() { return _state_; }
+//     /** Implements the `Node` interface. */
+//     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
+// };
+
 /** Creates an AST node representing a `Type`. */
 inline Node to_node(Type t) { return Node(std::move(t)); }
 
 /** Renders a type as HILTI source code. */
 inline std::ostream& operator<<(std::ostream& out, Type t) { return out << to_node(std::move(t)); }
-
-/**
- * Base class for classes implementing the `Type` interface. This class
- * provides implementations for some interface methods shared that are shared
- * by all types.
- */
-class TypeBase : public NodeBase, public hilti::trait::isType {
-public:
-    using NodeBase::NodeBase;
-};
 
 namespace type {
 namespace detail {
