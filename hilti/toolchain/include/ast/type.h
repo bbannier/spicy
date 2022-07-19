@@ -167,6 +167,8 @@ public:
 
     virtual ~TypeBase() = default;
 
+    // Generic node stuff. {{{
+
     /** Returns true if the type is equivalent to another HILTI type. */
     bool isEqual(const hilti::TypeBase& other) const { return node::isEqual(this, other); }
 
@@ -206,6 +208,8 @@ public:
     virtual uintptr_t identity() const {
         return typeid_(); // FIXME(bbannier): is this correct?
     }
+
+    // }}}
 };
 
 class Type : public TypeBase {
