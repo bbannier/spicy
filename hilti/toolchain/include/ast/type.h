@@ -206,18 +206,13 @@ public:
         return {};
     }
 
-    virtual const char* typename_() const {
-        return "hilti::Type"; // FIXME(bbannier)
-    }
+    virtual const char* typename_() const { return typeid(*this).name(); }
 
-    virtual size_t typeid_() const {
-        return 0; // FIXME(bbannier)
-    }
+    virtual size_t typeid_() const { return typeid(*this).hash_code(); }
 
     virtual uintptr_t identity() const {
-        return 0; // FIXME(bbannier)
+        return typeid_(); // FIXME(bbannier): is this correct?
     }
-
 
     /** Returns true if the type is equivalent to another HILTI type. */
     bool isEqual(const hilti::Type& other) const {
