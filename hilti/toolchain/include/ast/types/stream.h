@@ -45,7 +45,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    const Type& elementType() const {
+    const Type& elementType() const override {
         return dynamic_cast<const trait::isDereferenceable&>(iteratorType(true)).dereferencedType();
     }
     /** Implements the `Type` interface. */
@@ -73,7 +73,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    const Type& elementType() const {
+    const Type& elementType() const override {
         return dynamic_cast<const trait::isDereferenceable&>(iteratorType(true)).dereferencedType();
     }
     /** Implements the `Type` interface. */

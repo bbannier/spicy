@@ -143,7 +143,7 @@ struct Visitor : public visitor::PreOrder<void, Visitor> {
             }
         }
         else {
-            if ( n.type().elementType() != type::unknown )
+            if ( dynamic_cast<const type::trait::isIterable&>(n.type()).elementType() != type::unknown )
                 p.node.addError("type mismatch in list elements");
         }
     }

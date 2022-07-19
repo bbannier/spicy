@@ -40,6 +40,9 @@ struct isDereferenceable {
 struct isIterable {
     /** Returns the type of an iterator for this type. */
     virtual const hilti::Type& iteratorType(bool const_) const = 0;
+
+    /** Returns the type of elements the container stores. */
+    virtual const hilti::Type& elementType() const = 0;
 };
 
 class isIterator {};
@@ -265,12 +268,6 @@ public:
     Type() = default;
 
     Type _clone() const { return *this; }
-
-    /** Returns the type of elements the container stores. */
-    const hilti::Type& elementType() const { // NOTE: if hilti::type::trait::isIterable
-        static Type _x;                      /* FIXME(bbannier) */
-        return _x;
-    }
 
     /** For internal use. Use ``type::isAllocable` instead. */
     bool _isAllocable() const { return false; /* FIXME(bbannier) */ }

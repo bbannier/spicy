@@ -92,7 +92,7 @@ public:
                type::detail::isResolved(iteratorType(false), rstate);
     }
     /** Implements the `Type` interface. */
-    const Type& elementType() const { return valueType(); }
+    const Type& elementType() const override { return valueType(); }
     /** Implements the `Type` interface. */
     const Type& iteratorType(bool const_) const override { return const_ ? child<Type>(0) : child<Type>(1); }
     /** Implements the `Type` interface. */

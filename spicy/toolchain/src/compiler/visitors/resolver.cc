@@ -157,7 +157,7 @@ struct Visitor : public hilti::visitor::PreOrder<void, Visitor> {
                 return;
             }
 
-            dd = dd->elementType();
+            dd = dynamic_cast<const type::trait::isIterable&>(*dd).elementType();
         }
         else
             dd = h.unitField()->itemType();

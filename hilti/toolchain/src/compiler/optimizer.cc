@@ -45,7 +45,7 @@ Type innermostType(Type type) {
         return innermostType(dynamic_cast<const type::trait::isDereferenceable&>(type).dereferencedType());
 
     if ( type::isIterable(type) )
-        return innermostType(type.elementType());
+        return innermostType(dynamic_cast<const type::trait::isIterable&>(type).elementType());
 
     return type;
 }

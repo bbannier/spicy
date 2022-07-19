@@ -91,7 +91,8 @@ struct Visitor : hilti::visitor::PreOrder<std::string, Visitor> {
     result_t operator()(const expression::ListComprehension& n) {
         auto id = cxx::ID(n.local().id());
         auto input = cg->compile(n.input());
-        auto itype = cg->compile(n.input().type().elementType(), codegen::TypeUsage::Storage);
+        auto itype = cg->compile(dynamic_cast<const type::trait::isIterable&>(n.input().type()).elementType(),
+                                 codegen::TypeUsage::Storage);
         auto otype = cg->compile(n.output().type(), codegen::TypeUsage::Storage);
         auto output = cg->compile(n.output());
         auto pred = std::string();
