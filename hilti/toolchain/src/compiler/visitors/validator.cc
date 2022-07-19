@@ -118,7 +118,8 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
             }
 
             if ( type::takesArguments(n.type()) )
-                _checkStructArguments(n.typeArguments(), n.type().parameters(), p);
+                _checkStructArguments(n.typeArguments(),
+                                      dynamic_cast<const type::trait::takesArguments&>(n.type()).parameters(), p);
         }
 
         // Check whether this local variable was declared at module scope. We
@@ -184,7 +185,8 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
         }
 
         if ( type::takesArguments(n.type()) )
-            _checkStructArguments(n.typeArguments(), n.type().parameters(), p);
+            _checkStructArguments(n.typeArguments(),
+                                  dynamic_cast<const type::trait::takesArguments&>(n.type()).parameters(), p);
     }
 
     ////// Ctors
@@ -201,7 +203,8 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
         }
 
         if ( type::takesArguments(t) )
-            _checkStructArguments(c.typeArguments(), t.parameters(), p);
+            _checkStructArguments(c.typeArguments(), dynamic_cast<const type::trait::takesArguments&>(t).parameters(),
+                                  p);
     }
 
     void operator()(const hilti::ctor::Exception& e, position_t p) {
@@ -562,7 +565,8 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
                     args = ctor.as<ctor::Tuple>().value();
                 }
 
-                _checkStructArguments(args, t->typeValue().parameters(), p);
+                _checkStructArguments(args,
+                                      dynamic_cast<const type::trait::takesArguments&>(t->typeValue()).parameters(), p);
             }
         }
     }

@@ -82,7 +82,9 @@ public:
     }
 
     auto id() const { return children()[1].tryAs<ID>(); }
-    auto parameters() const { return childrenOfType<type::function::Parameter>(); }
+    hilti::node::Set<type::function::Parameter> parameters() const override {
+        return childrenOfType<type::function::Parameter>();
+    }
     auto parameterRefs() const { return childRefsOfType<type::function::Parameter>(); }
     auto items() const { return childrenOfType<unit::Item>(); }
     auto itemRefs() const { return childRefsOfType<unit::Item>(); }

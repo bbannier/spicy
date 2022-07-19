@@ -77,7 +77,12 @@ struct isViewable {
 };
 
 class supportsWildcard {};
-class takesArguments {};
+
+struct takesArguments {
+    /** Returns any parameters the type expects. */
+    virtual hilti::node::Set<type::function::Parameter> parameters() const = 0;
+};
+
 } // namespace trait
 
 using ResolvedState = std::unordered_set<uintptr_t>;
@@ -265,11 +270,6 @@ public:
     const hilti::Type& elementType() const { // NOTE: if hilti::type::trait::isIterable
         static Type _x;                      /* FIXME(bbannier) */
         return _x;
-    }
-
-    /** Returns any parameters the type expects. */
-    hilti::node::Set<type::function::Parameter> parameters() const { // NOTE: if hilti::type::trait::takesArguments;
-        return {};                                                   // FIXME(bbannier)
     }
 
     /** For internal use. Use ``type::isAllocable` instead. */

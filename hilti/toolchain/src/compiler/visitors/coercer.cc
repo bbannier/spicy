@@ -221,7 +221,9 @@ struct Visitor : public visitor::PreOrder<void, Visitor> {
 
         if ( type::takesArguments(t) ) {
             if ( auto x = n.typeArguments(); x.size() ) {
-                if ( auto coerced = coerceCallArguments(x, t.parameters()); coerced && *coerced ) {
+                if ( auto coerced =
+                         coerceCallArguments(x, dynamic_cast<const type::trait::takesArguments&>(t).parameters());
+                     coerced && *coerced ) {
                     logChange(p.node, ctor::Tuple(**coerced), "call arguments");
                     p.node.as<ctor::Default>().setTypeArguments(std::move(**coerced));
                     modified = true;
@@ -258,7 +260,8 @@ struct Visitor : public visitor::PreOrder<void, Visitor> {
         }
 
         if ( type::takesArguments(n.type()) && n.typeArguments().size() ) {
-            auto coerced = coerceCallArguments(n.typeArguments(), n.type().parameters());
+            auto coerced = coerceCallArguments(n.typeArguments(),
+                                               dynamic_cast<const type::trait::takesArguments&>(n.type()).parameters());
             if ( coerced && *coerced )
                 args = std::move(*coerced);
         }
@@ -288,7 +291,8 @@ struct Visitor : public visitor::PreOrder<void, Visitor> {
         }
 
         if ( type::takesArguments(n.type()) && n.typeArguments().size() ) {
-            auto coerced = coerceCallArguments(n.typeArguments(), n.type().parameters());
+            auto coerced = coerceCallArguments(n.typeArguments(),
+                                               dynamic_cast<const type::trait::takesArguments&>(n.type()).parameters());
             if ( coerced && *coerced )
                 args = std::move(*coerced);
         }
@@ -315,7 +319,10 @@ struct Visitor : public visitor::PreOrder<void, Visitor> {
 
         if ( type::takesArguments(etype->typeValue()) ) {
             auto args = n.op1().as<expression::Ctor>().ctor().as<ctor::Tuple>().value();
-            if ( auto coerced = coerceCallArguments(args, etype->typeValue().parameters()); coerced && *coerced ) {
+            if ( auto coerced =
+                     coerceCallArguments(args, dynamic_cast<const type::trait::takesArguments&>(etype->typeValue())
+                                                   .parameters());
+                 coerced && *coerced ) {
                 Expression ntuple = expression::Ctor(ctor::Tuple(**coerced), n.op1().meta());
                 logChange(p.node, ntuple, "type arguments");
                 p.node.as<operator_::generic::New>().setOp1(ntuple);
