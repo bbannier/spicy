@@ -31,7 +31,11 @@ using Parameter = declaration::Parameter;
 
 namespace trait {
 class isAllocable {};
-class isDereferenceable {};
+
+struct isDereferenceable {
+    /** Returns the type of elements the iterator traverse. */
+    virtual const hilti::Type& dereferencedType() const = 0;
+};
 
 struct isIterable {
     /** Returns the type of an iterator for this type. */
@@ -256,12 +260,6 @@ public:
     Type() = default;
 
     Type _clone() const { return *this; }
-
-    /** Returns the type of elements the iterator traverse. */
-    const hilti::Type& dereferencedType() const { // NOTE: if hilti::type::trait::isDereferenceable
-        static Type _x;                           /* FIXME(bbannier) */
-        return _x;
-    }
 
     /** Returns the type of elements the container stores. */
     const hilti::Type& elementType() const { // NOTE: if hilti::type::trait::isIterable

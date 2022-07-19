@@ -76,8 +76,12 @@ struct VisitorDeclaration : hilti::visitor::PreOrder<cxx::declaration::Type, Vis
                         // potentially expensive copies or let us hold on to
                         // objects longer than they'd otherwise stick around.
                         assert(type::isReferenceType(p.type()));
-                        internal_type = cg->compile(type::WeakReference(p.type().dereferencedType(), p.meta()),
-                                                    codegen::TypeUsage::Storage);
+                        internal_type =
+                            cg->compile(type::WeakReference(dynamic_cast<const type::trait::isDereferenceable&>(
+                                                                p.type())
+                                                                .dereferencedType(),
+                                                            p.meta()),
+                                        codegen::TypeUsage::Storage);
                     }
 
                     std::optional<cxx::Expression> default_;

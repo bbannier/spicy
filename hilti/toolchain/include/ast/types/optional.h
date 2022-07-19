@@ -15,7 +15,7 @@ public:
     Optional(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
     Optional(Type ct, Meta m = Meta()) : TypeBase({std::move(ct)}, std::move(m)) {}
 
-    const Type& dereferencedType() const { return children()[0].as<Type>(); }
+    const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 
     bool operator==(const Optional& other) const { return dereferencedType() == other.dereferencedType(); }
 

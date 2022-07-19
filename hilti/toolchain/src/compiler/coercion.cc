@@ -305,7 +305,7 @@ struct VisitorCtor : public visitor::PreOrder<std::optional<Ctor>, VisitorCtor> 
 
         if ( (dst.isA<type::ValueReference>() || dst.isA<type::StrongReference>()) && ! type::isReferenceType(dst) )
             // Allow coercion from value to reference type with new instance.
-            dst_ = dst.dereferencedType();
+            dst_ = dynamic_cast<const type::trait::isDereferenceable&>(dst).dereferencedType();
 
         if ( auto dtype = dst_.tryAs<type::Struct>() ) {
             if ( ! dst_.typeID() )
@@ -435,7 +435,9 @@ struct VisitorType : public visitor::PreOrder<std::optional<Type>, VisitorType> 
             return dst;
 
         if ( type::isReferenceType(dst) ) {
-            if ( type::sameExceptForConstness(r.dereferencedType(), dst.dereferencedType()) )
+            if ( type::sameExceptForConstness(r.dereferencedType(),
+                                              dynamic_cast<const type::trait::isDereferenceable&>(dst)
+                                                  .dereferencedType()) )
                 return dst;
         }
 
@@ -549,7 +551,9 @@ struct VisitorType : public visitor::PreOrder<std::optional<Type>, VisitorType> 
             return hilti::coerceType(r.dereferencedType(), dst, style);
 
         if ( type::isReferenceType(dst) ) {
-            if ( type::sameExceptForConstness(r.dereferencedType(), dst.dereferencedType()) )
+            if ( type::sameExceptForConstness(r.dereferencedType(),
+                                              dynamic_cast<const type::trait::isDereferenceable&>(dst)
+                                                  .dereferencedType()) )
                 return dst;
         }
 
@@ -564,7 +568,9 @@ struct VisitorType : public visitor::PreOrder<std::optional<Type>, VisitorType> 
             return dst;
 
         if ( type::isReferenceType(dst) ) {
-            if ( type::sameExceptForConstness(r.dereferencedType(), dst.dereferencedType()) )
+            if ( type::sameExceptForConstness(r.dereferencedType(),
+                                              dynamic_cast<const type::trait::isDereferenceable&>(dst)
+                                                  .dereferencedType()) )
                 return dst;
         }
 

@@ -28,7 +28,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    const Type& dereferencedType() const { return child<Type>(0); }
+    const Type& dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }
 };
@@ -45,7 +45,9 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    const Type& elementType() const { return iteratorType(true).dereferencedType(); }
+    const Type& elementType() const {
+        return dynamic_cast<const trait::isDereferenceable&>(iteratorType(true)).dereferencedType();
+    }
     /** Implements the `Type` interface. */
     const Type& iteratorType(bool /* const_ */) const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
@@ -71,7 +73,9 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    const Type& elementType() const { return iteratorType(true).dereferencedType(); }
+    const Type& elementType() const {
+        return dynamic_cast<const trait::isDereferenceable&>(iteratorType(true)).dereferencedType();
+    }
     /** Implements the `Type` interface. */
     const Type& iteratorType(bool /* const_ */) const override {
         return dynamic_cast<const trait::isIterable&>(viewType()).iteratorType(true);

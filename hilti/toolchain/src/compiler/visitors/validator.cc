@@ -111,7 +111,7 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
                 auto t = n.type();
 
                 if ( type::isReferenceType(t) )
-                    t = t.dereferencedType();
+                    t = dynamic_cast<const type::trait::isDereferenceable&>(t).dereferencedType();
 
                 if ( ! type::takesArguments(t) )
                     error("type does not take arguments", p);
