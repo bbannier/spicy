@@ -28,7 +28,7 @@ public:
     /** Implements the `Type` interface. */
     auto typeParameters() const { return std::vector<Node>{id()}; }
     /** Implements the `Type` interface. */
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
 
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }

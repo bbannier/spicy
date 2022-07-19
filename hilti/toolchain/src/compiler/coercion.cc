@@ -602,7 +602,7 @@ static Result<Type> _coerceParameterizedType(const Type& src, const Type& dst, b
     if ( src.typeid_() != dst.typeid_() )
         return {};
 
-    if ( dst.isWildcard() )
+    if ( dynamic_cast<const type::trait::isParameterized*>(&dst) )
         return src;
 
     auto params1 = src.typeParameters();
@@ -630,7 +630,7 @@ static Result<Type> _coerceParameterizedType(const Type& src, const Type& dst, b
         if ( ! coerceType(*t1, *t2, style) )
             return {};
 
-        if ( t2->isWildcard() )
+        if ( dynamic_cast<const type::trait::isParameterized*>(&*t2) )
             have_wildcard = true;
     }
 
@@ -661,7 +661,7 @@ static Result<Type> _coerceType(const Type& src, const Type& dst, bitmask<Coerci
 
     if ( style & (CoercionStyle::Assignment | CoercionStyle::FunctionCall) ) {
         if ( auto opt = dst.tryAs<type::Optional>() ) {
-            if ( dst.isWildcard() )
+            if ( dynamic_cast<const type::trait::isParameterized*>(&dst) )
                 return dst;
 
             // All types converts into a corresponding optional.
@@ -670,7 +670,7 @@ static Result<Type> _coerceType(const Type& src, const Type& dst, bitmask<Coerci
         }
 
         if ( auto opt = dst.tryAs<type::Result>() ) {
-            if ( dst.isWildcard() )
+            if ( dynamic_cast<const type::trait::isParameterized*>(&dst) )
                 return dst;
 
             // All types converts into a corresponding result.
@@ -860,7 +860,7 @@ static CoercedExpression _coerceExpression(const Expression& e, const Type& src,
             if ( e_is_const && (! dst_is_const) && dst_is_mut )
                 RETURN(result::Error());
 
-            if ( dst.isWildcard() && src.typename_() == dst.typename_() )
+            if ( dynamic_cast<const type::trait::isParameterized*>(&dst) && src.typename_() == dst.typename_() )
                 RETURN(no_change);
 
             if ( src == dst )
@@ -878,7 +878,7 @@ static CoercedExpression _coerceExpression(const Expression& e, const Type& src,
             if ( type::sameExceptForConstness(src, dst) )
                 RETURN(no_change);
 
-            if ( dst.isWildcard() && src.typename_() == dst.typename_() )
+            if ( dynamic_cast<const type::trait::isParameterized*>(&dst) && src.typename_() == dst.typename_() )
                 RETURN(no_change);
         }
     }

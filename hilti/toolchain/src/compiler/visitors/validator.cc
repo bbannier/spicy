@@ -92,7 +92,7 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
     ////// Declarations
 
     void operator()(const declaration::Constant& n, position_t p) {
-        if ( n.value().type().isWildcard() )
+        if ( dynamic_cast<const type::trait::isParameterized*>(&n.value().type()) )
             error("cannot use wildcard type for constants", p);
     }
 
@@ -100,7 +100,7 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
         if ( ! type::isAllocable(n.type()) )
             error(fmt("type '%s' cannot be used for variable declaration", n.type()), p);
 
-        if ( n.type().isWildcard() )
+        if ( dynamic_cast<const type::trait::isParameterized*>(&n.type()) )
             error("cannot use wildcard type for variables", p);
 
         if ( p.parent().isA<statement::Block>() ) {
@@ -141,7 +141,7 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
                 error(fmt("type '%s' cannot be used for function parameter", n.type()), p);
         }
 
-        if ( n.type().isWildcard() ) {
+        if ( dynamic_cast<const type::trait::isParameterized*>(&n.type()) ) {
             if ( auto d = p.parent(3).tryAs<declaration::Function>() ) {
                 if ( ! AttributeSet::find(d->function().attributes(), "&cxxname") )
                     error(fmt("parameter '%s' cannot have wildcard type; only allowed with runtime library "
@@ -175,7 +175,7 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
         if ( ! type::isAllocable(n.type()) )
             error(fmt("type '%s' cannot be used for variable declaration", n.type()), p);
 
-        if ( n.type().isWildcard() )
+        if ( dynamic_cast<const type::trait::isParameterized*>(&n.type()) )
             error("cannot use wildcard type for variables", p);
 
         if ( auto args = n.typeArguments(); args.size() ) {

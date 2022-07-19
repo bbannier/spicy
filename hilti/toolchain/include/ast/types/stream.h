@@ -34,7 +34,7 @@ public:
 };
 
 /** AST node for a stream view type. */
-class View : public TypeBase, trait::isView, trait::isIterable, trait::isAllocable, trait::isRuntimeNonTrivial {
+class View : public TypeBase, trait::isView, trait::isAllocable, trait::isRuntimeNonTrivial {
 public:
     View(const Meta& m = Meta()) : TypeBase(nodes(stream::Iterator(m)), m) {}
 
@@ -47,7 +47,7 @@ public:
     /** Implements the `Type` interface. */
     const Type& elementType() const { return iteratorType(true).dereferencedType(); }
     /** Implements the `Type` interface. */
-    const Type& iteratorType(bool /* const_ */) const { return child<Type>(0); }
+    const Type& iteratorType(bool /* const_ */) const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }
 };
@@ -73,7 +73,9 @@ public:
     /** Implements the `Type` interface. */
     const Type& elementType() const { return iteratorType(true).dereferencedType(); }
     /** Implements the `Type` interface. */
-    const Type& iteratorType(bool /* const_ */) const { return viewType().iteratorType(true); }
+    const Type& iteratorType(bool /* const_ */) const override {
+        return dynamic_cast<const trait::isIterable&>(viewType()).iteratorType(true);
+    }
     /** Implements the `Type` interface. */
     const Type& viewType() const { return child<Type>(0); }
     /** Implements the `Node` interface. */

@@ -189,7 +189,7 @@ public:
 
     // type::trait::Parameterized interface.
     auto typeParameters() const { return children(); }
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
 
     // Node interface.
     auto properties() const { return node::Properties{{"public", _public}}; }

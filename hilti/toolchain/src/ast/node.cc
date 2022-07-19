@@ -65,7 +65,7 @@ std::string Node::render(bool include_location) const {
         if ( auto cppid = t->cxxID() )
             s += util::fmt(" (cxx-id: %s)", *cppid);
 
-        if ( t->isWildcard() )
+        if ( dynamic_cast<const type::trait::isParameterized*>(&*t) )
             s += " (wildcard)";
 
         s += (type::isResolved(t) ? " (resolved)" : " (not resolved)");

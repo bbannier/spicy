@@ -635,7 +635,7 @@ struct VisitorStorage : hilti::visitor::PreOrder<CxxTypes, VisitorStorage> {
     result_t operator()(const type::Optional& n) {
         std::string t;
 
-        if ( const auto& ct = n.dereferencedType(); ! ct.isWildcard() )
+        if ( const auto& ct = n.dereferencedType(); ! dynamic_cast<const type::trait::isParameterized*>(&ct) )
             t = fmt("std::optional<%s>", cg->compile(ct, codegen::TypeUsage::Storage));
         else
             t = "*";
@@ -646,7 +646,7 @@ struct VisitorStorage : hilti::visitor::PreOrder<CxxTypes, VisitorStorage> {
     result_t operator()(const type::StrongReference& n) {
         std::string t;
 
-        if ( const auto& ct = n.dereferencedType(); ! ct.isWildcard() )
+        if ( const auto& ct = n.dereferencedType(); ! dynamic_cast<const type::trait::isParameterized*>(&ct) )
             t = fmt("::hilti::rt::StrongReference<%s>", cg->compile(ct, codegen::TypeUsage::Ctor)); // XXX
         else
             t = "*";
@@ -659,7 +659,7 @@ struct VisitorStorage : hilti::visitor::PreOrder<CxxTypes, VisitorStorage> {
     result_t operator()(const type::Result& n) {
         std::string t;
 
-        if ( const auto& ct = n.dereferencedType(); ! ct.isWildcard() )
+        if ( const auto& ct = n.dereferencedType(); ! dynamic_cast<const type::trait::isParameterized*>(&ct) )
             t = fmt("::hilti::rt::Result<%s>", cg->compile(ct, codegen::TypeUsage::Storage));
         else
             t = "*";
@@ -727,7 +727,7 @@ struct VisitorStorage : hilti::visitor::PreOrder<CxxTypes, VisitorStorage> {
     result_t operator()(const type::WeakReference& n) {
         std::string t;
 
-        if ( const auto& ct = n.dereferencedType(); ! ct.isWildcard() )
+        if ( const auto& ct = n.dereferencedType(); ! dynamic_cast<const type::trait::isParameterized*>(&ct) )
             t = fmt("::hilti::rt::WeakReference<%s>", cg->compile(ct, codegen::TypeUsage::Ctor));
         else
             t = "*";
@@ -738,7 +738,7 @@ struct VisitorStorage : hilti::visitor::PreOrder<CxxTypes, VisitorStorage> {
     result_t operator()(const type::ValueReference& n) {
         std::string t;
 
-        if ( const auto& ct = n.dereferencedType(); ! ct.isWildcard() ) {
+        if ( const auto& ct = n.dereferencedType(); ! dynamic_cast<const type::trait::isParameterized*>(&ct) ) {
             auto element_type = cg->compile(ct, codegen::TypeUsage::Ctor);
             return CxxTypes{.base_type = fmt("::hilti::rt::ValueReference<%s>", element_type), .ctor = element_type};
         }

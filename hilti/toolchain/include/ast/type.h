@@ -32,13 +32,29 @@ using Parameter = declaration::Parameter;
 namespace trait {
 class isAllocable {};
 class isDereferenceable {};
-class isIterable {};
+
+struct isIterable {
+    /** Returns the type of an iterator for this type. */
+    virtual const hilti::Type& iteratorType(bool const_) const = 0;
+};
+
 class isIterator {};
 class isMutable {};
-class isParameterized {};
+
+struct isParameterized {
+    /**
+     * Returns true if all instances of the same type class can be coerced
+     * into the current instance, independent of their pararameters. In HILTI
+     * source code, this typically corresponds to a type `T<*>`.
+     */
+    virtual bool isWildcard() const = 0;
+};
+
 class isReferenceType {};
 class isRuntimeNonTrivial {};
-class isView {};
+
+struct isView : isIterable {};
+
 class isViewable {};
 class supportsWildcard {};
 class takesArguments {};
@@ -210,6 +226,10 @@ public:
     }
 
     // }}}
+
+    // Type interface. {{{
+
+    // }}}
 };
 
 class Type : public TypeBase {
@@ -228,22 +248,6 @@ public:
      */
     std::vector<Node> typeParameters() const { // NOTE: if hilti::type::trait::isParameterized else {};
         return {};
-    }
-
-    /**
-     * Returns true if all instances of the same type class can be coerced
-     * into the current instance, independent of their pararameters. In HILTI
-     * source code, this typically corresponds to a type `T<*>`.
-     */
-    bool isWildcard() const { // NOTE: if hilti::type::trait::isParameterized else false;
-        return false;         /* FIXME(bbannier)*/
-    }
-
-    /** Returns the type of an iterator for this type. */
-    const hilti::Type& iteratorType(
-        bool const_) const { // NOTE: if hilti::type::trait::isIterable or hilti::type::trait::isView
-        static Type _x;      /* FIXME(bbannier) */
-        return _x;
     }
 
     /** Returns the type of an view for this type. */

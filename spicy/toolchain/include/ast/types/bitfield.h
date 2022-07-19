@@ -103,7 +103,7 @@ public:
     /** Implements the `Type` interface. */
     auto typeParameters() const { return hilti::util::slice(children(), 1); }
     /** Implements the `Type` interface. */
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }
 

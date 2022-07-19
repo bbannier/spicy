@@ -50,7 +50,9 @@ BEGIN_OPERATOR_CUSTOM(generic, Begin)
         if ( ops.empty() )
             return type::DocOnly("<iterator>");
 
-        return type::isIterable(ops[0].type()) ? ops[0].type().iteratorType(ops[0].isConstant()) : type::unknown;
+        return type::isIterable(ops[0].type()) ?
+                   dynamic_cast<const type::trait::isIterable&>(ops[0].type()).iteratorType(ops[0].isConstant()) :
+                   type::unknown;
     }
 
     bool isLhs() const { return false; }
@@ -76,7 +78,9 @@ BEGIN_OPERATOR_CUSTOM(generic, End)
         if ( ops.empty() )
             return type::DocOnly("<iterator>");
 
-        return type::isIterable(ops[0].type()) ? ops[0].type().iteratorType(ops[0].isConstant()) : type::unknown;
+        return type::isIterable(ops[0].type()) ?
+                   dynamic_cast<const type::trait::isIterable&>(ops[0].type()).iteratorType(ops[0].isConstant()) :
+                   type::unknown;
     }
 
     bool isLhs() const { return false; }

@@ -35,7 +35,7 @@ public:
     /** Implements the `Type` interface. */
     const Type& dereferencedType() const { return child<Type>(0); }
     /** Implements the `Type` interface. */
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
     /** Implements the `Type` interface. */
     auto typeParameters() const { return children(); }
     /** Implements the `Node` interface. */
@@ -74,9 +74,9 @@ public:
     /** Implements the `Type` interface. */
     const Type& elementType() const { return child<set::Iterator>(0).dereferencedType(); }
     /** Implements the `Type` interface. */
-    const Type& iteratorType(bool const_) const { return const_ ? child<Type>(0) : child<Type>(1); }
+    const Type& iteratorType(bool const_) const override { return const_ ? child<Type>(0) : child<Type>(1); }
     /** Implements the `Type` interface. */
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
     /** Implements the `Type` interface. */
     auto typeParameters() const { return children(); }
     /** Implements the `Node` interface. */

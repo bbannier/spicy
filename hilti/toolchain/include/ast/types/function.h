@@ -114,7 +114,7 @@ public:
     /** Implements the `Type` interface. */
     auto typeParameters() const { return children(); }
     /** Implements the `Type` interface. */
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
 
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{{"flavor", to_string(_flavor)}}; }

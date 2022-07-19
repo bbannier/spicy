@@ -129,7 +129,7 @@ inline auto iteratorType(unsigned int op, bool const_, const char* doc = "<itera
                                              op, resolved_ops.size()));
 
         if ( type::isIterable(resolved_ops[op].type()) )
-            return resolved_ops[op].type().iteratorType(const_);
+            return dynamic_cast<const type::trait::isIterable&>(resolved_ops[op].type()).iteratorType(const_);
 
         return {};
     };
