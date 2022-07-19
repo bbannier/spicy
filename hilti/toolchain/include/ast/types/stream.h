@@ -77,7 +77,7 @@ public:
         return dynamic_cast<const trait::isIterable&>(viewType()).iteratorType(true);
     }
     /** Implements the `Type` interface. */
-    const Type& viewType() const { return child<Type>(0); }
+    const Type& viewType() const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }
 };

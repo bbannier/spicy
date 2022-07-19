@@ -62,7 +62,16 @@ class isRuntimeNonTrivial {};
 
 struct isView : isIterable {};
 
-class isViewable {};
+struct isViewable {
+    /**
+     * Returns any parameters associated with type. If a type is declared as
+     * `T<A,B,C>` this returns a vector of the AST nodes for `A`, `B`, and
+     * `C`.
+     */
+    /** Returns the type of an view for this type. */
+    virtual const hilti::Type& viewType() const = 0;
+};
+
 class supportsWildcard {};
 class takesArguments {};
 } // namespace trait
@@ -247,17 +256,6 @@ public:
     Type() = default;
 
     Type _clone() const { return *this; }
-
-    /**
-     * Returns any parameters associated with type. If a type is declared as
-     * `T<A,B,C>` this returns a vector of the AST nodes for `A`, `B`, and
-     * `C`.
-     */
-    /** Returns the type of an view for this type. */
-    const hilti::Type& viewType() const { // NOTE: if hilti::type::trait::isViewable
-        static Type _x;                   /* FIXME(bbannier) */
-        return _x;
-    }
 
     /** Returns the type of elements the iterator traverse. */
     const hilti::Type& dereferencedType() const { // NOTE: if hilti::type::trait::isDereferenceable
