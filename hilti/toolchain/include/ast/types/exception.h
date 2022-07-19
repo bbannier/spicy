@@ -26,7 +26,7 @@ public:
         return baseType().has_value() ? type::detail::isResolved(baseType(), rstate) : true;
     }
     /** Implements the `Type` interface. */
-    auto typeParameters() const { return children(); }
+    std::vector<Node> typeParameters() const override { return children(); }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
     /** Implements the `Node` interface. */

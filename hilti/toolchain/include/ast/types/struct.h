@@ -102,7 +102,7 @@ public:
     }
 
     /** Implements the `Type` interface. */
-    auto typeParameters() const {
+    std::vector<Node> typeParameters() const override {
         std::vector<Node> params;
         for ( const auto& f : fields() )
             params.emplace_back(f.type());

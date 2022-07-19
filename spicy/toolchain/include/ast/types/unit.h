@@ -188,7 +188,7 @@ public:
     }
 
     // type::trait::Parameterized interface.
-    auto typeParameters() const { return children(); }
+    std::vector<Node> typeParameters() const override { return children(); }
     bool isWildcard() const override { return _wildcard; }
 
     // Node interface.

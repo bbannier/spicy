@@ -26,7 +26,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    auto typeParameters() const { return std::vector<Node>{id()}; }
+    std::vector<Node> typeParameters() const override { return std::vector<Node>{id()}; }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
 

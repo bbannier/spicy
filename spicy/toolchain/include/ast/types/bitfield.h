@@ -101,7 +101,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    auto typeParameters() const { return hilti::util::slice(children(), 1); }
+    std::vector<Node> typeParameters() const override { return hilti::util::slice(children(), 1); }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
     /** Implements the `Node` interface. */

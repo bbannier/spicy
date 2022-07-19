@@ -48,6 +48,13 @@ struct isParameterized {
      * source code, this typically corresponds to a type `T<*>`.
      */
     virtual bool isWildcard() const = 0;
+
+    /**
+     * Returns any parameters associated with type. If a type is declared as
+     * `T<A,B,C>` this returns a vector of the AST nodes for `A`, `B`, and
+     * `C`.
+     */
+    virtual std::vector<Node> typeParameters() const = 0;
 };
 
 class isReferenceType {};
@@ -246,10 +253,6 @@ public:
      * `T<A,B,C>` this returns a vector of the AST nodes for `A`, `B`, and
      * `C`.
      */
-    std::vector<Node> typeParameters() const { // NOTE: if hilti::type::trait::isParameterized else {};
-        return {};
-    }
-
     /** Returns the type of an view for this type. */
     const hilti::Type& viewType() const { // NOTE: if hilti::type::trait::isViewable
         static Type _x;                   /* FIXME(bbannier) */

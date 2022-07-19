@@ -605,8 +605,8 @@ static Result<Type> _coerceParameterizedType(const Type& src, const Type& dst, b
     if ( dynamic_cast<const type::trait::isParameterized*>(&dst) )
         return src;
 
-    auto params1 = src.typeParameters();
-    auto params2 = dst.typeParameters();
+    auto params1 = dynamic_cast<const type::trait::isParameterized&>(src).typeParameters();
+    auto params2 = dynamic_cast<const type::trait::isParameterized&>(dst).typeParameters();
 
     if ( params1.size() != params2.size() )
         return {};

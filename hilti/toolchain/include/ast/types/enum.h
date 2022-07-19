@@ -82,7 +82,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return _initialized; }
     /** Implements the `Type` interface. */
-    auto typeParameters() const {
+    std::vector<Node> typeParameters() const override {
         std::vector<Node> params;
         for ( auto&& c : uniqueLabels() )
             params.emplace_back(c.get());
