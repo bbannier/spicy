@@ -161,21 +161,14 @@ struct State {
  * provides implementations for some interface methods shared that are shared
  * by all types.
  */
-class TypeBase : public NodeBase, public hilti::trait::isType {
+class TypeBase : public NodeBase, public trait::isType {
 public:
     using NodeBase::NodeBase;
 
     virtual ~TypeBase() = default;
-};
 
-class Type : public TypeBase {
-public:
-    Type(const TypeBase&) {} // FIXME(bbannier)
-    Type(TypeBase&&) {}      // FIXME(bbannier)
-
-    Type() = default;
-
-    Type _clone() const { return *this; }
+    /** Returns true if the type is equivalent to another HILTI type. */
+    bool isEqual(const hilti::TypeBase& other) const { return node::isEqual(this, other); }
 
     template<typename T>
     bool isA() const {
@@ -206,19 +199,23 @@ public:
         return {};
     }
 
-    virtual const char* typename_() const { return typeid(*this).name(); }
+    const char* typename_() const { return typeid(*this).name(); }
 
-    virtual size_t typeid_() const { return typeid(*this).hash_code(); }
+    size_t typeid_() const { return typeid(*this).hash_code(); }
 
     virtual uintptr_t identity() const {
         return typeid_(); // FIXME(bbannier): is this correct?
     }
+};
 
-    /** Returns true if the type is equivalent to another HILTI type. */
-    bool isEqual(const hilti::Type& other) const {
-        // node::isEqual(this, &other);
-        return false; // FIXME(bbannier)
-    }
+class Type : public TypeBase {
+public:
+    Type(const TypeBase&) {} // FIXME(bbannier)
+    Type(TypeBase&&) {}      // FIXME(bbannier)
+
+    Type() = default;
+
+    Type _clone() const { return *this; }
 
     /**
      * Returns any parameters associated with type. If a type is declared as
@@ -347,34 +344,6 @@ public:
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
 };
-
-// class Type : public type::detail::Type {
-// public:
-//     using type::detail::Type::Type;
-
-//     std::optional<ID> resolvedID() const { return _state().resolved_id; }
-
-//     void setCxxID(ID id) { _state().cxx = std::move(id); }
-//     void setTypeID(ID id) { _state().id = std::move(id); }
-//     void addFlag(type::Flag f) { _state().flags += f; }
-
-//     /** Implements the `Type` interface. */
-//     bool hasFlag(type::Flag f) const { return _state().flags.has(f); }
-//     /** Implements the `Type` interface. */
-//     const type::Flags& flags() const { return _state().flags; }
-//     /** Implements the `Type` interface. */
-//     bool _isConstant() const { return _state().flags.has(type::Flag::Constant); }
-//     /** Implements the `Type` interface. */
-//     const std::optional<ID>& typeID() const { return _state().id; }
-//     /** Implements the `Type` interface. */
-//     const std::optional<ID>& cxxID() const { return _state().cxx; }
-//     /** Implements the `Type` interface. */
-//     const type::detail::State& _state() const { return _state_; }
-//     /** Implements the `Type` interface. */
-//     type::detail::State& _state() { return _state_; }
-//     /** Implements the `Node` interface. */
-//     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
-// };
 
 /** Creates an AST node representing a `Type`. */
 inline Node to_node(Type t) { return Node(std::move(t)); }
