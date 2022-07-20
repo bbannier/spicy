@@ -30,7 +30,9 @@ using Parameter = declaration::Parameter;
 }
 
 namespace trait {
-class isAllocable {};
+struct isAllocable {
+    virtual ~isAllocable() = default;
+};
 
 struct isDereferenceable {
     /** Returns the type of elements the iterator traverse. */
@@ -46,7 +48,7 @@ struct isIterable {
 };
 
 class isIterator {};
-class isMutable {};
+struct isMutable {};
 
 struct isParameterized {
     /**
@@ -64,8 +66,8 @@ struct isParameterized {
     virtual std::vector<Node> typeParameters() const = 0;
 };
 
-class isReferenceType {};
-class isRuntimeNonTrivial {};
+struct isReferenceType {};
+struct isRuntimeNonTrivial {};
 
 struct isView : isIterable {};
 
@@ -270,34 +272,34 @@ public:
     Type _clone() const { return *this; }
 
     /** For internal use. Use ``type::isAllocable` instead. */
-    bool _isAllocable() const { return false; /* FIXME(bbannier) */ }
+    bool _isAllocable() const { return dynamic_cast<const type::trait::isAllocable*>(this); }
 
     /** For internal use. Use ``type::isDereferenceable` instead. */
-    bool _isDereferenceable() const { return false; /* FIXME(bbannier) */ }
+    bool _isDereferenceable() const { return dynamic_cast<const type::trait::isDereferenceable*>(this); }
 
     /** For internal use. Use ``type::isIterable` instead. */
-    bool _isIterable() const { return false; /* FIXME(bbannier) */ }
+    bool _isIterable() const { return dynamic_cast<const type::trait::isIterable*>(this); }
 
     /** For internal use. Use ``type::isViewable` instead. */
-    bool _isViewable() const { return false; /* FIXME(bbannier) */ }
+    bool _isViewable() const { return dynamic_cast<const type::trait::isViewable*>(this); }
 
     /** For internal use. Use ``type::isIterator` instead. */
-    bool _isIterator() const { return false; /* FIXME(bbannier) */ }
+    bool _isIterator() const { return dynamic_cast<const type::trait::isReferenceType*>(this); }
 
     /** For internal use. Use ``type::isView` instead. */
-    bool _isView() const { return false; /* FIXME(bbannier) */ }
+    bool _isView() const { return dynamic_cast<const type::trait::isView*>(this); }
 
     /** For internal use. Use ``type::isParameterized` instead. */
-    bool _isParameterized() const { return false; /* FIXME(bbannier) */ }
+    bool _isParameterized() const { return dynamic_cast<const type::trait::isParameterized*>(this); }
 
     /** For internal use. Use ``type::isReferenceType` instead. */
-    bool _isReferenceType() const { return false; /* FIXME(bbannier) */ }
+    bool _isReferenceType() const { return dynamic_cast<const type::trait::isReferenceType*>(this); }
 
     /** For internal use. Use ``type::isMutable` instead. */
-    bool _isMutable() const { return false; /* FIXME(bbannier) */ }
+    bool _isMutable() const { return dynamic_cast<const type::trait::isMutable*>(this); }
 
     /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
-    bool _isRuntimeNonTrivial() const { return false; /* FIXME(bbannier) */ }
+    bool _isRuntimeNonTrivial() const { return dynamic_cast<const type::trait::isRuntimeNonTrivial*>(this); }
 
     /** For internal use. Use ``type::isResolved` instead. */
     bool _isResolved(type::ResolvedState* rstate) const { return false; /* FIXME(bbannier) */ }
