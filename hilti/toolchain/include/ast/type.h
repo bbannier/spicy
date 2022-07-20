@@ -252,7 +252,8 @@ public:
     size_t typeid_() const { return typeid(*this).hash_code(); }
 
     virtual uintptr_t identity() const {
-        return typeid_(); // FIXME(bbannier): is this correct?
+        // FIXME(bbannier): is this correct?
+        return reinterpret_cast<uintptr_t>(this);
     }
 
     // }}}
