@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <hilti/rt/extension-points.h>
 #include <hilti/rt/result.h>

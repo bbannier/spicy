@@ -26,7 +26,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return true; }
+    bool _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
     const Type& dereferencedType() const { return child<Type>(0); }
     /** Implements the `Node` interface. */
@@ -45,12 +45,12 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return true; }
+    bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
-    const Type& elementType() const { return child<Type>(0); }
+    const Type& elementType() const override { return child<Type>(0); }
 
     /** Implements the `Type` interface. */
-    const Type& iteratorType(bool /* const */) const { return child<Type>(1); }
+    const Type& iteratorType(bool /* const */) const override { return child<Type>(1); }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }
 };

@@ -50,7 +50,7 @@ public:
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
 
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const {
+    bool _isResolved(ResolvedState* rstate) const override {
         for ( auto c = ++children().begin(); c != children().end(); c++ ) {
             if ( ! c->as<declaration::Field>().isResolved(rstate) )
                 return false;

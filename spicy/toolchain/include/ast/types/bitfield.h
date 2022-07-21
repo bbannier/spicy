@@ -99,7 +99,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return true; }
+    bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
     std::vector<Node> typeParameters() const override { return hilti::util::slice(children(), 1); }
     /** Implements the `Type` interface. */

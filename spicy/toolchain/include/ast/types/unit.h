@@ -184,7 +184,7 @@ public:
     // Type interface.
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
 
-    auto _isResolved(ResolvedState* rstate) const {
+    bool _isResolved(ResolvedState* rstate) const override {
         auto xs = items();
         return std::all_of(xs.begin(), xs.end(), [](const auto& x) { return x.isResolved(); });
     }

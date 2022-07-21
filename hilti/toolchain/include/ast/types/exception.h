@@ -3,6 +3,7 @@
 #pragma once
 
 #include <utility>
+#include <vector>
 
 #include <hilti/ast/type.h>
 
@@ -22,7 +23,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const {
+    bool _isResolved(ResolvedState* rstate) const override {
         return baseType().has_value() ? type::detail::isResolved(baseType(), rstate) : true;
     }
     /** Implements the `Type` interface. */

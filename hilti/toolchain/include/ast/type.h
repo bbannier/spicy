@@ -260,17 +260,21 @@ public:
 
     // Type interface. {{{
 
+    /** For internal use. Use ``type::isResolved` instead. */
+    virtual bool _isResolved(type::ResolvedState* rstate) const { return false; }
+
     // }}}
 };
 
 class Type : public TypeBase {
 public:
-    Type(const TypeBase&) {} // FIXME(bbannier)
-    Type(TypeBase&&) {}      // FIXME(bbannier)
+    Type(const TypeBase& x) : TypeBase(x) {} // FIXME(bbannier)
 
     Type() = default;
 
     Type _clone() const { return *this; }
+
+    bool _isResolved(type::ResolvedState* rstate) const override { return false; }
 
     /** For internal use. Use ``type::isAllocable` instead. */
     bool _isAllocable() const { return dynamic_cast<const type::trait::isAllocable*>(this); }
@@ -301,9 +305,6 @@ public:
 
     /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
     bool _isRuntimeNonTrivial() const { return dynamic_cast<const type::trait::isRuntimeNonTrivial*>(this); }
-
-    /** For internal use. Use ``type::isResolved` instead. */
-    bool _isResolved(type::ResolvedState* rstate) const { return false; /* FIXME(bbannier) */ }
 
     /** Internal state managed by derived class. */
     type::detail::State _state_;

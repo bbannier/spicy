@@ -26,7 +26,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return true; }
+    bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
     const Type& dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
@@ -43,7 +43,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return true; }
+    bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
     const Type& elementType() const override {
         return dynamic_cast<const trait::isDereferenceable&>(iteratorType(true)).dereferencedType();
@@ -71,7 +71,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return true; }
+    bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
     const Type& elementType() const override {
         return dynamic_cast<const trait::isDereferenceable&>(iteratorType(true)).dereferencedType();

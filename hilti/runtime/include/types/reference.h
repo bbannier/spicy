@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <hilti/rt/any.h>
 #include <hilti/rt/extension-points.h>

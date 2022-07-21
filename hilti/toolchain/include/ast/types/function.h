@@ -93,7 +93,7 @@ public:
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
 
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const {
+    bool _isResolved(ResolvedState* rstate) const override {
         if ( result().type().isA<type::Auto>() )
             // We treat this as resolved because (1) it doesn't need to hold up
             // other resolving, and (2) can lead to resolver dead-locks if we

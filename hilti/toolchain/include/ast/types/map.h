@@ -3,6 +3,7 @@
 #pragma once
 
 #include <utility>
+#include <vector>
 
 #include <hilti/ast/type.h>
 #include <hilti/ast/types/tuple.h>
@@ -46,7 +47,9 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const { return type::detail::isResolved(dereferencedType(), rstate); }
+    bool _isResolved(ResolvedState* rstate) const override {
+        return type::detail::isResolved(dereferencedType(), rstate);
+    }
     /** Implements the `Type` interface. */
     const Type& dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Type` interface. */
@@ -87,7 +90,7 @@ public:
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
-    auto _isResolved(ResolvedState* rstate) const {
+    bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(iteratorType(true), rstate) &&
                type::detail::isResolved(iteratorType(false), rstate);
     }
