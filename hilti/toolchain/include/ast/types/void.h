@@ -9,7 +9,7 @@
 namespace hilti::type {
 
 /** AST node for a void type. */
-class Void : public TypeBase {
+class Void : public Type {
 public:
     bool operator==(const Void& /* other */) const { return true; }
 
@@ -28,7 +28,7 @@ public:
     static Void create(Meta m = Meta()) { return Void(std::move(m)); }
 
 private:
-    Void(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Void(Meta m = Meta()) : Type(std::move(m)) {}
 };
 
 /** Singleton. */

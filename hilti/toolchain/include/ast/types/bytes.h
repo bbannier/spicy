@@ -12,14 +12,14 @@ namespace hilti::type {
 namespace bytes {
 
 /** AST node for a list iterator type. */
-class Iterator : public TypeBase,
+class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  trait::isMutable,
                  trait::isRuntimeNonTrivial {
 public:
-    Iterator(Meta m = Meta()) : TypeBase(nodes(Type(type::UnsignedInteger(8))), std::move(m)) {}
+    Iterator(Meta m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)) {}
 
     bool operator==(const Iterator& /* other */) const { return true; }
 
@@ -36,9 +36,9 @@ public:
 } // namespace bytes
 
 /** AST node for a bytes type. */
-class Bytes : public TypeBase, trait::isAllocable, trait::isMutable, trait::isIterable, trait::isRuntimeNonTrivial {
+class Bytes : public Type, trait::isAllocable, trait::isMutable, trait::isIterable, trait::isRuntimeNonTrivial {
 public:
-    Bytes(const Meta& m = Meta()) : TypeBase(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m) {}
+    Bytes(const Meta& m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m) {}
 
     bool operator==(const Bytes& /* other */) const { return true; }
 

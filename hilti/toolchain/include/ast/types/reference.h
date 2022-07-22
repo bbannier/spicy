@@ -13,15 +13,15 @@ namespace hilti::type {
 /*
  * AST node for a `strong_ref<T>` type.
  */
-class StrongReference : public TypeBase,
+class StrongReference : public Type,
                         trait::isAllocable,
                         trait::isParameterized,
                         trait::isDereferenceable,
                         trait::isReferenceType {
 public:
-    StrongReference(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
-    StrongReference(Type ct, Meta m = Meta()) : TypeBase(nodes(std::move(ct)), std::move(m)) {}
-    StrongReference(NodeRef ct, Meta m = Meta()) : TypeBase(nodes(node::none), std::move(m)), _type(std::move(ct)) {}
+    StrongReference(Wildcard /*unused*/, Meta m = Meta()) : Type({type::unknown}, std::move(m)), _wildcard(true) {}
+    StrongReference(Type ct, Meta m = Meta()) : Type(nodes(std::move(ct)), std::move(m)) {}
+    StrongReference(NodeRef ct, Meta m = Meta()) : Type(nodes(node::none), std::move(m)), _type(std::move(ct)) {}
 
     const Type& dereferencedType() const override {
         if ( _type )
@@ -52,14 +52,14 @@ private:
 };
 
 /** AST node for a `weak_ref<T>` type. */
-class WeakReference : public TypeBase,
+class WeakReference : public Type,
                       trait::isAllocable,
                       trait::isParameterized,
                       trait::isDereferenceable,
                       trait::isReferenceType {
 public:
-    WeakReference(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
-    WeakReference(Type ct, Meta m = Meta()) : TypeBase({std::move(ct)}, std::move(m)) {}
+    WeakReference(Wildcard /*unused*/, Meta m = Meta()) : Type({type::unknown}, std::move(m)), _wildcard(true) {}
+    WeakReference(Type ct, Meta m = Meta()) : Type({std::move(ct)}, std::move(m)) {}
 
     const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 
@@ -84,16 +84,15 @@ private:
 };
 
 /** AST node for a `val_ref<T>` type. */
-class ValueReference : public TypeBase,
+class ValueReference : public Type,
                        trait::isAllocable,
                        trait::isParameterized,
                        trait::isDereferenceable,
                        trait::isReferenceType {
 public:
-    ValueReference(Wildcard /*unused*/, Meta m = Meta())
-        : TypeBase(nodes(type::unknown), std::move(m)), _wildcard(true) {}
-    ValueReference(Type ct, Meta m = Meta()) : TypeBase(nodes(std::move(ct)), std::move(m)) {}
-    ValueReference(NodeRef ct, Meta m = Meta()) : TypeBase(nodes(type::unknown), std::move(m)), _node(std::move(ct)) {}
+    ValueReference(Wildcard /*unused*/, Meta m = Meta()) : Type(nodes(type::unknown), std::move(m)), _wildcard(true) {}
+    ValueReference(Type ct, Meta m = Meta()) : Type(nodes(std::move(ct)), std::move(m)) {}
+    ValueReference(NodeRef ct, Meta m = Meta()) : Type(nodes(type::unknown), std::move(m)), _node(std::move(ct)) {}
 
     const Type& dereferencedType() const override {
         if ( _node )

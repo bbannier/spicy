@@ -13,7 +13,7 @@ namespace hilti::type {
 namespace list {
 
 /** AST node for a list iterator type. */
-class Iterator : public TypeBase,
+class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -21,10 +21,9 @@ class Iterator : public TypeBase,
                  trait::isRuntimeNonTrivial,
                  trait::isParameterized {
 public:
-    Iterator(Type etype, bool const_, Meta m = Meta())
-        : TypeBase(nodes(std::move(etype)), std::move(m)), _const(const_) {}
+    Iterator(Type etype, bool const_, Meta m = Meta()) : Type(nodes(std::move(etype)), std::move(m)), _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : TypeBase(nodes(type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
+        : Type(nodes(type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
 
     /** Returns true if the container elements aren't modifiable. */
     bool isConstant() const { return _const; }
@@ -54,7 +53,7 @@ private:
 } // namespace list
 
 /** AST node for a list type. */
-class List : public TypeBase,
+class List : public Type,
              trait::isAllocable,
              trait::isMutable,
              trait::isIterable,
@@ -62,10 +61,9 @@ class List : public TypeBase,
              trait::isParameterized {
 public:
     List(const Type& t, const Meta& m = Meta())
-        : TypeBase(nodes(list::Iterator(t, true, m), list::Iterator(t, false, m)), m) {}
+        : Type(nodes(list::Iterator(t, true, m), list::Iterator(t, false, m)), m) {}
     List(Wildcard /*unused*/, const Meta& m = Meta())
-        : TypeBase(nodes(list::Iterator(Wildcard{}, true, m), list::Iterator(Wildcard{}, false, m)), m),
-          _wildcard(true) {}
+        : Type(nodes(list::Iterator(Wildcard{}, true, m), list::Iterator(Wildcard{}, false, m)), m), _wildcard(true) {}
 
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }

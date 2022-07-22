@@ -38,7 +38,7 @@ namespace detail {
  * This functionality is not implemented in `Unit` since we want to use
  * `assignIndices` in a call to a base class's constructor before `Unit` is
  * fully constructed. Putting the counter `_next_index` into `Unit` would lead
- * to it being initialized after `Unit`'s base class `TypeBase`.
+ * to it being initialized after `Unit`'s base class `Type`.
  */
 struct AssignIndices {
     /**
@@ -55,7 +55,7 @@ struct AssignIndices {
 
 /** AST node for a Spicy unit. */
 class Unit : detail::AssignIndices,
-             public hilti::TypeBase,
+             public hilti::Type,
              hilti::type::trait::isAllocable,
              hilti::type::trait::isParameterized,
              hilti::type::trait::takesArguments,
@@ -63,16 +63,16 @@ class Unit : detail::AssignIndices,
 public:
     Unit(const std::vector<type::function::Parameter>& params, std::vector<unit::Item> i,
          const std::optional<AttributeSet>& /* attrs */ = {}, Meta m = Meta())
-        : TypeBase(hilti::nodes(node::none, node::none, node::none,
-                                hilti::util::transform(params,
-                                                       [](auto p) {
-                                                           p.setIsTypeParameter();
-                                                           return Declaration(p);
-                                                       }),
-                                assignIndices(std::move(i))),
-                   std::move(m)) {}
+        : Type(hilti::nodes(node::none, node::none, node::none,
+                            hilti::util::transform(params,
+                                                   [](auto p) {
+                                                       p.setIsTypeParameter();
+                                                       return Declaration(p);
+                                                   }),
+                            assignIndices(std::move(i))),
+               std::move(m)) {}
 
-    Unit(Wildcard /*unused*/, Meta m = Meta()) : TypeBase(std::move(m)), _wildcard(true) {}
+    Unit(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
 
     NodeRef selfRef() const {
         if ( children()[0].isA<Declaration>() )

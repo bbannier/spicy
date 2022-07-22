@@ -1,5 +1,7 @@
 // Copyright (c) 2020-2021 by the Zeek Project. See LICENSE for details.
 
+// FIXME(bbannier): remove this.
+
 /** Interface for HILTI types. */
 class Type(hilti::trait::isType) : hilti::trait::isNode {
     /** Returns true if the type is equivalent to another HILTI type. */

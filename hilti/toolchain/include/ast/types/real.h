@@ -9,9 +9,9 @@
 namespace hilti::type {
 
 /** AST node for a floating point type. */
-class Real : public TypeBase, trait::isAllocable {
+class Real : public Type, trait::isAllocable {
 public:
-    Real(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Real(Meta m = Meta()) : Type(std::move(m)) {}
 
     bool operator==(const Real& /* other */) const { return true; }
 

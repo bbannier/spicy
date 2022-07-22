@@ -12,14 +12,14 @@ namespace hilti::type {
 namespace stream {
 
 /** AST node for a stream iterator type. */
-class Iterator : public TypeBase,
+class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  trait::isMutable,
                  trait::isRuntimeNonTrivial {
 public:
-    Iterator(Meta m = Meta()) : TypeBase(nodes(type::UnsignedInteger(8)), std::move(m)) {}
+    Iterator(Meta m = Meta()) : Type(nodes(type::UnsignedInteger(8)), std::move(m)) {}
 
     bool operator==(const Iterator& /* other */) const { return true; }
 
@@ -34,9 +34,9 @@ public:
 };
 
 /** AST node for a stream view type. */
-class View : public TypeBase, trait::isView, trait::isAllocable, trait::isRuntimeNonTrivial {
+class View : public Type, trait::isView, trait::isAllocable, trait::isRuntimeNonTrivial {
 public:
-    View(const Meta& m = Meta()) : TypeBase(nodes(stream::Iterator(m)), m) {}
+    View(const Meta& m = Meta()) : Type(nodes(stream::Iterator(m)), m) {}
 
     bool operator==(const View& /* other */) const { return true; }
 
@@ -57,14 +57,14 @@ public:
 } // namespace stream
 
 /** AST node for a stream type. */
-class Stream : public TypeBase,
+class Stream : public Type,
                trait::isAllocable,
                trait::isMutable,
                trait::isIterable,
                trait::isViewable,
                trait::isRuntimeNonTrivial {
 public:
-    Stream(const Meta& m = Meta()) : TypeBase(nodes(stream::View(m)), m) {}
+    Stream(const Meta& m = Meta()) : Type(nodes(stream::View(m)), m) {}
 
     bool operator==(const Stream& /* other */) const { return true; }
 

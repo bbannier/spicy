@@ -17,7 +17,7 @@ namespace hilti::type {
  * instantiated by a HILTI program. That's also why we don't use any child
  * nodes, but store the operands directly.
  */
-class OperandList : public TypeBase {
+class OperandList : public Type {
 public:
     OperandList(std::vector<operator_::Operand> operands) : _operands(std::move(operands)) {}
 

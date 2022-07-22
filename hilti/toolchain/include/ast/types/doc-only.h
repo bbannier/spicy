@@ -15,9 +15,9 @@ namespace hilti::type {
  * auto-generated documentation. If it's used anywhere else, it'll cause
  * trouble.
  */
-class DocOnly : public TypeBase {
+class DocOnly : public Type {
 public:
-    DocOnly(std::string desc, Meta m = Meta()) : TypeBase(std::move(m)), _description(std::move(desc)) {}
+    DocOnly(std::string desc, Meta m = Meta()) : Type(std::move(m)), _description(std::move(desc)) {}
 
     auto description() const { return _description; }
 

@@ -14,7 +14,7 @@ namespace hilti::type {
 namespace map {
 
 /** AST node for a map iterator type. */
-class Iterator : public TypeBase,
+class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -23,9 +23,9 @@ class Iterator : public TypeBase,
                  trait::isParameterized {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
-        : TypeBase(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m), _const(const_) {}
+        : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m), _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : TypeBase(nodes(type::unknown, type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
+        : Type(nodes(type::unknown, type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
 
     const Type& keyType() const {
         if ( auto t = children()[0].tryAs<type::Tuple>() )
@@ -71,7 +71,7 @@ private:
 } // namespace map
 
 /** AST node for a map type. */
-class Map : public TypeBase,
+class Map : public Type,
             trait::isAllocable,
             trait::isMutable,
             trait::isIterable,
@@ -79,10 +79,9 @@ class Map : public TypeBase,
             trait::isParameterized {
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())
-        : TypeBase(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m) {}
+        : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
-        : TypeBase(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
-          _wildcard(true) {}
+        : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m), _wildcard(true) {}
 
     const Type& keyType() const { return child<map::Iterator>(0).keyType(); }
     const Type& valueType() const { return child<map::Iterator>(0).valueType(); }

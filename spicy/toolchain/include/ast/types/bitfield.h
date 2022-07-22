@@ -74,18 +74,18 @@ inline hilti::Node to_node(Bits f) { return hilti::Node(std::move(f)); }
 } // namespace bitfield
 
 /** AST node for a struct type. */
-class Bitfield : public hilti::TypeBase,
+class Bitfield : public hilti::Type,
                  hilti::type::trait::isAllocable,
                  hilti::type::trait::isParameterized,
                  hilti::type::trait::isMutable {
 public:
     Bitfield(int width, std::vector<bitfield::Bits> bits, const Meta& m = Meta())
-        : TypeBase(nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m), _width(width) {}
+        : Type(nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m), _width(width) {}
     Bitfield(Wildcard /*unused*/, Meta m = Meta())
-        : TypeBase({hilti::type::unknown, hilti::type::unknown}, std::move(m)), _wildcard(true) {}
+        : Type({hilti::type::unknown, hilti::type::unknown}, std::move(m)), _wildcard(true) {}
 
     int width() const { return _width; }
-    auto bits() const { return children<bitfield::Bits>(2, -1); }
+    auto bits() const { return NodeBase::children<bitfield::Bits>(2, -1); }
     hilti::optional_ref<const bitfield::Bits> bits(const ID& id) const;
     std::optional<int> bitsIndex(const ID& id) const;
     const Type& parseType() const { return child<Type>(0); }

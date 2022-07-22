@@ -9,7 +9,7 @@
 namespace hilti::type {
 
 /** AST node for an "auto" type. */
-class Auto : public TypeBase, type::trait::isAllocable {
+class Auto : public Type, type::trait::isAllocable {
 public:
     bool operator==(const Auto& /* other */) const { return true; }
 
@@ -27,7 +27,7 @@ public:
     static Auto create(Meta m = Meta()) { return Auto(std::move(m)); }
 
 private:
-    Auto(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Auto(Meta m = Meta()) : Type(std::move(m)) {}
 };
 
 /** Singleton. */

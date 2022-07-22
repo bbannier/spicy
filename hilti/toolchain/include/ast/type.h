@@ -189,15 +189,12 @@ private:
 inline Flags operator+(Flag f1, Flag f2) { return Flags(f1) + f2; }
 
 namespace detail {
-
 struct State {
     std::optional<ID> id;
     std::optional<ID> cxx;
     std::optional<ID> resolved_id;
     type::Flags flags;
 };
-
-#include <hilti/autogen/__type.h>
 } // namespace detail
 
 } // namespace type
@@ -214,10 +211,6 @@ public:
     virtual ~TypeBase() = default;
 
     // Generic node stuff. {{{
-
-    /** Returns true if the type is equivalent to another HILTI type. */
-    bool isEqual(const hilti::TypeBase& other) const { return node::isEqual(this, other); }
-
     template<typename T>
     bool isA() const {
         return dynamic_cast<const T*>(this);
@@ -260,21 +253,22 @@ public:
 
     // Type interface. {{{
 
-    /** For internal use. Use ``type::isResolved` instead. */
-    virtual bool _isResolved(type::ResolvedState* rstate) const { return false; }
-
     // }}}
 };
 
 class Type : public TypeBase {
 public:
-    Type(const TypeBase& x) : TypeBase(x) {} // FIXME(bbannier)
+    using TypeBase::TypeBase;
+
+    /** Returns true if the type is equivalent to another HILTI type. */
+    bool isEqual(const hilti::TypeBase& other) const { return node::isEqual(this, other); }
+
+    /** For internal use. Use ``type::isResolved` instead. */
+    virtual bool _isResolved(type::ResolvedState* rstate) const { return false; }
 
     Type() = default;
 
     Type _clone() const { return *this; }
-
-    bool _isResolved(type::ResolvedState* rstate) const override { return false; }
 
     /** For internal use. Use ``type::isAllocable` instead. */
     bool _isAllocable() const { return dynamic_cast<const type::trait::isAllocable*>(this); }

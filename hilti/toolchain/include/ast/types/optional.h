@@ -11,10 +11,10 @@
 namespace hilti::type {
 
 /** AST node for an "optional" type. */
-class Optional : public TypeBase, trait::isAllocable, trait::isParameterized, trait::isDereferenceable {
+class Optional : public Type, trait::isAllocable, trait::isParameterized, trait::isDereferenceable {
 public:
-    Optional(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
-    Optional(Type ct, Meta m = Meta()) : TypeBase({std::move(ct)}, std::move(m)) {}
+    Optional(Wildcard /*unused*/, Meta m = Meta()) : Type({type::unknown}, std::move(m)), _wildcard(true) {}
+    Optional(Type ct, Meta m = Meta()) : Type({std::move(ct)}, std::move(m)) {}
 
     const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 

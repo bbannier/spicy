@@ -9,9 +9,9 @@
 namespace spicy::type {
 
 /** AST node for a Sink type. */
-class Sink : public hilti::TypeBase, hilti::type::trait::isAllocable {
+class Sink : public hilti::Type, hilti::type::trait::isAllocable {
 public:
-    Sink(hilti::Meta m = hilti::Meta()) : TypeBase(std::move(m)) {}
+    Sink(hilti::Meta m = hilti::Meta()) : Type(std::move(m)) {}
 
     bool operator==(const Sink& /* other */) const { return true; }
 

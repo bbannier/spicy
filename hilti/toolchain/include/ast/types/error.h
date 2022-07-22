@@ -9,9 +9,9 @@
 namespace hilti::type {
 
 /** AST node for an error type. */
-class Error : public TypeBase, trait::isAllocable {
+class Error : public Type, trait::isAllocable {
 public:
-    Error(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Error(Meta m = Meta()) : Type(std::move(m)) {}
 
     bool operator==(const Error& /* other */) const { return true; }
 

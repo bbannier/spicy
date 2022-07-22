@@ -9,9 +9,9 @@
 namespace hilti::type {
 
 /** AST node for an "any" type. */
-class Any : public TypeBase {
+class Any : public Type {
 public:
-    Any(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Any(Meta m = Meta()) : Type(std::move(m)) {}
 
     bool operator==(const Any& /* other */) const { return true; }
 

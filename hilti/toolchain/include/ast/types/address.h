@@ -9,9 +9,9 @@
 namespace hilti::type {
 
 /** AST node for a address type. */
-class Address : public TypeBase, trait::isAllocable {
+class Address : public Type, trait::isAllocable {
 public:
-    Address(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Address(Meta m = Meta()) : Type(std::move(m)) {}
 
     bool operator==(const Address& /* other */) const { return true; }
 

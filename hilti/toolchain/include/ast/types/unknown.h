@@ -10,7 +10,7 @@ namespace hilti {
 namespace type {
 
 /** AST node for an unknown place-holder type. */
-class Unknown : public TypeBase, public type::trait::isAllocable, public util::type_erasure::trait::Singleton {
+class Unknown : public Type, public type::trait::isAllocable, public util::type_erasure::trait::Singleton {
 public:
     bool operator==(const Unknown& /* other */) const { return true; }
 
@@ -29,7 +29,7 @@ public:
     static Unknown create(Meta m = Meta()) { return Unknown(std::move(m)); }
 
 private:
-    Unknown(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Unknown(Meta m = Meta()) : Type(std::move(m)) {}
 };
 
 /** Singleton. */

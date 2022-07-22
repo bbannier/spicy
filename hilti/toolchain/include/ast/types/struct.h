@@ -29,21 +29,21 @@
 namespace hilti::type {
 
 /** AST node for a struct type. */
-class Struct : public TypeBase, trait::isAllocable, trait::isParameterized, trait::takesArguments, trait::isMutable {
+class Struct : public Type, trait::isAllocable, trait::isParameterized, trait::takesArguments, trait::isMutable {
 public:
     Struct(std::vector<Declaration> fields, Meta m = Meta())
-        : TypeBase(nodes(node::none, std::move(fields)), std::move(m)) {}
+        : Type(nodes(node::none, std::move(fields)), std::move(m)) {}
 
     Struct(const std::vector<type::function::Parameter>& params, std::vector<Declaration> fields, Meta m = Meta())
-        : TypeBase(nodes(node::none, std::move(fields),
-                         util::transform(params,
-                                         [](auto p) {
-                                             p.setIsTypeParameter();
-                                             return Declaration(p);
-                                         })),
-                   std::move(m)) {}
+        : Type(nodes(node::none, std::move(fields),
+                     util::transform(params,
+                                     [](auto p) {
+                                         p.setIsTypeParameter();
+                                         return Declaration(p);
+                                     })),
+               std::move(m)) {}
 
-    Struct(Wildcard /*unused*/, Meta m = Meta()) : TypeBase(nodes(node::none), std::move(m)), _wildcard(true) {}
+    Struct(Wildcard /*unused*/, Meta m = Meta()) : Type(nodes(node::none), std::move(m)), _wildcard(true) {}
 
     NodeRef selfRef() const {
         if ( children()[0].isA<Declaration>() )

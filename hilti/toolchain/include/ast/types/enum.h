@@ -48,11 +48,10 @@ inline Node to_node(Label l) { return Node(std::move(l)); }
 } // namespace enum_
 
 /** AST node for an enum type. */
-class Enum : public TypeBase, trait::isAllocable, trait::isParameterized {
+class Enum : public hilti::Type, trait::isAllocable, trait::isParameterized {
 public:
-    Enum(std::vector<enum_::Label> l, Meta m = Meta())
-        : TypeBase(nodes(_normalizeLabels(std::move(l))), std::move(m)) {}
-    Enum(Wildcard /*unused*/, Meta m = Meta()) : TypeBase(std::move(m)), _wildcard(true) {}
+    Enum(std::vector<enum_::Label> l, Meta m = Meta()) : Type(nodes(_normalizeLabels(std::move(l))), std::move(m)) {}
+    Enum(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
 
     std::vector<std::reference_wrapper<const enum_::Label>> labels() const;
 
@@ -74,7 +73,7 @@ public:
     auto labelDeclarationRefs() { return childRefs(0, -1); }
 
     bool operator==(const Enum& other) const {
-        return children<Declaration>(0, -1) == other.children<Declaration>(0, -1);
+        return NodeBase::children<Declaration>(0, -1) == other.NodeBase::children<Declaration>(0, -1);
     }
 
     /** Implements the `Type` interface. */

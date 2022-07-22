@@ -24,7 +24,6 @@ autogen_type_erased(SOURCES_TYPE_ERASED include/hilti/ast/expression.api YES)
 autogen_type_erased(SOURCES_TYPE_ERASED include/hilti/ast/expressions/resolved-operator.api YES)
 autogen_type_erased(SOURCES_TYPE_ERASED include/hilti/ast/operator.api YES)
 autogen_type_erased(SOURCES_TYPE_ERASED include/hilti/ast/statement.api YES)
-autogen_type_erased(SOURCES_TYPE_ERASED include/hilti/ast/type.api YES)
 
 include(ASTOperators)
 autogen_operators(SOURCES_OPERATORS hilti include/hilti/ast/operators ${AUTOGEN_H}/operators.decl

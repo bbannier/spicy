@@ -13,7 +13,7 @@ namespace hilti::type {
 namespace vector {
 
 /** AST node for a vector iterator type. */
-class Iterator : public TypeBase,
+class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -21,10 +21,9 @@ class Iterator : public TypeBase,
                  trait::isRuntimeNonTrivial,
                  trait::isParameterized {
 public:
-    Iterator(Type etype, bool const_, Meta m = Meta())
-        : TypeBase(nodes(std::move(etype)), std::move(m)), _const(const_) {}
+    Iterator(Type etype, bool const_, Meta m = Meta()) : Type(nodes(std::move(etype)), std::move(m)), _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : TypeBase(nodes(type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
+        : Type(nodes(type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
 
     /** Returns true if the container elements aren't modifiable. */
     bool isConstant() const { return _const; }
@@ -54,7 +53,7 @@ private:
 } // namespace vector
 
 /** AST node for a vector type. */
-class Vector : public TypeBase,
+class Vector : public Type,
                trait::isAllocable,
                trait::isMutable,
                trait::isIterable,
@@ -62,9 +61,9 @@ class Vector : public TypeBase,
                trait::isParameterized {
 public:
     Vector(const Type& t, const Meta& m = Meta())
-        : TypeBase(nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m) {}
+        : Type(nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m) {}
     Vector(Wildcard /*unused*/, const Meta& m = Meta())
-        : TypeBase(nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)), m),
+        : Type(nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)), m),
           _wildcard(true) {}
 
     /** Implements the `Type` interface. */

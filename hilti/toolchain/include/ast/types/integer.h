@@ -11,13 +11,12 @@ namespace hilti::type {
 
 namespace detail {
 
-// CHECK: IntegerBase = TypeBase
 /** Base class for an AST node representing an integer type. */
-class IntegerBase : public TypeBase, trait::isAllocable, trait::isParameterized {
+class IntegerBase : public hilti::Type, trait::isAllocable, trait::isParameterized {
 public:
-    IntegerBase(Wildcard /*unused*/, Meta m = Meta()) : TypeBase(std::move(m)), _wildcard(true) {}
-    IntegerBase(int width, Meta m = Meta()) : TypeBase(std::move(m)), _width(width) {}
-    IntegerBase(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    IntegerBase(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
+    IntegerBase(int width, Meta m = Meta()) : Type(std::move(m)), _width(width) {}
+    IntegerBase(Meta m = Meta()) : Type(std::move(m)) {}
 
     auto width() const { return _width; }
 

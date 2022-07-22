@@ -13,9 +13,9 @@
 namespace hilti::type {
 
 /** AST node for an unresolved type ID. */
-class UnresolvedID : public TypeBase {
+class UnresolvedID : public Type {
 public:
-    UnresolvedID(::hilti::ID id, Meta m = Meta()) : TypeBase({std::move(id)}, std::move(m)) {}
+    UnresolvedID(::hilti::ID id, Meta m = Meta()) : Type({std::move(id)}, std::move(m)) {}
 
     const auto& id() const { return child<::hilti::ID>(0); }
 

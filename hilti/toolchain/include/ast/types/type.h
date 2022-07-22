@@ -11,10 +11,10 @@
 namespace hilti::type {
 
 /** AST node for a type representing a type value. */
-class Type_ : public TypeBase, trait::isParameterized {
+class Type_ : public Type, trait::isParameterized {
 public:
-    Type_(Type t, Meta m = Meta()) : TypeBase(nodes(std::move(t)), std::move(m)) {}
-    Type_(Wildcard /*unused*/, Meta m = Meta()) : TypeBase(nodes(type::Any()), std::move(m)), _wildcard(true) {}
+    Type_(Type t, Meta m = Meta()) : Type(nodes(std::move(t)), std::move(m)) {}
+    Type_(Wildcard /*unused*/, Meta m = Meta()) : Type(nodes(type::Any()), std::move(m)), _wildcard(true) {}
 
     const auto& typeValue() const { return child<Type>(0); }
 

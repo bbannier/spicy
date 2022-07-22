@@ -9,9 +9,9 @@
 namespace hilti::type {
 
 /** AST node for a null type. */
-class Null : public TypeBase {
+class Null : public Type {
 public:
-    Null(Meta m = Meta()) : TypeBase(std::move(m)) {}
+    Null(Meta m = Meta()) : Type(std::move(m)) {}
 
     bool operator==(const Null& /* other */) const { return true; }
 
