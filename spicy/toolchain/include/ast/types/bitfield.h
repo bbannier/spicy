@@ -104,8 +104,6 @@ public:
     std::vector<Node> typeParameters() const override { return hilti::util::slice(children(), 1); }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
 
 private:
     int _width = 0;

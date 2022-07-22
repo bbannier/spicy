@@ -307,7 +307,7 @@ public:
     bool _takesArguments() const { return false; /* FIXME(bbannier) */ }
 
     /** Implements the `Node` interface. */
-    hilti::node::Properties properties() const { return {}; /* FIXME(bbannier) */ }
+    virtual node::Properties properties() const { return {}; }
 
     /** Implements the `Node` interface. */
     std::vector<hilti::Node>& children() const {

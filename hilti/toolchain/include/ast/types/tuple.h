@@ -70,7 +70,7 @@ public:
     bool isWildcard() const override { return _wildcard; }
 
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"wildcard", _wildcard}}; }
+    node::Properties properties() const override { return node::Properties{{"wildcard", _wildcard}}; }
 
 private:
     std::vector<tuple::Element> _typesToElements(std::vector<Type>&& types) {

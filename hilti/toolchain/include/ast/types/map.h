@@ -57,7 +57,7 @@ public:
     /** Implements the `Type` interface. */
     std::vector<Node> typeParameters() const override { return children(); }
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"const", _const}}; }
+    node::Properties properties() const override { return node::Properties{{"const", _const}}; }
 
     bool operator==(const Iterator& other) const {
         return keyType() == other.keyType() && valueType() == other.valueType();
@@ -101,8 +101,6 @@ public:
     bool isWildcard() const override { return _wildcard; }
     /** Implements the `Type` interface. */
     std::vector<Node> typeParameters() const override { return children(); }
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
 
     bool operator==(const Map& other) const { return iteratorType(true) == other.iteratorType(true); }
 

@@ -117,7 +117,7 @@ public:
     bool isWildcard() const override { return _wildcard; }
 
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"flavor", to_string(_flavor)}}; }
+    node::Properties properties() const override { return node::Properties{{"flavor", to_string(_flavor)}}; }
 
 private:
     bool _wildcard = false;

@@ -30,7 +30,7 @@ public:
     /** Implements the `Type` interface. */
     const Type& dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
+    node::Properties properties() const override { return node::Properties{}; }
 };
 
 /** AST node for a stream view type. */
@@ -51,7 +51,7 @@ public:
     /** Implements the `Type` interface. */
     const Type& iteratorType(bool /* const_ */) const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
+    node::Properties properties() const override { return node::Properties{}; }
 };
 
 } // namespace stream
@@ -83,7 +83,7 @@ public:
     /** Implements the `Type` interface. */
     const Type& viewType() const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
+    node::Properties properties() const override { return node::Properties{}; }
 };
 
 namespace detail::stream {

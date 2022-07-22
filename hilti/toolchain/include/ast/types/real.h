@@ -21,7 +21,7 @@ public:
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
+    node::Properties properties() const override { return node::Properties{}; }
 };
 
 } // namespace hilti::type

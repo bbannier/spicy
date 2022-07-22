@@ -19,8 +19,6 @@ public:
     auto isEqual(const hilti::Type& other) const { return hilti::node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(hilti::type::ResolvedState* rstate) const override { return true; }
-    /** Implements the `Node` interface. */
-    auto properties() const { return hilti::node::Properties{}; }
 };
 
 } // namespace spicy::type

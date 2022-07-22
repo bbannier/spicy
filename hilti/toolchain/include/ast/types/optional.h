@@ -31,9 +31,6 @@ public:
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
 
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
-
 private:
     bool _wildcard = false;
 };

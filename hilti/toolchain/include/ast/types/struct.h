@@ -113,9 +113,6 @@ public:
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
 
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
-
     /**
      * Given an existing node wrapping a struct type, updates the contained
      * struct type to have its `self` declaration initialized. The struct

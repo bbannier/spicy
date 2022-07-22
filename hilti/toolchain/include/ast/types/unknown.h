@@ -19,9 +19,6 @@ public:
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; } // sic!
 
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
-
     /**
      * Wrapper around constructor so that we can make it private. Don't use
      * this, use the singleton `type::unknown` instead.

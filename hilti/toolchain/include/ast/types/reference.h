@@ -44,7 +44,7 @@ public:
     bool isWildcard() const override { return _wildcard; }
 
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"type", _type.renderedRid()}}; }
+    node::Properties properties() const override { return node::Properties{{"type", _type.renderedRid()}}; }
 
 private:
     bool _wildcard = false;
@@ -75,9 +75,6 @@ public:
     std::vector<Node> typeParameters() const override { return children(); }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
-
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
 
 private:
     bool _wildcard = false;
@@ -115,7 +112,7 @@ public:
     bool isWildcard() const override { return _wildcard; }
 
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"rid", (_node ? _node->rid() : 0U)}}; }
+    node::Properties properties() const override { return node::Properties{{"rid", (_node ? _node->rid() : 0U)}}; }
 
 private:
     bool _wildcard = false;

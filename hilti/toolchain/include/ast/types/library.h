@@ -34,7 +34,7 @@ public:
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"cxx_name", _cxx_name}}; }
+    node::Properties properties() const override { return node::Properties{{"cxx_name", _cxx_name}}; }
 
 private:
     std::string _cxx_name;

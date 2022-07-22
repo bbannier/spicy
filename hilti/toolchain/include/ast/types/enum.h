@@ -91,9 +91,6 @@ public:
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
 
-    /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{}; }
-
     /** Helper method for the resolver to link labels to their type. */
     static void initLabelTypes(Node* n);
 

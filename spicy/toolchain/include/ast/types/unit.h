@@ -193,9 +193,6 @@ public:
     std::vector<Node> typeParameters() const override { return children(); }
     bool isWildcard() const override { return _wildcard; }
 
-    // Node interface.
-    auto properties() const { return node::Properties{{"public", _public}}; }
-
     /**
      * Given an existing node wrapping a unit type, updates the contained unit
      * type to have its `self` declaration initialized. Note that the unit

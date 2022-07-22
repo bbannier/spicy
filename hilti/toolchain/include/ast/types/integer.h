@@ -25,7 +25,7 @@ public:
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Node` interface. */
-    auto properties() const { return node::Properties{{"width", _width}}; }
+    node::Properties properties() const override { return node::Properties{{"width", _width}}; }
 
 private:
     bool _wildcard = false;
