@@ -23,6 +23,7 @@ class Iterator : public Type,
 public:
     Iterator(Type etype, bool const_, Meta m = Meta())
         : Type(nodes(std::move(etype)), std::move(m)),
+          trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
@@ -30,6 +31,7 @@ public:
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
         : Type(nodes(type::unknown), std::move(m)),
+          trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),

@@ -21,6 +21,7 @@ class Iterator : public Type,
 public:
     Iterator(Meta m = Meta())
         : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)),
+          trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),

@@ -34,6 +34,7 @@ struct Traits {
     bool isAllocable = false;
     bool isDereferenceable = false;
     bool isIterable = false;
+    bool isIterator = false;
     bool isMutable = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
@@ -61,7 +62,9 @@ struct isIterable {
     virtual const hilti::Type& elementType() const = 0;
 };
 
-class isIterator {};
+struct isIterator {
+    isIterator(Traits* all) { all->isIterator = true; }
+};
 
 struct isMutable {
     isMutable(Traits* all) { all->isMutable = true; }
@@ -321,7 +324,7 @@ public:
     bool _isViewable() const { return _traits_.isViewable; }
 
     /** For internal use. Use ``type::isIterator` instead. */
-    bool _isIterator() const { return dynamic_cast<const type::trait::isIterator*>(this); }
+    bool _isIterator() const { return _traits_.isIterator; }
 
     /** For internal use. Use ``type::isView` instead. */
     bool _isView() const { return dynamic_cast<const type::trait::isView*>(this); }
