@@ -17,7 +17,7 @@ class StrongReference : public Type,
                         trait::isAllocable,
                         trait::isParameterized,
                         trait::isDereferenceable,
-                        trait::isReferenceType {
+                        public trait::isReferenceType<StrongReference> {
 public:
     StrongReference(Wildcard /*unused*/, Meta m = Meta()) : Type({type::unknown}, std::move(m)), _wildcard(true) {}
     StrongReference(Type ct, Meta m = Meta()) : Type(nodes(std::move(ct)), std::move(m)) {}
@@ -56,7 +56,7 @@ class WeakReference : public Type,
                       trait::isAllocable,
                       trait::isParameterized,
                       trait::isDereferenceable,
-                      trait::isReferenceType {
+                      public trait::isReferenceType<WeakReference> {
 public:
     WeakReference(Wildcard /*unused*/, Meta m = Meta()) : Type({type::unknown}, std::move(m)), _wildcard(true) {}
     WeakReference(Type ct, Meta m = Meta()) : Type({std::move(ct)}, std::move(m)) {}
@@ -85,7 +85,7 @@ class ValueReference : public Type,
                        trait::isAllocable,
                        trait::isParameterized,
                        trait::isDereferenceable,
-                       trait::isReferenceType {
+                       public trait::isReferenceType<ValueReference> {
 public:
     ValueReference(Wildcard /*unused*/, Meta m = Meta()) : Type(nodes(type::unknown), std::move(m)), _wildcard(true) {}
     ValueReference(Type ct, Meta m = Meta()) : Type(nodes(std::move(ct)), std::move(m)) {}

@@ -70,7 +70,11 @@ struct isParameterized {
     virtual std::vector<Node> typeParameters() const = 0;
 };
 
-struct isReferenceType {};
+template<typename T>
+struct isReferenceType {
+    isReferenceType() { static_cast<T*>(this)->_traits().isReferenceType = true; }
+};
+
 struct isRuntimeNonTrivial {};
 
 struct isView : isIterable {};
@@ -96,6 +100,7 @@ struct takesArguments {
 
 struct Traits {
     bool isMutable = false;
+    bool isReferenceType = false;
 };
 
 using ResolvedState = std::unordered_set<uintptr_t>;
@@ -303,7 +308,7 @@ public:
     bool _isViewable() const { return dynamic_cast<const type::trait::isViewable*>(this); }
 
     /** For internal use. Use ``type::isIterator` instead. */
-    bool _isIterator() const { return dynamic_cast<const type::trait::isReferenceType*>(this); }
+    bool _isIterator() const { return dynamic_cast<const type::trait::isIterator*>(this); }
 
     /** For internal use. Use ``type::isView` instead. */
     bool _isView() const { return dynamic_cast<const type::trait::isView*>(this); }
@@ -312,7 +317,7 @@ public:
     bool _isParameterized() const { return dynamic_cast<const type::trait::isParameterized*>(this); }
 
     /** For internal use. Use ``type::isReferenceType` instead. */
-    bool _isReferenceType() const { return dynamic_cast<const type::trait::isReferenceType*>(this); }
+    bool _isReferenceType() const { return _traits_.isReferenceType; }
 
     /** For internal use. Use ``type::isMutable` instead. */
     bool _isMutable() const { return _traits_.isMutable; }
