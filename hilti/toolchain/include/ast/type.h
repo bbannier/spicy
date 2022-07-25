@@ -41,6 +41,7 @@ struct Traits {
     bool isRuntimeNonTrivial = false;
     bool isView = false;
     bool isViewable = false;
+    bool takesArguments = false;
 };
 
 struct isAllocable {
@@ -117,6 +118,8 @@ struct isViewable {
 class supportsWildcard {};
 
 struct takesArguments {
+    takesArguments(Traits* all) { all->takesArguments = true; }
+
     /** Returns any parameters the type expects. */
     virtual hilti::node::Set<type::function::Parameter> parameters() const = 0;
 };
@@ -346,7 +349,7 @@ public:
     bool _isRuntimeNonTrivial() const { return _traits_.isRuntimeNonTrivial; }
 
     /** For internal use. Use ``type::takesArguments` instead. */
-    bool _takesArguments() const { return false; /* FIXME(bbannier) */ }
+    bool _takesArguments() const { return _traits_.takesArguments; }
 
     std::optional<ID> resolvedID() const { return _state().resolved_id; }
 

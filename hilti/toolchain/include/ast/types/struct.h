@@ -35,6 +35,7 @@ public:
         : Type(nodes(node::none, std::move(fields)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
+          trait::takesArguments(&_traits()),
           trait::isMutable(&_traits()) {}
 
     Struct(const std::vector<type::function::Parameter>& params, std::vector<Declaration> fields, Meta m = Meta())
@@ -47,12 +48,14 @@ public:
                std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
+          trait::takesArguments(&_traits()),
           trait::isMutable(&_traits()) {}
 
     Struct(Wildcard /*unused*/, Meta m = Meta())
         : Type(nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
+          trait::takesArguments(&_traits()),
           trait::isMutable(&_traits()),
           _wildcard(true) {}
 
