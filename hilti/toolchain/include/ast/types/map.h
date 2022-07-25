@@ -19,7 +19,7 @@ class Iterator : public Type,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  public trait::isMutable<Iterator>,
-                 trait::isRuntimeNonTrivial,
+                 public trait::isRuntimeNonTrivial<Iterator>,
                  trait::isParameterized {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
@@ -75,7 +75,7 @@ class Map : public Type,
             trait::isAllocable,
             public trait::isMutable<Map>,
             trait::isIterable,
-            trait::isRuntimeNonTrivial,
+            public trait::isRuntimeNonTrivial<Map>,
             trait::isParameterized {
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())

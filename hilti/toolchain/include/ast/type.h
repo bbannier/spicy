@@ -75,7 +75,10 @@ struct isReferenceType {
     isReferenceType() { static_cast<T*>(this)->_traits().isReferenceType = true; }
 };
 
-struct isRuntimeNonTrivial {};
+template<typename T>
+struct isRuntimeNonTrivial {
+    isRuntimeNonTrivial() { static_cast<T*>(this)->_traits().isRuntimeNonTrivial = true; }
+};
 
 struct isView : isIterable {};
 
@@ -101,6 +104,7 @@ struct takesArguments {
 struct Traits {
     bool isMutable = false;
     bool isReferenceType = false;
+    bool isRuntimeNonTrivial = false;
 };
 
 using ResolvedState = std::unordered_set<uintptr_t>;
@@ -323,7 +327,7 @@ public:
     bool _isMutable() const { return _traits_.isMutable; }
 
     /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
-    bool _isRuntimeNonTrivial() const { return dynamic_cast<const type::trait::isRuntimeNonTrivial*>(this); }
+    bool _isRuntimeNonTrivial() const { return _traits_.isRuntimeNonTrivial; }
 
     /** For internal use. Use ``type::takesArguments` instead. */
     bool _takesArguments() const { return false; /* FIXME(bbannier) */ }

@@ -9,7 +9,7 @@
 namespace hilti::type {
 
 /** AST node for a regexp type. */
-class RegExp : public Type, trait::isAllocable, trait::isRuntimeNonTrivial {
+class RegExp : public Type, trait::isAllocable, public trait::isRuntimeNonTrivial<RegExp> {
 public:
     RegExp(Meta m = Meta()) : Type(std::move(m)) {}
 

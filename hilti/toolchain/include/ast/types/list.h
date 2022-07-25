@@ -18,7 +18,7 @@ class Iterator : public Type,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  public trait::isMutable<Iterator>,
-                 trait::isRuntimeNonTrivial,
+                 public trait::isRuntimeNonTrivial<Iterator>,
                  trait::isParameterized {
 public:
     Iterator(Type etype, bool const_, Meta m = Meta()) : Type(nodes(std::move(etype)), std::move(m)), _const(const_) {}
@@ -57,7 +57,7 @@ class List : public Type,
              trait::isAllocable,
              public trait::isMutable<List>,
              trait::isIterable,
-             trait::isRuntimeNonTrivial,
+             public trait::isRuntimeNonTrivial<List>,
              trait::isParameterized {
 public:
     List(const Type& t, const Meta& m = Meta())

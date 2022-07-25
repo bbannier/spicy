@@ -17,7 +17,7 @@ class Iterator : public Type,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  public trait::isMutable<Iterator>,
-                 trait::isRuntimeNonTrivial {
+                 public trait::isRuntimeNonTrivial<Iterator> {
 public:
     Iterator(Meta m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)) {}
 
@@ -40,7 +40,7 @@ class Bytes : public Type,
               trait::isAllocable,
               public trait::isMutable<Bytes>,
               trait::isIterable,
-              trait::isRuntimeNonTrivial {
+              public trait::isRuntimeNonTrivial<Bytes> {
 public:
     Bytes(const Meta& m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m) {}
 
