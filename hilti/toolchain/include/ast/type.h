@@ -31,13 +31,14 @@ using Parameter = declaration::Parameter;
 
 namespace trait {
 struct Traits {
+    bool isAllocable = false;
     bool isMutable = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
 };
 
 struct isAllocable {
-    virtual ~isAllocable() = default;
+    isAllocable(Traits* all) { all->isAllocable = true; }
 };
 
 struct isDereferenceable {
@@ -297,7 +298,7 @@ public:
     Type _clone() const { return *this; }
 
     /** For internal use. Use ``type::isAllocable` instead. */
-    bool _isAllocable() const { return dynamic_cast<const type::trait::isAllocable*>(this); }
+    bool _isAllocable() const { return _traits_.isAllocable; }
 
     /** For internal use. Use ``type::isDereferenceable` instead. */
     bool _isDereferenceable() const { return dynamic_cast<const type::trait::isDereferenceable*>(this); }

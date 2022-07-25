@@ -21,6 +21,7 @@ class Iterator : public Type,
 public:
     Iterator(Meta m = Meta())
         : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
 
@@ -47,6 +48,7 @@ class Bytes : public Type,
 public:
     Bytes(const Meta& m = Meta())
         : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
 

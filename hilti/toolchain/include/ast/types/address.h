@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for a address type. */
 class Address : public Type, trait::isAllocable {
 public:
-    Address(Meta m = Meta()) : Type(std::move(m)) {}
+    Address(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Address& /* other */) const { return true; }
 

@@ -25,7 +25,7 @@ public:
     static Auto create(Meta m = Meta()) { return Auto(std::move(m)); }
 
 private:
-    Auto(Meta m = Meta()) : Type(std::move(m)) {}
+    Auto(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
 };
 
 /** Singleton. */

@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for a bool type. */
 class Bool : public Type, trait::isAllocable {
 public:
-    Bool(Meta m = Meta()) : Type(std::move(m)) {}
+    Bool(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Bool& /* other */) const { return true; }
 

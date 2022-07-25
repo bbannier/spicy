@@ -11,7 +11,7 @@ namespace spicy::type {
 /** AST node for a Sink type. */
 class Sink : public hilti::Type, hilti::type::trait::isAllocable {
 public:
-    Sink(hilti::Meta m = hilti::Meta()) : Type(std::move(m)) {}
+    Sink(hilti::Meta m = hilti::Meta()) : Type(std::move(m)), hilti::type::trait::isAllocable(&_traits()) {}
 
     bool operator==(const Sink& /* other */) const { return true; }
 

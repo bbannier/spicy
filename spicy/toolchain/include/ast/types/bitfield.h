@@ -81,10 +81,12 @@ class Bitfield : public hilti::Type,
 public:
     Bitfield(int width, std::vector<bitfield::Bits> bits, const Meta& m = Meta())
         : Type(nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           _width(width) {}
     Bitfield(Wildcard /*unused*/, Meta m = Meta())
         : Type({hilti::type::unknown, hilti::type::unknown}, std::move(m)),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           _wildcard(true) {}
 

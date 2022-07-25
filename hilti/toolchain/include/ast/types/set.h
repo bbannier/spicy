@@ -23,11 +23,13 @@ class Iterator : public Type,
 public:
     Iterator(Type etype, bool const_, Meta m = Meta())
         : Type(nodes(std::move(etype)), std::move(m)),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
         : Type(nodes(type::unknown), std::move(m)),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true),
@@ -70,10 +72,12 @@ class Set : public Type,
 public:
     Set(const Type& t, const Meta& m = Meta())
         : Type(nodes(set::Iterator(t, true, m), set::Iterator(t, false, m)), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
     Set(Wildcard /*unused*/, const Meta& m = Meta())
         : Type(nodes(set::Iterator(Wildcard{}, true, m), set::Iterator(Wildcard{}, false, m)), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true) {}

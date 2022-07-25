@@ -20,11 +20,19 @@ class StrongReference : public Type,
                         public trait::isReferenceType {
 public:
     StrongReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type({type::unknown}, std::move(m)), trait::isReferenceType(&_traits()), _wildcard(true) {}
+        : Type({type::unknown}, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()),
+          _wildcard(true) {}
     StrongReference(Type ct, Meta m = Meta())
-        : Type(nodes(std::move(ct)), std::move(m)), trait::isReferenceType(&_traits()) {}
+        : Type(nodes(std::move(ct)), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()) {}
     StrongReference(NodeRef ct, Meta m = Meta())
-        : Type(nodes(node::none), std::move(m)), trait::isReferenceType(&_traits()), _type(std::move(ct)) {}
+        : Type(nodes(node::none), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()),
+          _type(std::move(ct)) {}
 
     const Type& dereferencedType() const override {
         if ( _type )
@@ -62,8 +70,12 @@ class WeakReference : public Type,
                       public trait::isReferenceType {
 public:
     WeakReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type({type::unknown}, std::move(m)), trait::isReferenceType(&_traits()), _wildcard(true) {}
-    WeakReference(Type ct, Meta m = Meta()) : Type({std::move(ct)}, std::move(m)), trait::isReferenceType(&_traits()) {}
+        : Type({type::unknown}, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()),
+          _wildcard(true) {}
+    WeakReference(Type ct, Meta m = Meta())
+        : Type({std::move(ct)}, std::move(m)), trait::isAllocable(&_traits()), trait::isReferenceType(&_traits()) {}
 
     const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 
@@ -92,11 +104,19 @@ class ValueReference : public Type,
                        public trait::isReferenceType {
 public:
     ValueReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)), trait::isReferenceType(&_traits()), _wildcard(true) {}
+        : Type(nodes(type::unknown), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()),
+          _wildcard(true) {}
     ValueReference(Type ct, Meta m = Meta())
-        : Type(nodes(std::move(ct)), std::move(m)), trait::isReferenceType(&_traits()) {}
+        : Type(nodes(std::move(ct)), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()) {}
     ValueReference(NodeRef ct, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)), trait::isReferenceType(&_traits()), _node(std::move(ct)) {}
+        : Type(nodes(type::unknown), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isReferenceType(&_traits()),
+          _node(std::move(ct)) {}
 
     const Type& dereferencedType() const override {
         if ( _node )

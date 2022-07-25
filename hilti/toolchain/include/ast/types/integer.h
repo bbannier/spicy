@@ -14,9 +14,10 @@ namespace detail {
 /** Base class for an AST node representing an integer type. */
 class IntegerBase : public hilti::Type, trait::isAllocable, trait::isParameterized {
 public:
-    IntegerBase(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
-    IntegerBase(int width, Meta m = Meta()) : Type(std::move(m)), _width(width) {}
-    IntegerBase(Meta m = Meta()) : Type(std::move(m)) {}
+    IntegerBase(Wildcard /*unused*/, Meta m = Meta())
+        : Type(std::move(m)), trait::isAllocable(&_traits()), _wildcard(true) {}
+    IntegerBase(int width, Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()), _width(width) {}
+    IntegerBase(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
 
     auto width() const { return _width; }
 
@@ -42,7 +43,7 @@ public:
     bool operator==(const SignedInteger& other) const { return width() == other.width(); }
 
     /** Implements the `Type` interface. */
-    std::vector<Node> typeParameters() const;
+    std::vector<Node> typeParameters() const override;
 
     /** Implements the `Node` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
@@ -56,7 +57,7 @@ public:
     bool operator==(const UnsignedInteger& other) const { return width() == other.width(); }
 
     /** Implements the `Type` interface. */
-    std::vector<Node> typeParameters() const;
+    std::vector<Node> typeParameters() const override;
 
     /** Implements the `Node` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }

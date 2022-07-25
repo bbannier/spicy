@@ -38,9 +38,11 @@ inline Node to_node(Element f) { return Node(std::move(f)); }
 /** AST node for a tuple type. */
 class Tuple : public Type, trait::isAllocable, trait::isParameterized {
 public:
-    Tuple(std::vector<Type> t, Meta m = Meta()) : Type(nodes(_typesToElements(std::move(t))), std::move(m)) {}
-    Tuple(std::vector<tuple::Element> e, Meta m = Meta()) : Type(nodes(std::move(e)), std::move(m)) {}
-    Tuple(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
+    Tuple(std::vector<Type> t, Meta m = Meta())
+        : Type(nodes(_typesToElements(std::move(t))), std::move(m)), trait::isAllocable(&_traits()) {}
+    Tuple(std::vector<tuple::Element> e, Meta m = Meta())
+        : Type(nodes(std::move(e)), std::move(m)), trait::isAllocable(&_traits()) {}
+    Tuple(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()), _wildcard(true) {}
 
     auto elements() const { return NodeBase::children<tuple::Element>(0, -1); }
     std::optional<std::pair<int, const type::tuple::Element*>> elementByID(const ID& id) const;

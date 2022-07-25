@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for a string type. */
 class String : public Type, trait::isAllocable {
 public:
-    String(Meta m = Meta()) : Type(std::move(m)) {}
+    String(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const String& /* other */) const { return true; }
 

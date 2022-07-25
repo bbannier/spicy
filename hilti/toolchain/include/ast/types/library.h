@@ -19,7 +19,10 @@ namespace hilti::type {
 class Library : public Type, trait::isAllocable, public trait::isMutable {
 public:
     Library(std::string cxx_name, Meta m = Meta())
-        : Type(std::move(m)), trait::isMutable(&_traits()), _cxx_name(std::move(cxx_name)) {}
+        : Type(std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isMutable(&_traits()),
+          _cxx_name(std::move(cxx_name)) {}
 
     const std::string& cxxName() const { return _cxx_name; }
     bool operator==(const Library& other) const { return _cxx_name == other._cxx_name; }

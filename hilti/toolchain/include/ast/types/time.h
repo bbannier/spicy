@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for a time type. */
 class Time : public Type, trait::isAllocable {
 public:
-    Time(Meta m = Meta()) : Type(std::move(m)) {}
+    Time(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Time& /* other */) const { return true; }
 

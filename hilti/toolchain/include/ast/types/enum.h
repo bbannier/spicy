@@ -50,8 +50,9 @@ inline Node to_node(Label l) { return Node(std::move(l)); }
 /** AST node for an enum type. */
 class Enum : public hilti::Type, trait::isAllocable, trait::isParameterized {
 public:
-    Enum(std::vector<enum_::Label> l, Meta m = Meta()) : Type(nodes(_normalizeLabels(std::move(l))), std::move(m)) {}
-    Enum(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
+    Enum(std::vector<enum_::Label> l, Meta m = Meta())
+        : Type(nodes(_normalizeLabels(std::move(l))), std::move(m)), trait::isAllocable(&_traits()) {}
+    Enum(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()), _wildcard(true) {}
 
     std::vector<std::reference_wrapper<const enum_::Label>> labels() const;
 

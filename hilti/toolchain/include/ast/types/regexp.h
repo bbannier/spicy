@@ -11,7 +11,8 @@ namespace hilti::type {
 /** AST node for a regexp type. */
 class RegExp : public Type, trait::isAllocable, public trait::isRuntimeNonTrivial {
 public:
-    RegExp(Meta m = Meta()) : Type(std::move(m)), trait::isRuntimeNonTrivial(&_traits()) {}
+    RegExp(Meta m = Meta())
+        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const RegExp& /* other */) const { return true; }
 

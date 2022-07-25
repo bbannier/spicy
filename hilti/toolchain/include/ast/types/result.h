@@ -13,8 +13,9 @@ namespace hilti::type {
 /** AST node for a "result" type. */
 class Result : public Type, trait::isAllocable, trait::isParameterized, trait::isDereferenceable {
 public:
-    Result(Wildcard /*unused*/, Meta m = Meta()) : Type({type::unknown}, std::move(m)), _wildcard(true) {}
-    Result(Type ct, Meta m = Meta()) : Type({std::move(ct)}, std::move(m)) {}
+    Result(Wildcard /*unused*/, Meta m = Meta())
+        : Type({type::unknown}, std::move(m)), trait::isAllocable(&_traits()), _wildcard(true) {}
+    Result(Type ct, Meta m = Meta()) : Type({std::move(ct)}, std::move(m)), trait::isAllocable(&_traits()) {}
 
     const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 

@@ -24,11 +24,13 @@ class Iterator : public Type,
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
         : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
         : Type(nodes(type::unknown, type::unknown), std::move(m)),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true),
@@ -87,10 +89,12 @@ class Map : public Type,
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())
         : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
         : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true) {}

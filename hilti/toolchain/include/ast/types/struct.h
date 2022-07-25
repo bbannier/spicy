@@ -32,7 +32,9 @@ namespace hilti::type {
 class Struct : public Type, trait::isAllocable, trait::isParameterized, trait::takesArguments, public trait::isMutable {
 public:
     Struct(std::vector<Declaration> fields, Meta m = Meta())
-        : Type(nodes(node::none, std::move(fields)), std::move(m)), trait::isMutable(&_traits()) {}
+        : Type(nodes(node::none, std::move(fields)), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isMutable(&_traits()) {}
 
     Struct(const std::vector<type::function::Parameter>& params, std::vector<Declaration> fields, Meta m = Meta())
         : Type(nodes(node::none, std::move(fields),
@@ -42,10 +44,14 @@ public:
                                          return Declaration(p);
                                      })),
                std::move(m)),
+          trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()) {}
 
     Struct(Wildcard /*unused*/, Meta m = Meta())
-        : Type(nodes(node::none), std::move(m)), trait::isMutable(&_traits()), _wildcard(true) {}
+        : Type(nodes(node::none), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isMutable(&_traits()),
+          _wildcard(true) {}
 
     NodeRef selfRef() const {
         if ( children()[0].isA<Declaration>() )
