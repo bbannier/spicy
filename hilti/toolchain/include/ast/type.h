@@ -36,6 +36,7 @@ struct Traits {
     bool isIterable = false;
     bool isIterator = false;
     bool isMutable = false;
+    bool isParameterized = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
     bool isView = false;
@@ -72,6 +73,8 @@ struct isMutable {
 };
 
 struct isParameterized {
+    isParameterized(Traits* all) { all->isParameterized = true; }
+
     /**
      * Returns true if all instances of the same type class can be coerced
      * into the current instance, independent of their pararameters. In HILTI
@@ -331,7 +334,7 @@ public:
     bool _isView() const { return _traits_.isView; }
 
     /** For internal use. Use ``type::isParameterized` instead. */
-    bool _isParameterized() const { return dynamic_cast<const type::trait::isParameterized*>(this); }
+    bool _isParameterized() const { return _traits_.isParameterized; }
 
     /** For internal use. Use ``type::isReferenceType` instead. */
     bool _isReferenceType() const { return _traits_.isReferenceType; }

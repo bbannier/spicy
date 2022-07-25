@@ -71,11 +71,14 @@ using Kind = declaration::parameter::Kind;
 class Function : public hilti::Type, trait::isParameterized {
 public:
     Function(Wildcard /*unused*/, Meta m = Meta())
-        : Type(nodes(function::Result(type::Error(m))), std::move(m)), _wildcard(true) {}
+        : Type(nodes(function::Result(type::Error(m))), std::move(m)),
+          trait::isParameterized(&_traits()),
+          _wildcard(true) {}
     Function(function::Result result, const std::vector<function::Parameter>& params,
              function::Flavor flavor = function::Flavor::Standard, Meta m = Meta())
         : Type(nodes(std::move(result), util::transform(params, [](const auto& p) { return Declaration(p); })),
                std::move(m)),
+          trait::isParameterized(&_traits()),
           _flavor(flavor) {}
 
     const auto& result() const { return child<function::Result>(0); }

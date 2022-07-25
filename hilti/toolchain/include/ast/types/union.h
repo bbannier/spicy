@@ -23,10 +23,12 @@ public:
     Union(std::vector<Declaration> fields, Meta m = Meta())
         : Type(nodes(node::none, std::move(fields)), std::move(m)),
           trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
           trait::isMutable(&_traits()) {}
     Union(Wildcard /*unused*/, Meta m = Meta())
         : Type(nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
           trait::isMutable(&_traits()),
           _wildcard(true) {}
 

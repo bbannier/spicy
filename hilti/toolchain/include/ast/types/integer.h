@@ -15,9 +15,11 @@ namespace detail {
 class IntegerBase : public hilti::Type, trait::isAllocable, trait::isParameterized {
 public:
     IntegerBase(Wildcard /*unused*/, Meta m = Meta())
-        : Type(std::move(m)), trait::isAllocable(&_traits()), _wildcard(true) {}
-    IntegerBase(int width, Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()), _width(width) {}
-    IntegerBase(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
+        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()), _wildcard(true) {}
+    IntegerBase(int width, Meta m = Meta())
+        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()), _width(width) {}
+    IntegerBase(Meta m = Meta())
+        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
 
     auto width() const { return _width; }
 

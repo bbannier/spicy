@@ -72,11 +72,13 @@ public:
                             assignIndices(std::move(i))),
                std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
+          hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::isMutable(&_traits()) {}
 
     Unit(Wildcard /*unused*/, Meta m = Meta())
         : Type(std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
+          hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::isMutable(&_traits()),
           _wildcard(true) {}
 

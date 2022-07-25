@@ -14,8 +14,9 @@ namespace hilti::type {
 /** AST node for a type representing a member of another type. */
 class Member : public Type, trait::isParameterized {
 public:
-    Member(Wildcard /*unused*/, Meta m = Meta()) : Type({ID("<wildcard>")}, std::move(m)), _wildcard(true) {}
-    Member(::hilti::ID id, Meta m = Meta()) : Type({std::move(id)}, std::move(m)) {}
+    Member(Wildcard /*unused*/, Meta m = Meta())
+        : Type({ID("<wildcard>")}, std::move(m)), trait::isParameterized(&_traits()), _wildcard(true) {}
+    Member(::hilti::ID id, Meta m = Meta()) : Type({std::move(id)}, std::move(m)), trait::isParameterized(&_traits()) {}
 
     const auto& id() const { return child<::hilti::ID>(0); }
 

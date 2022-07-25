@@ -29,6 +29,7 @@ public:
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
+          trait::isParameterized(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
         : Type(nodes(type::unknown, type::unknown), std::move(m)),
@@ -37,6 +38,7 @@ public:
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
+          trait::isParameterized(&_traits()),
           _wildcard(true),
           _const(const_) {}
 
@@ -96,13 +98,15 @@ public:
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
-          trait::isRuntimeNonTrivial(&_traits()) {}
+          trait::isRuntimeNonTrivial(&_traits()),
+          trait::isParameterized(&_traits()) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
         : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
+          trait::isParameterized(&_traits()),
           _wildcard(true) {}
 
     const Type& keyType() const { return child<map::Iterator>(0).keyType(); }

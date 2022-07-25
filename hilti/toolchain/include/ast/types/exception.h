@@ -12,10 +12,15 @@ namespace hilti::type {
 /** AST node for an `exception` type. */
 class Exception : public Type, trait::isAllocable, trait::isParameterized {
 public:
-    Exception(Meta m = Meta()) : Type({node::none}, std::move(m)), trait::isAllocable(&_traits()) {}
-    Exception(Type base, Meta m = Meta()) : Type({std::move(base)}, std::move(m)), trait::isAllocable(&_traits()) {}
+    Exception(Meta m = Meta())
+        : Type({node::none}, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
+    Exception(Type base, Meta m = Meta())
+        : Type({std::move(base)}, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
     Exception(Wildcard /*unused*/, Meta m = Meta())
-        : Type({node::none}, std::move(m)), trait::isAllocable(&_traits()), _wildcard(true) {}
+        : Type({node::none}, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
+          _wildcard(true) {}
 
     hilti::optional_ref<const Type> baseType() const { return children()[0].tryAs<Type>(); }
 

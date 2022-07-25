@@ -16,10 +16,14 @@ public:
     Result(Wildcard /*unused*/, Meta m = Meta())
         : Type({type::unknown}, std::move(m)),
           trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           _wildcard(true) {}
     Result(Type ct, Meta m = Meta())
-        : Type({std::move(ct)}, std::move(m)), trait::isAllocable(&_traits()), trait::isDereferenceable(&_traits()) {}
+        : Type({std::move(ct)}, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
+          trait::isDereferenceable(&_traits()) {}
 
     const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 
