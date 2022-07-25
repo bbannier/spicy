@@ -75,9 +75,8 @@ struct isParameterized {
     virtual std::vector<Node> typeParameters() const = 0;
 };
 
-template<typename T>
 struct isReferenceType {
-    isReferenceType() { static_cast<T*>(this)->_traits().isReferenceType = true; }
+    isReferenceType(Traits* all) { all->isReferenceType = true; }
 };
 
 template<typename T>
