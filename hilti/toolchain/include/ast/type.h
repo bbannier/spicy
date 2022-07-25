@@ -30,6 +30,12 @@ using Parameter = declaration::Parameter;
 }
 
 namespace trait {
+struct Traits {
+    bool isMutable = false;
+    bool isReferenceType = false;
+    bool isRuntimeNonTrivial = false;
+};
+
 struct isAllocable {
     virtual ~isAllocable() = default;
 };
@@ -49,9 +55,8 @@ struct isIterable {
 
 class isIterator {};
 
-template<typename T>
 struct isMutable {
-    isMutable() { static_cast<T*>(this)->_traits().isMutable = true; }
+    isMutable(Traits* all) { all->isMutable = true; }
 };
 
 struct isParameterized {
@@ -100,12 +105,6 @@ struct takesArguments {
 };
 
 } // namespace trait
-
-struct Traits {
-    bool isMutable = false;
-    bool isReferenceType = false;
-    bool isRuntimeNonTrivial = false;
-};
 
 using ResolvedState = std::unordered_set<uintptr_t>;
 
@@ -355,11 +354,11 @@ public:
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
 
-    type::Traits& _traits() { return _traits_; }
+    type::trait::Traits& _traits() { return _traits_; }
 
 private:
     type::detail::State _state_;
-    type::Traits _traits_;
+    type::trait::Traits _traits_;
 };
 
 /** Creates an AST node representing a `Type`. */

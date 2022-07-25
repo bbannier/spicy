@@ -17,13 +17,14 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 public trait::isMutable<Iterator>,
+                 public trait::isMutable,
                  public trait::isRuntimeNonTrivial<Iterator>,
                  trait::isParameterized {
 public:
-    Iterator(Type etype, bool const_, Meta m = Meta()) : Type(nodes(std::move(etype)), std::move(m)), _const(const_) {}
+    Iterator(Type etype, bool const_, Meta m = Meta())
+        : Type(nodes(std::move(etype)), std::move(m)), trait::isMutable(&_traits()), _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
+        : Type(nodes(type::unknown), std::move(m)), trait::isMutable(&_traits()), _wildcard(true), _const(const_) {}
 
     /** Returns true if the container elements aren't modifiable. */
     bool isConstant() const { return _const; }
@@ -55,15 +56,17 @@ private:
 /** AST node for a list type. */
 class List : public Type,
              trait::isAllocable,
-             public trait::isMutable<List>,
+             public trait::isMutable,
              trait::isIterable,
              public trait::isRuntimeNonTrivial<List>,
              trait::isParameterized {
 public:
     List(const Type& t, const Meta& m = Meta())
-        : Type(nodes(list::Iterator(t, true, m), list::Iterator(t, false, m)), m) {}
+        : Type(nodes(list::Iterator(t, true, m), list::Iterator(t, false, m)), m), trait::isMutable(&_traits()) {}
     List(Wildcard /*unused*/, const Meta& m = Meta())
-        : Type(nodes(list::Iterator(Wildcard{}, true, m), list::Iterator(Wildcard{}, false, m)), m), _wildcard(true) {}
+        : Type(nodes(list::Iterator(Wildcard{}, true, m), list::Iterator(Wildcard{}, false, m)), m),
+          trait::isMutable(&_traits()),
+          _wildcard(true) {}
 
     /** Implements the `Type` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }

@@ -16,10 +16,11 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 public trait::isMutable<Iterator>,
+                 public trait::isMutable,
                  public trait::isRuntimeNonTrivial<Iterator> {
 public:
-    Iterator(Meta m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)) {}
+    Iterator(Meta m = Meta())
+        : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)), trait::isMutable(&_traits()) {}
 
     bool operator==(const Iterator& /* other */) const { return true; }
 
@@ -38,11 +39,12 @@ public:
 /** AST node for a bytes type. */
 class Bytes : public Type,
               trait::isAllocable,
-              public trait::isMutable<Bytes>,
+              public trait::isMutable,
               trait::isIterable,
               public trait::isRuntimeNonTrivial<Bytes> {
 public:
-    Bytes(const Meta& m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m) {}
+    Bytes(const Meta& m = Meta())
+        : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m), trait::isMutable(&_traits()) {}
 
     bool operator==(const Bytes& /* other */) const { return true; }
 

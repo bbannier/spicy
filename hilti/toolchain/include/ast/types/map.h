@@ -18,14 +18,19 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 public trait::isMutable<Iterator>,
+                 public trait::isMutable,
                  public trait::isRuntimeNonTrivial<Iterator>,
                  trait::isParameterized {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
-        : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m), _const(const_) {}
+        : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
+          trait::isMutable(&_traits()),
+          _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(nodes(type::unknown, type::unknown), std::move(m)), _wildcard(true), _const(const_) {}
+        : Type(nodes(type::unknown, type::unknown), std::move(m)),
+          trait::isMutable(&_traits()),
+          _wildcard(true),
+          _const(const_) {}
 
     const Type& keyType() const {
         if ( auto t = children()[0].tryAs<type::Tuple>() )
@@ -73,15 +78,17 @@ private:
 /** AST node for a map type. */
 class Map : public Type,
             trait::isAllocable,
-            public trait::isMutable<Map>,
+            public trait::isMutable,
             trait::isIterable,
             public trait::isRuntimeNonTrivial<Map>,
             trait::isParameterized {
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())
-        : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m) {}
+        : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m), trait::isMutable(&_traits()) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
-        : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m), _wildcard(true) {}
+        : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
+          trait::isMutable(&_traits()),
+          _wildcard(true) {}
 
     const Type& keyType() const { return child<map::Iterator>(0).keyType(); }
     const Type& valueType() const { return child<map::Iterator>(0).valueType(); }

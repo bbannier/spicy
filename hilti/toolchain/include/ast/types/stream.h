@@ -16,10 +16,10 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 public trait::isMutable<Iterator>,
+                 public trait::isMutable,
                  public trait::isRuntimeNonTrivial<Iterator> {
 public:
-    Iterator(Meta m = Meta()) : Type(nodes(type::UnsignedInteger(8)), std::move(m)) {}
+    Iterator(Meta m = Meta()) : Type(nodes(type::UnsignedInteger(8)), std::move(m)), trait::isMutable(&_traits()) {}
 
     bool operator==(const Iterator& /* other */) const { return true; }
 
@@ -59,12 +59,12 @@ public:
 /** AST node for a stream type. */
 class Stream : public Type,
                trait::isAllocable,
-               public trait::isMutable<Stream>,
+               public trait::isMutable,
                trait::isIterable,
                trait::isViewable,
                public trait::isRuntimeNonTrivial<Stream> {
 public:
-    Stream(const Meta& m = Meta()) : Type(nodes(stream::View(m)), m) {}
+    Stream(const Meta& m = Meta()) : Type(nodes(stream::View(m)), m), trait::isMutable(&_traits()) {}
 
     bool operator==(const Stream& /* other */) const { return true; }
 

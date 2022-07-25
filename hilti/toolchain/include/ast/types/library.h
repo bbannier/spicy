@@ -16,9 +16,10 @@ namespace hilti::type {
  * making it accessible in the `hilti::*` namespace. HILTI assumes the
  * library type to be mutable.
  */
-class Library : public Type, trait::isAllocable, public trait::isMutable<Library> {
+class Library : public Type, trait::isAllocable, public trait::isMutable {
 public:
-    Library(std::string cxx_name, Meta m = Meta()) : Type(std::move(m)), _cxx_name(std::move(cxx_name)) {}
+    Library(std::string cxx_name, Meta m = Meta())
+        : Type(std::move(m)), trait::isMutable(&_traits()), _cxx_name(std::move(cxx_name)) {}
 
     const std::string& cxxName() const { return _cxx_name; }
     bool operator==(const Library& other) const { return _cxx_name == other._cxx_name; }

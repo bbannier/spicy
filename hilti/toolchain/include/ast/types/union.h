@@ -18,11 +18,12 @@
 namespace hilti::type {
 
 /** AST node for a struct type. */
-class Union : public Type, trait::isAllocable, trait::isParameterized, public trait::isMutable<Union> {
+class Union : public Type, trait::isAllocable, trait::isParameterized, public trait::isMutable {
 public:
     Union(std::vector<Declaration> fields, Meta m = Meta())
-        : Type(nodes(node::none, std::move(fields)), std::move(m)) {}
-    Union(Wildcard /*unused*/, Meta m = Meta()) : Type(nodes(node::none), std::move(m)), _wildcard(true) {}
+        : Type(nodes(node::none, std::move(fields)), std::move(m)), trait::isMutable(&_traits()) {}
+    Union(Wildcard /*unused*/, Meta m = Meta())
+        : Type(nodes(node::none), std::move(m)), trait::isMutable(&_traits()), _wildcard(true) {}
 
     auto fields() const { return childrenOfType<declaration::Field>(); }
 

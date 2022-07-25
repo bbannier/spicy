@@ -59,7 +59,7 @@ class Unit : detail::AssignIndices,
              hilti::type::trait::isAllocable,
              hilti::type::trait::isParameterized,
              hilti::type::trait::takesArguments,
-             public hilti::type::trait::isMutable<Unit> {
+             public hilti::type::trait::isMutable {
 public:
     Unit(const std::vector<type::function::Parameter>& params, std::vector<unit::Item> i,
          const std::optional<AttributeSet>& /* attrs */ = {}, Meta m = Meta())
@@ -70,9 +70,11 @@ public:
                                                        return Declaration(p);
                                                    }),
                             assignIndices(std::move(i))),
-               std::move(m)) {}
+               std::move(m)),
+          hilti::type::trait::isMutable(&_traits()) {}
 
-    Unit(Wildcard /*unused*/, Meta m = Meta()) : Type(std::move(m)), _wildcard(true) {}
+    Unit(Wildcard /*unused*/, Meta m = Meta())
+        : Type(std::move(m)), hilti::type::trait::isMutable(&_traits()), _wildcard(true) {}
 
     NodeRef selfRef() const {
         if ( children()[0].isA<Declaration>() )
