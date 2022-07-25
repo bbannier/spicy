@@ -59,7 +59,7 @@ class Unit : detail::AssignIndices,
              hilti::type::trait::isAllocable,
              hilti::type::trait::isParameterized,
              hilti::type::trait::takesArguments,
-             hilti::type::trait::isMutable {
+             public hilti::type::trait::isMutable<Unit> {
 public:
     Unit(const std::vector<type::function::Parameter>& params, std::vector<unit::Item> i,
          const std::optional<AttributeSet>& /* attrs */ = {}, Meta m = Meta())

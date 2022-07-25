@@ -17,7 +17,7 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 trait::isMutable,
+                 public trait::isMutable<Iterator>,
                  trait::isRuntimeNonTrivial,
                  trait::isParameterized {
 public:
@@ -55,7 +55,7 @@ private:
 /** AST node for a vector type. */
 class Vector : public Type,
                trait::isAllocable,
-               trait::isMutable,
+               public trait::isMutable<Vector>,
                trait::isIterable,
                trait::isRuntimeNonTrivial,
                trait::isParameterized {

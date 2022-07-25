@@ -16,7 +16,7 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 trait::isMutable,
+                 public trait::isMutable<Iterator>,
                  trait::isRuntimeNonTrivial {
 public:
     Iterator(Meta m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)) {}
@@ -36,7 +36,11 @@ public:
 } // namespace bytes
 
 /** AST node for a bytes type. */
-class Bytes : public Type, trait::isAllocable, trait::isMutable, trait::isIterable, trait::isRuntimeNonTrivial {
+class Bytes : public Type,
+              trait::isAllocable,
+              public trait::isMutable<Bytes>,
+              trait::isIterable,
+              trait::isRuntimeNonTrivial {
 public:
     Bytes(const Meta& m = Meta()) : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m) {}
 

@@ -77,7 +77,7 @@ inline hilti::Node to_node(Bits f) { return hilti::Node(std::move(f)); }
 class Bitfield : public hilti::Type,
                  hilti::type::trait::isAllocable,
                  hilti::type::trait::isParameterized,
-                 hilti::type::trait::isMutable {
+                 public hilti::type::trait::isMutable<Bitfield> {
 public:
     Bitfield(int width, std::vector<bitfield::Bits> bits, const Meta& m = Meta())
         : Type(nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m), _width(width) {}

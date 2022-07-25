@@ -240,7 +240,8 @@ TEST_CASE("Find specific parent") {
 
 TEST_CASE("Copy node by value") {
     hilti::Type t = hilti::type::Vector(hilti::type::String());
-    CHECK(! hilti::type::isConstant(t));
+    REQUIRE(t._isMutable());
+    REQUIRE(! hilti::type::isConstant(t));
     auto t2 = hilti::type::constant(t._clone().as<hilti::Type>());
     auto t3 = hilti::type::constant(t);
     auto t4(hilti::type::constant(t));

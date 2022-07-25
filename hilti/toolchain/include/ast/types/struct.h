@@ -29,7 +29,11 @@
 namespace hilti::type {
 
 /** AST node for a struct type. */
-class Struct : public Type, trait::isAllocable, trait::isParameterized, trait::takesArguments, trait::isMutable {
+class Struct : public Type,
+               trait::isAllocable,
+               trait::isParameterized,
+               trait::takesArguments,
+               public trait::isMutable<Struct> {
 public:
     Struct(std::vector<Declaration> fields, Meta m = Meta())
         : Type(nodes(node::none, std::move(fields)), std::move(m)) {}

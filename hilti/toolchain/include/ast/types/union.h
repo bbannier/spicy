@@ -18,7 +18,7 @@
 namespace hilti::type {
 
 /** AST node for a struct type. */
-class Union : public Type, trait::isAllocable, trait::isParameterized, trait::isMutable {
+class Union : public Type, trait::isAllocable, trait::isParameterized, public trait::isMutable<Union> {
 public:
     Union(std::vector<Declaration> fields, Meta m = Meta())
         : Type(nodes(node::none, std::move(fields)), std::move(m)) {}

@@ -48,7 +48,11 @@ struct isIterable {
 };
 
 class isIterator {};
-struct isMutable {};
+
+template<typename T>
+struct isMutable {
+    isMutable() { static_cast<T*>(this)->_traits().isMutable = true; }
+};
 
 struct isParameterized {
     /**
@@ -89,6 +93,10 @@ struct takesArguments {
 };
 
 } // namespace trait
+
+struct Traits {
+    bool isMutable = false;
+};
 
 using ResolvedState = std::unordered_set<uintptr_t>;
 
@@ -307,7 +315,7 @@ public:
     bool _isReferenceType() const { return dynamic_cast<const type::trait::isReferenceType*>(this); }
 
     /** For internal use. Use ``type::isMutable` instead. */
-    bool _isMutable() const { return dynamic_cast<const type::trait::isMutable*>(this); }
+    bool _isMutable() const { return _traits_.isMutable; }
 
     /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
     bool _isRuntimeNonTrivial() const { return dynamic_cast<const type::trait::isRuntimeNonTrivial*>(this); }
@@ -338,8 +346,11 @@ public:
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
 
+    type::Traits& _traits() { return _traits_; }
+
 private:
     type::detail::State _state_;
+    type::Traits _traits_;
 };
 
 /** Creates an AST node representing a `Type`. */

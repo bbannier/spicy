@@ -16,7 +16,7 @@ class Iterator : public Type,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
-                 trait::isMutable,
+                 public trait::isMutable<Iterator>,
                  trait::isRuntimeNonTrivial {
 public:
     Iterator(Meta m = Meta()) : Type(nodes(type::UnsignedInteger(8)), std::move(m)) {}
@@ -59,7 +59,7 @@ public:
 /** AST node for a stream type. */
 class Stream : public Type,
                trait::isAllocable,
-               trait::isMutable,
+               public trait::isMutable<Stream>,
                trait::isIterable,
                trait::isViewable,
                trait::isRuntimeNonTrivial {
