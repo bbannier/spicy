@@ -24,12 +24,14 @@ class Iterator : public Type,
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
         : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
+          trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
         : Type(nodes(type::unknown, type::unknown), std::move(m)),
+          trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),

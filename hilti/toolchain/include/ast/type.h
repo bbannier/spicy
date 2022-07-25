@@ -32,6 +32,7 @@ using Parameter = declaration::Parameter;
 namespace trait {
 struct Traits {
     bool isAllocable = false;
+    bool isDereferenceable = false;
     bool isMutable = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
@@ -42,6 +43,8 @@ struct isAllocable {
 };
 
 struct isDereferenceable {
+    isDereferenceable(Traits* all) { all->isDereferenceable = true; }
+
     /** Returns the type of elements the iterator traverse. */
     virtual const hilti::Type& dereferencedType() const = 0;
 };
@@ -301,7 +304,7 @@ public:
     bool _isAllocable() const { return _traits_.isAllocable; }
 
     /** For internal use. Use ``type::isDereferenceable` instead. */
-    bool _isDereferenceable() const { return dynamic_cast<const type::trait::isDereferenceable*>(this); }
+    bool _isDereferenceable() const { return _traits_.isDereferenceable; }
 
     /** For internal use. Use ``type::isIterable` instead. */
     bool _isIterable() const { return dynamic_cast<const type::trait::isIterable*>(this); }
