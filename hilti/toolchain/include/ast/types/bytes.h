@@ -17,10 +17,12 @@ class Iterator : public Type,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  public trait::isMutable,
-                 public trait::isRuntimeNonTrivial<Iterator> {
+                 public trait::isRuntimeNonTrivial {
 public:
     Iterator(Meta m = Meta())
-        : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)), trait::isMutable(&_traits()) {}
+        : Type(nodes(Type(type::UnsignedInteger(8))), std::move(m)),
+          trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const Iterator& /* other */) const { return true; }
 
@@ -41,10 +43,12 @@ class Bytes : public Type,
               trait::isAllocable,
               public trait::isMutable,
               trait::isIterable,
-              public trait::isRuntimeNonTrivial<Bytes> {
+              public trait::isRuntimeNonTrivial {
 public:
     Bytes(const Meta& m = Meta())
-        : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m), trait::isMutable(&_traits()) {}
+        : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m),
+          trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const Bytes& /* other */) const { return true; }
 

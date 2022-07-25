@@ -79,9 +79,8 @@ struct isReferenceType {
     isReferenceType(Traits* all) { all->isReferenceType = true; }
 };
 
-template<typename T>
 struct isRuntimeNonTrivial {
-    isRuntimeNonTrivial() { static_cast<T*>(this)->_traits().isRuntimeNonTrivial = true; }
+    isRuntimeNonTrivial(Traits* all) { all->isRuntimeNonTrivial = true; }
 };
 
 struct isView : isIterable {};

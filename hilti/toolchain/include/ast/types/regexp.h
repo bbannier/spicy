@@ -9,9 +9,9 @@
 namespace hilti::type {
 
 /** AST node for a regexp type. */
-class RegExp : public Type, trait::isAllocable, public trait::isRuntimeNonTrivial<RegExp> {
+class RegExp : public Type, trait::isAllocable, public trait::isRuntimeNonTrivial {
 public:
-    RegExp(Meta m = Meta()) : Type(std::move(m)) {}
+    RegExp(Meta m = Meta()) : Type(std::move(m)), trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const RegExp& /* other */) const { return true; }
 

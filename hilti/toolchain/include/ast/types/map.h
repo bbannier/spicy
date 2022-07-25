@@ -19,16 +19,18 @@ class Iterator : public Type,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  public trait::isMutable,
-                 public trait::isRuntimeNonTrivial<Iterator>,
+                 public trait::isRuntimeNonTrivial,
                  trait::isParameterized {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
         : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
           trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
         : Type(nodes(type::unknown, type::unknown), std::move(m)),
           trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true),
           _const(const_) {}
 
@@ -80,14 +82,17 @@ class Map : public Type,
             trait::isAllocable,
             public trait::isMutable,
             trait::isIterable,
-            public trait::isRuntimeNonTrivial<Map>,
+            public trait::isRuntimeNonTrivial,
             trait::isParameterized {
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())
-        : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m), trait::isMutable(&_traits()) {}
+        : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m),
+          trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
         : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
           trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true) {}
 
     const Type& keyType() const { return child<map::Iterator>(0).keyType(); }

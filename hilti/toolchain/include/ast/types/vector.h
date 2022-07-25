@@ -18,13 +18,20 @@ class Iterator : public Type,
                  trait::isDereferenceable,
                  trait::isAllocable,
                  public trait::isMutable,
-                 public trait::isRuntimeNonTrivial<Iterator>,
+                 public trait::isRuntimeNonTrivial,
                  trait::isParameterized {
 public:
     Iterator(Type etype, bool const_, Meta m = Meta())
-        : Type(nodes(std::move(etype)), std::move(m)), trait::isMutable(&_traits()), _const(const_) {}
+        : Type(nodes(std::move(etype)), std::move(m)),
+          trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()),
+          _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)), trait::isMutable(&_traits()), _wildcard(true), _const(const_) {}
+        : Type(nodes(type::unknown), std::move(m)),
+          trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()),
+          _wildcard(true),
+          _const(const_) {}
 
     /** Returns true if the container elements aren't modifiable. */
     bool isConstant() const { return _const; }
@@ -58,14 +65,17 @@ class Vector : public Type,
                trait::isAllocable,
                public trait::isMutable,
                trait::isIterable,
-               public trait::isRuntimeNonTrivial<Vector>,
+               public trait::isRuntimeNonTrivial,
                trait::isParameterized {
 public:
     Vector(const Type& t, const Meta& m = Meta())
-        : Type(nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m), trait::isMutable(&_traits()) {}
+        : Type(nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m),
+          trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()) {}
     Vector(Wildcard /*unused*/, const Meta& m = Meta())
         : Type(nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)), m),
           trait::isMutable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true) {}
 
     /** Implements the `Type` interface. */
