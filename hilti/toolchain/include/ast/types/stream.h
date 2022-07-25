@@ -78,6 +78,7 @@ public:
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
+          trait::isViewable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const Stream& /* other */) const { return true; }

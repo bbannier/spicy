@@ -37,6 +37,7 @@ struct Traits {
     bool isMutable = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
+    bool isViewable = false;
 };
 
 struct isAllocable {
@@ -95,6 +96,8 @@ struct isView : isIterable {
 };
 
 struct isViewable {
+    isViewable(Traits* all) { all->isViewable = true; }
+
     /**
      * Returns any parameters associated with type. If a type is declared as
      * `T<A,B,C>` this returns a vector of the AST nodes for `A`, `B`, and
@@ -315,7 +318,7 @@ public:
     bool _isIterable() const { return _traits_.isIterable; }
 
     /** For internal use. Use ``type::isViewable` instead. */
-    bool _isViewable() const { return dynamic_cast<const type::trait::isViewable*>(this); }
+    bool _isViewable() const { return _traits_.isViewable; }
 
     /** For internal use. Use ``type::isIterator` instead. */
     bool _isIterator() const { return dynamic_cast<const type::trait::isIterator*>(this); }
