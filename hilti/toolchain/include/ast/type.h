@@ -38,6 +38,7 @@ struct Traits {
     bool isMutable = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
+    bool isView = false;
     bool isViewable = false;
 };
 
@@ -95,7 +96,7 @@ struct isRuntimeNonTrivial {
 };
 
 struct isView : isIterable {
-    isView(Traits* all) : isIterable(all) {}
+    isView(Traits* all) : isIterable(all) { all->isView = true; }
 };
 
 struct isViewable {
@@ -327,7 +328,7 @@ public:
     bool _isIterator() const { return _traits_.isIterator; }
 
     /** For internal use. Use ``type::isView` instead. */
-    bool _isView() const { return dynamic_cast<const type::trait::isView*>(this); }
+    bool _isView() const { return _traits_.isView; }
 
     /** For internal use. Use ``type::isParameterized` instead. */
     bool _isParameterized() const { return dynamic_cast<const type::trait::isParameterized*>(this); }
