@@ -42,7 +42,10 @@ public:
 class View : public Type, trait::isView, trait::isAllocable, public trait::isRuntimeNonTrivial {
 public:
     View(const Meta& m = Meta())
-        : Type(nodes(stream::Iterator(m)), m), trait::isAllocable(&_traits()), trait::isRuntimeNonTrivial(&_traits()) {}
+        : Type(nodes(stream::Iterator(m)), m),
+          trait::isView(&_traits()),
+          trait::isAllocable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const View& /* other */) const { return true; }
 
@@ -74,6 +77,7 @@ public:
         : Type(nodes(stream::View(m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
+          trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const Stream& /* other */) const { return true; }

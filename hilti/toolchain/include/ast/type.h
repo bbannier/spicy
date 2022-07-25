@@ -33,6 +33,7 @@ namespace trait {
 struct Traits {
     bool isAllocable = false;
     bool isDereferenceable = false;
+    bool isIterable = false;
     bool isMutable = false;
     bool isReferenceType = false;
     bool isRuntimeNonTrivial = false;
@@ -50,6 +51,8 @@ struct isDereferenceable {
 };
 
 struct isIterable {
+    isIterable(Traits* all) { all->isIterable = true; }
+
     /** Returns the type of an iterator for this type. */
     virtual const hilti::Type& iteratorType(bool const_) const = 0;
 
@@ -87,7 +90,9 @@ struct isRuntimeNonTrivial {
     isRuntimeNonTrivial(Traits* all) { all->isRuntimeNonTrivial = true; }
 };
 
-struct isView : isIterable {};
+struct isView : isIterable {
+    isView(Traits* all) : isIterable(all) {}
+};
 
 struct isViewable {
     /**
@@ -307,7 +312,7 @@ public:
     bool _isDereferenceable() const { return _traits_.isDereferenceable; }
 
     /** For internal use. Use ``type::isIterable` instead. */
-    bool _isIterable() const { return dynamic_cast<const type::trait::isIterable*>(this); }
+    bool _isIterable() const { return _traits_.isIterable; }
 
     /** For internal use. Use ``type::isViewable` instead. */
     bool _isViewable() const { return dynamic_cast<const type::trait::isViewable*>(this); }

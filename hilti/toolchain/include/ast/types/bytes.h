@@ -51,6 +51,7 @@ public:
         : Type(nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
+          trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const Bytes& /* other */) const { return true; }

@@ -76,11 +76,13 @@ public:
         : Type(nodes(list::Iterator(t, true, m), list::Iterator(t, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
+          trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
     List(Wildcard /*unused*/, const Meta& m = Meta())
         : Type(nodes(list::Iterator(Wildcard{}, true, m), list::Iterator(Wildcard{}, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
+          trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           _wildcard(true) {}
 
