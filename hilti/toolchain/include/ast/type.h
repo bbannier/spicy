@@ -249,9 +249,21 @@ public:
         return reinterpret_cast<uintptr_t>(this);
     }
 
-    // }}}
+    /** Implements the `Node` interface. */
+    virtual node::Properties properties() const { return {}; }
 
-    // Type interface. {{{
+    /** Implements the `Node` interface. */
+    std::vector<hilti::Node>& children() const {
+        static std::vector<hilti::Node> _children; // FIXME(bbannier)
+        return _children;
+    }
+
+    /** Implements the `Node` interface. */
+    const Meta& meta() const { return _meta; }
+
+    /** Implements the `Node` interface. */
+    void setMeta(Meta m) { _meta = std::move(m); }
+    Meta _meta;
 
     // }}}
 };
@@ -300,28 +312,8 @@ public:
     /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
     bool _isRuntimeNonTrivial() const { return dynamic_cast<const type::trait::isRuntimeNonTrivial*>(this); }
 
-    /** Internal state managed by derived class. */
-    type::detail::State _state_;
-
     /** For internal use. Use ``type::takesArguments` instead. */
     bool _takesArguments() const { return false; /* FIXME(bbannier) */ }
-
-    /** Implements the `Node` interface. */
-    virtual node::Properties properties() const { return {}; }
-
-    /** Implements the `Node` interface. */
-    std::vector<hilti::Node>& children() const {
-        static std::vector<hilti::Node> _children; // FIXME(bbannier)
-        return _children;
-    }
-
-    /** Implements the `Node` interface. */
-    const Meta& meta() const { return _meta; }
-
-    /** Implements the `Node` interface. */
-    void setMeta(Meta m) { _meta = std::move(m); }
-    Meta _meta;
-
 
     std::optional<ID> resolvedID() const { return _state().resolved_id; }
 
@@ -345,6 +337,9 @@ public:
     type::detail::State& _state() { return _state_; }
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
+
+private:
+    type::detail::State _state_;
 };
 
 /** Creates an AST node representing a `Type`. */
