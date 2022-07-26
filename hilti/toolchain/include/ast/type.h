@@ -314,7 +314,7 @@ public:
     // }}}
 
 private:
-    std::string _typename; // FIXME(bbannier): can this be a const char?
+    std::string _typename;
     size_t _typeid;
 };
 
