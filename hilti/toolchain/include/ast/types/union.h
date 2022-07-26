@@ -21,12 +21,12 @@ namespace hilti::type {
 class Union : public Type, trait::isAllocable, trait::isParameterized, public trait::isMutable {
 public:
     Union(std::vector<Declaration> fields, Meta m = Meta())
-        : Type(nodes(node::none, std::move(fields)), std::move(m)),
+        : Type(typeid(Union), nodes(node::none, std::move(fields)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isMutable(&_traits()) {}
     Union(Wildcard /*unused*/, Meta m = Meta())
-        : Type(nodes(node::none), std::move(m)),
+        : Type(typeid(Union), nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isMutable(&_traits()),

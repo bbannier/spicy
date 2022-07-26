@@ -14,12 +14,18 @@ namespace detail {
 /** Base class for an AST node representing an integer type. */
 class IntegerBase : public hilti::Type, trait::isAllocable, trait::isParameterized {
 public:
-    IntegerBase(Wildcard /*unused*/, Meta m = Meta())
-        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()), _wildcard(true) {}
-    IntegerBase(int width, Meta m = Meta())
-        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()), _width(width) {}
-    IntegerBase(Meta m = Meta())
-        : Type(std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
+    IntegerBase(const std::type_info& type_info, Wildcard /*unused*/, Meta m = Meta())
+        : Type(type_info, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
+          _wildcard(true) {}
+    IntegerBase(const std::type_info& type_info, int width, Meta m = Meta())
+        : Type(type_info, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()),
+          _width(width) {}
+    IntegerBase(const std::type_info& type_info, Meta m = Meta())
+        : Type(type_info, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
 
     auto width() const { return _width; }
 
@@ -40,7 +46,9 @@ private:
 /** AST node for a signed integer type. */
 class SignedInteger : public detail::IntegerBase {
 public:
-    using detail::IntegerBase::IntegerBase;
+    SignedInteger(Wildcard w, Meta m = hilti::Meta()) : detail::IntegerBase(typeid(SignedInteger), w, std::move(m)) {}
+    SignedInteger(int width, Meta m = hilti::Meta()) : detail::IntegerBase(typeid(SignedInteger), std::move(m)) {}
+    SignedInteger(Meta m = hilti::Meta()) : detail::IntegerBase(typeid(SignedInteger), std::move(m)) {}
 
     bool operator==(const SignedInteger& other) const { return width() == other.width(); }
 
@@ -54,7 +62,10 @@ public:
 /** AST node for an unsigned integer type. */
 class UnsignedInteger : public detail::IntegerBase {
 public:
-    using detail::IntegerBase::IntegerBase;
+    UnsignedInteger(Wildcard w, Meta m = hilti::Meta())
+        : detail::IntegerBase(typeid(UnsignedInteger), w, std::move(m)) {}
+    UnsignedInteger(int width, Meta m = hilti::Meta()) : detail::IntegerBase(typeid(UnsignedInteger), std::move(m)) {}
+    UnsignedInteger(Meta m = hilti::Meta()) : detail::IntegerBase(typeid(UnsignedInteger), std::move(m)) {}
 
     bool operator==(const UnsignedInteger& other) const { return width() == other.width(); }
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <hilti/ast/expressions/coerced.h>
 #include <hilti/ast/expressions/member.h>
 #include <hilti/ast/operators/common.h>
 #include <hilti/ast/types/any.h>
@@ -197,15 +198,14 @@ public:
     using hilti::expression::ResolvedOperatorBase::ResolvedOperatorBase;
 
     struct Operator : public hilti::trait::isOperator {
-        Operator(const type::Struct& stype, const declaration::Field& f) {
-            auto ftype = f.type().as<type::Function>();
-            auto op0 = operator_::Operand{{}, stype};
-            auto op1 = operator_::Operand{{}, type::Member(f.id())};
-            auto op2 = operator_::Operand{{}, type::OperandList::fromParameters(ftype.parameters())};
-            _field = f;
-            _operands = {op0, op1, op2};
-            _result = ftype.result().type();
-        };
+        Operator(const type::Struct& stype, const declaration::Field& f)
+            : _field(f),
+              _operands({
+                  operator_::Operand{{}, stype},
+                  operator_::Operand{{}, type::Member(f.id())},
+                  operator_::Operand{{}, type::OperandList::fromParameters(f.type().as<type::Function>().parameters())},
+              }),
+              _result(f.type().as<type::Function>().result().type()){};
 
         static operator_::Kind kind() { return operator_::Kind::MemberCall; }
         const std::vector<operator_::Operand>& operands() const { return _operands; }

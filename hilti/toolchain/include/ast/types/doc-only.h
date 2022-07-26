@@ -17,7 +17,7 @@ namespace hilti::type {
  */
 class DocOnly : public Type {
 public:
-    DocOnly(std::string desc, Meta m = Meta()) : Type(std::move(m)), _description(std::move(desc)) {}
+    DocOnly(std::string desc, Meta m = Meta()) : Type(typeid(DocOnly), std::move(m)), _description(std::move(desc)) {}
 
     auto description() const { return _description; }
 

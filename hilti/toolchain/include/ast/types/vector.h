@@ -22,7 +22,7 @@ class Iterator : public Type,
                  trait::isParameterized {
 public:
     Iterator(Type etype, bool const_, Meta m = Meta())
-        : Type(nodes(std::move(etype)), std::move(m)),
+        : Type(typeid(Iterator), nodes(std::move(etype)), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -31,7 +31,7 @@ public:
           trait::isParameterized(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)),
+        : Type(typeid(Iterator), nodes(type::unknown), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -77,14 +77,14 @@ class Vector : public Type,
                trait::isParameterized {
 public:
     Vector(const Type& t, const Meta& m = Meta())
-        : Type(nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m),
+        : Type(typeid(Vector), nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           trait::isParameterized(&_traits()) {}
     Vector(Wildcard /*unused*/, const Meta& m = Meta())
-        : Type(nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)), m),
+        : Type(typeid(Vector), nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),

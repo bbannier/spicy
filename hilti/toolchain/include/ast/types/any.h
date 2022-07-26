@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for an "any" type. */
 class Any : public Type {
 public:
-    Any(Meta m = Meta()) : Type(std::move(m)) {}
+    Any(Meta m = Meta()) : Type(typeid(Any), std::move(m)) {}
 
     bool operator==(const Any& /* other */) const { return true; }
 

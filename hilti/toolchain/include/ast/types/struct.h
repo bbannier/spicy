@@ -32,14 +32,15 @@ namespace hilti::type {
 class Struct : public Type, trait::isAllocable, trait::isParameterized, trait::takesArguments, public trait::isMutable {
 public:
     Struct(std::vector<Declaration> fields, Meta m = Meta())
-        : Type(nodes(node::none, std::move(fields)), std::move(m)),
+        : Type(typeid(Struct), nodes(node::none, std::move(fields)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::takesArguments(&_traits()),
           trait::isMutable(&_traits()) {}
 
     Struct(const std::vector<type::function::Parameter>& params, std::vector<Declaration> fields, Meta m = Meta())
-        : Type(nodes(node::none, std::move(fields),
+        : Type(typeid(Struct),
+               nodes(node::none, std::move(fields),
                      util::transform(params,
                                      [](auto p) {
                                          p.setIsTypeParameter();
@@ -52,7 +53,7 @@ public:
           trait::isMutable(&_traits()) {}
 
     Struct(Wildcard /*unused*/, Meta m = Meta())
-        : Type(nodes(node::none), std::move(m)),
+        : Type(typeid(Struct), nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::takesArguments(&_traits()),

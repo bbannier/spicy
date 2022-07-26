@@ -20,7 +20,7 @@ class Iterator : public Type,
                  public trait::isRuntimeNonTrivial {
 public:
     Iterator(Meta m = Meta())
-        : Type(nodes(type::UnsignedInteger(8)), std::move(m)),
+        : Type(typeid(Iterator), nodes(type::UnsignedInteger(8)), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -43,7 +43,7 @@ public:
 class View : public Type, trait::isView, trait::isAllocable, public trait::isRuntimeNonTrivial {
 public:
     View(const Meta& m = Meta())
-        : Type(nodes(stream::Iterator(m)), m),
+        : Type(typeid(View), nodes(stream::Iterator(m)), m),
           trait::isView(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
@@ -75,7 +75,7 @@ class Stream : public Type,
                public trait::isRuntimeNonTrivial {
 public:
     Stream(const Meta& m = Meta())
-        : Type(nodes(stream::View(m)), m),
+        : Type(typeid(Stream), nodes(stream::View(m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),

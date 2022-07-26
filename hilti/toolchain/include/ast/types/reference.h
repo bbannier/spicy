@@ -20,20 +20,20 @@ class StrongReference : public Type,
                         public trait::isReferenceType {
 public:
     StrongReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type({type::unknown}, std::move(m)),
+        : Type(typeid(StrongReference), {type::unknown}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()),
           _wildcard(true) {}
     StrongReference(Type ct, Meta m = Meta())
-        : Type(nodes(std::move(ct)), std::move(m)),
+        : Type(typeid(StrongReference), nodes(std::move(ct)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()) {}
     StrongReference(NodeRef ct, Meta m = Meta())
-        : Type(nodes(node::none), std::move(m)),
+        : Type(typeid(StrongReference), nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
@@ -76,14 +76,14 @@ class WeakReference : public Type,
                       public trait::isReferenceType {
 public:
     WeakReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type({type::unknown}, std::move(m)),
+        : Type(typeid(WeakReference), {type::unknown}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()),
           _wildcard(true) {}
     WeakReference(Type ct, Meta m = Meta())
-        : Type({std::move(ct)}, std::move(m)),
+        : Type(typeid(WeakReference), {std::move(ct)}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
@@ -116,20 +116,20 @@ class ValueReference : public Type,
                        public trait::isReferenceType {
 public:
     ValueReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)),
+        : Type(typeid(ValueReference), nodes(type::unknown), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()),
           _wildcard(true) {}
     ValueReference(Type ct, Meta m = Meta())
-        : Type(nodes(std::move(ct)), std::move(m)),
+        : Type(typeid(ValueReference), nodes(std::move(ct)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()) {}
     ValueReference(NodeRef ct, Meta m = Meta())
-        : Type(nodes(type::unknown), std::move(m)),
+        : Type(typeid(ValueReference), nodes(type::unknown), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),

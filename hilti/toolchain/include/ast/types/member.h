@@ -15,8 +15,9 @@ namespace hilti::type {
 class Member : public Type, trait::isParameterized {
 public:
     Member(Wildcard /*unused*/, Meta m = Meta())
-        : Type({ID("<wildcard>")}, std::move(m)), trait::isParameterized(&_traits()), _wildcard(true) {}
-    Member(::hilti::ID id, Meta m = Meta()) : Type({std::move(id)}, std::move(m)), trait::isParameterized(&_traits()) {}
+        : Type(typeid(Member), {ID("<wildcard>")}, std::move(m)), trait::isParameterized(&_traits()), _wildcard(true) {}
+    Member(::hilti::ID id, Meta m = Meta())
+        : Type(typeid(Member), {std::move(id)}, std::move(m)), trait::isParameterized(&_traits()) {}
 
     const auto& id() const { return child<::hilti::ID>(0); }
 

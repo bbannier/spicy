@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -9,6 +10,7 @@
 #include <hilti/ast/id.h>
 #include <hilti/ast/node.h>
 #include <hilti/base/type_erase.h>
+#include <hilti/base/util.h>
 
 namespace hilti {
 
@@ -242,7 +244,15 @@ struct State {
  */
 class TypeBase : public NodeBase, public trait::isType {
 public:
-    using NodeBase::NodeBase;
+    TypeBase(const std::type_info& type_info_)
+        : _typename(util::demangle(type_info_.name())), _typeid(type_info_.hash_code()) {}
+    TypeBase(const std::type_info& type_info_, Meta meta)
+        : NodeBase(std::move(meta)), _typename(util::demangle(type_info_.name())), _typeid(type_info_.hash_code()) {}
+
+    TypeBase(const std::type_info& type_info_, std::vector<Node> children, Meta meta)
+        : NodeBase(std::move(children), std::move(meta)),
+          _typename(util::demangle(type_info_.name())),
+          _typeid(type_info_.hash_code()) {}
 
     virtual ~TypeBase() = default;
 
@@ -276,9 +286,9 @@ public:
         return {};
     }
 
-    const char* typename_() const { return typeid(*this).name(); }
+    const char* typename_() const { return _typename.c_str(); }
 
-    size_t typeid_() const { return typeid(*this).hash_code(); }
+    size_t typeid_() const { return _typeid; }
 
     virtual uintptr_t identity() const {
         // FIXME(bbannier): is this correct?
@@ -302,19 +312,23 @@ public:
     Meta _meta;
 
     // }}}
+
+private:
+    std::string _typename; // FIXME(bbannier): can this be a const char?
+    size_t _typeid;
 };
 
 class Type : public TypeBase {
 public:
     using TypeBase::TypeBase;
 
+    Type();
+
     /** Returns true if the type is equivalent to another HILTI type. */
     bool isEqual(const hilti::TypeBase& other) const { return node::isEqual(this, other); }
 
     /** For internal use. Use ``type::isResolved` instead. */
     virtual bool _isResolved(type::ResolvedState* rstate) const { return false; }
-
-    Type() = default;
 
     Type _clone() const { return *this; }
 

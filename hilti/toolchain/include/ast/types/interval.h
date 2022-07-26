@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for an interval type. */
 class Interval : public Type, trait::isAllocable {
 public:
-    Interval(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
+    Interval(Meta m = Meta()) : Type(typeid(Interval), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Interval& /* other */) const { return true; }
 

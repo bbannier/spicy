@@ -19,7 +19,7 @@ namespace hilti::type {
  */
 class OperandList : public Type {
 public:
-    OperandList(std::vector<operator_::Operand> operands) : _operands(std::move(operands)) {}
+    OperandList(std::vector<operator_::Operand> operands) : Type(typeid(OperandList)), _operands(std::move(operands)) {}
 
     const auto& operands() const { return _operands; }
 

@@ -63,7 +63,8 @@ class Unit : detail::AssignIndices,
 public:
     Unit(const std::vector<type::function::Parameter>& params, std::vector<unit::Item> i,
          const std::optional<AttributeSet>& /* attrs */ = {}, Meta m = Meta())
-        : Type(hilti::nodes(node::none, node::none, node::none,
+        : Type(typeid(Unit),
+               hilti::nodes(node::none, node::none, node::none,
                             hilti::util::transform(params,
                                                    [](auto p) {
                                                        p.setIsTypeParameter();
@@ -77,7 +78,7 @@ public:
           hilti::type::trait::isMutable(&_traits()) {}
 
     Unit(Wildcard /*unused*/, Meta m = Meta())
-        : Type(std::move(m)),
+        : Type(typeid(Unit), std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::takesArguments(&_traits()),

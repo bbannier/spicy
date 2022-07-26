@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for a network type. */
 class Network : public Type, trait::isAllocable {
 public:
-    Network(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
+    Network(Meta m = Meta()) : Type(typeid(Network), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Network& /* other */) const { return true; }
 

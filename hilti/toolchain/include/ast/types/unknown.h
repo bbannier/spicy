@@ -26,7 +26,7 @@ public:
     static Unknown create(Meta m = Meta()) { return Unknown(std::move(m)); }
 
 private:
-    Unknown(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
+    Unknown(Meta m = Meta()) : Type(typeid(Unknown), std::move(m)), trait::isAllocable(&_traits()) {}
 };
 
 /** Singleton. */

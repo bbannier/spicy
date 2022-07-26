@@ -19,7 +19,7 @@ namespace hilti::type {
 class Library : public Type, trait::isAllocable, public trait::isMutable {
 public:
     Library(std::string cxx_name, Meta m = Meta())
-        : Type(std::move(m)),
+        : Type(typeid(Library), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           _cxx_name(std::move(cxx_name)) {}

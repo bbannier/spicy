@@ -13,11 +13,15 @@ namespace hilti::type {
 class Exception : public Type, trait::isAllocable, trait::isParameterized {
 public:
     Exception(Meta m = Meta())
-        : Type({node::none}, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
+        : Type(typeid(Exception), {node::none}, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()) {}
     Exception(Type base, Meta m = Meta())
-        : Type({std::move(base)}, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
+        : Type(typeid(Exception), {std::move(base)}, std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isParameterized(&_traits()) {}
     Exception(Wildcard /*unused*/, Meta m = Meta())
-        : Type({node::none}, std::move(m)),
+        : Type(typeid(Exception), {node::none}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           _wildcard(true) {}

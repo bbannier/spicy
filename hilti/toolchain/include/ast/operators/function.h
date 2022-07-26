@@ -9,6 +9,7 @@
 #include <hilti/ast/expressions/id.h>
 #include <hilti/ast/operators/common.h>
 #include <hilti/ast/types/bool.h>
+#include <hilti/ast/types/function.h>
 #include <hilti/ast/types/string.h>
 
 namespace hilti::operator_ {
@@ -22,13 +23,13 @@ public:
     using hilti::expression::ResolvedOperatorBase::ResolvedOperatorBase;
 
     struct Operator : public hilti::trait::isOperator {
-        Operator(const Scope::Referee& r, const type::Function& ftype) {
-            auto op0 = operator_::Operand{{}, type::Any()}; // IDs won't be resolved
-            auto op1 = operator_::Operand{{}, type::OperandList::fromParameters(ftype.parameters())};
-            _referee = r;
-            _operands = {op0, op1};
-            _result = ftype.result().type();
-        }
+        Operator(Scope::Referee r, const type::Function& ftype)
+            : _referee(std::move(r)),
+              _operands({
+                  operator_::Operand{{}, type::Any()}, // IDs won't be resolved
+                  operator_::Operand{{}, type::OperandList::fromParameters(ftype.parameters())},
+              }),
+              _result(ftype.result().type()) {}
 
         static operator_::Kind kind() { return operator_::Kind::Call; }
         const std::vector<operator_::Operand>& operands() const { return _operands; }

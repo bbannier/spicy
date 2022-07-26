@@ -11,7 +11,7 @@ namespace hilti::type {
 /** AST node for a port type. */
 class Port : public Type, trait::isAllocable {
 public:
-    Port(Meta m = Meta()) : Type(std::move(m)), trait::isAllocable(&_traits()) {}
+    Port(Meta m = Meta()) : Type(typeid(Port), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Port& /* other */) const { return true; }
 

@@ -23,7 +23,7 @@ class Iterator : public Type,
                  trait::isParameterized {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
-        : Type(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
+        : Type(typeid(Iterator), nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -32,7 +32,7 @@ public:
           trait::isParameterized(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(nodes(type::unknown, type::unknown), std::move(m)),
+        : Type(typeid(Iterator), nodes(type::unknown, type::unknown), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -94,14 +94,14 @@ class Map : public Type,
             trait::isParameterized {
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())
-        : Type(nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m),
+        : Type(typeid(Map), nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           trait::isParameterized(&_traits()) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
-        : Type(nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
+        : Type(typeid(Map), nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),

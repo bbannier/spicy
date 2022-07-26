@@ -80,13 +80,13 @@ class Bitfield : public hilti::Type,
                  public hilti::type::trait::isMutable {
 public:
     Bitfield(int width, std::vector<bitfield::Bits> bits, const Meta& m = Meta())
-        : Type(nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m),
+        : Type(typeid(Bitfield), nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::isMutable(&_traits()),
           _width(width) {}
     Bitfield(Wildcard /*unused*/, Meta m = Meta())
-        : Type({hilti::type::unknown, hilti::type::unknown}, std::move(m)),
+        : Type(typeid(Bitfield), {hilti::type::unknown, hilti::type::unknown}, std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::isMutable(&_traits()),

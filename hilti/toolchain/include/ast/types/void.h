@@ -25,7 +25,7 @@ public:
     static Void create(Meta m = Meta()) { return Void(std::move(m)); }
 
 private:
-    Void(Meta m = Meta()) : Type(std::move(m)) {}
+    Void(Meta m = Meta()) : Type(typeid(Void), std::move(m)) {}
 };
 
 /** Singleton. */
