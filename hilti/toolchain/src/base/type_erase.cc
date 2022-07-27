@@ -1,9 +1,11 @@
 // Copyright (c) 2020-2021 by the Zeek Project. See LICENSE for details.
 
+#include "hilti/base/type_erase.h"
+
 #include <set>
 #include <utility>
 
-#include <hilti/base/type_erase.h>
+#include <hilti/ast/type.h>
 #include <hilti/base/util.h>
 
 using namespace hilti::util;
@@ -47,4 +49,9 @@ void type_erasure::summary(std::ostream& out) {
 #else
     out << "\n (No support for type-erase profiling compiled in.)\n\n";
 #endif
+}
+
+std::string type_erasure::type_typename(const type_erasure::ConceptBase& c) {
+    // return fmt("<foo: '%s'>", dynamic_cast<const Type*>(&c));
+    return fmt("<foo: '%s'>", rt::demangle(typeid(&c).name()));
 }

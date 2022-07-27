@@ -286,9 +286,9 @@ public:
         return {};
     }
 
-    const char* typename_() const { return _typename.c_str(); }
+    std::string typename_() const override { return _typename; }
 
-    size_t typeid_() const { return _typeid; }
+    size_t typeid_() const override { return _typeid; }
 
     virtual uintptr_t identity() const {
         // FIXME(bbannier): is this correct?

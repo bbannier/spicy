@@ -49,7 +49,9 @@ Checks: '
   -readability-named-parameter,
   -readability-qualified-auto,
   -readability-function-cognitive-complexity,
-  -readability-function-size
+  -readability-function-size,
+
+  cppcoreguidelines-slicing
   '
 
 HeaderFilterRegex: '(hilti|spicy)/[a-zA-Z]+/include/([a-zA-Z]+/)*[a-zA-Z]+\.h'

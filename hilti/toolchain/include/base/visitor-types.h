@@ -62,6 +62,7 @@ public:
     template<typename T>
     std::optional<std::reference_wrapper<const T>> findParent() const {
         for ( auto i = path.rbegin() + 1; i != path.rend(); i++ ) {
+            std::cerr << "NOPE findParent " << (**i).typename_() << '\n';
             if ( (**i).template isA<T>() )
                 return {(**i).template as<T>()};
         }

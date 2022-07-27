@@ -140,6 +140,12 @@ private:
     T _data;
 };
 
+// FIXME(bbannier): small helper function to extract a typename from a
+// conceptbase assuming it points to a `hilti::Type`. This is needed since that
+// type doesn't implement normal type erasure in contrast to every other node
+// type.
+std::string type_typename(const type_erasure::ConceptBase& c);
+
 /** Base class for the publicly visible, type-erased interface class. */
 template<typename Trait, typename Concept, template<typename T> typename Model, typename... ConceptArgs>
 class ErasedBase : public trait::TypeErased {
@@ -167,14 +173,26 @@ public:
      * type-erased objects are nested, it will return the information for the
      * inner-most type.
      */
-    size_t typeid_() const { return _typeid; }
+    virtual size_t typeid_() const { return _typeid; }
 
     /**
      * Returns C++ type name for the contained type. If multiple type-erased
      * objects are nested, it will return the information for the inner-most
      * type.
      */
-    std::string typename_() const { return _data ? _data->typename_() : "<nullptr>"; }
+    std::string typename_() const {
+        if ( ! _data )
+            return "<nullptr>";
+
+        const auto& t = _data->typename_();
+
+        if ( t != "hilti::Type" )
+            return t;
+        else {
+            return type_typename(*_data);
+            // return std::string("<foo: ") + this->as<hilti::Type>() + ">";
+        }
+    }
 
     /**
      * Casts the contained object into a specified type. This will aborts

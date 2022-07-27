@@ -227,13 +227,23 @@ TEST_CASE("Find specific parent") {
         result_t operator()(const hilti::type::SignedInteger& n, const_position_t i) {
             x = to_node(i.findParent<hilti::Module>()).typename_();
         }
+
+        result_t operator()(const hilti::type::String& n, const_position_t i) { CHECK(false); }
+        result_t operator()(const hilti::Type& n, const_position_t i) {
+            // CHECK_EQ(std::string(n.typename_()), std::string(i.node.data().get()->typename_()));
+            // CHECK_EQ(&n, i.node.data().get());
+            CHECK_EQ(std::string(n.typename_()), i.node.typename_());
+        }
+
         std::string x;
     };
 
     auto root = ast();
     auto v = Visitor();
-    for ( auto i : v.walk(root) )
+    for ( auto i : v.walk(root) ) {
+        // CHECK_EQ("NOPE", i.node.typename_());
         v.dispatch(i);
+    }
 
     REQUIRE(v.x == "hilti::Module");
 }

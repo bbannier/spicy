@@ -378,6 +378,8 @@ public:
 
     NodeBase() = default;
 
+    virtual ~NodeBase() = default;
+
     /**
      * Returns a child.
      *
@@ -478,6 +480,10 @@ public:
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return false; }
 
+    // Need to be implemented in derived classes, but not abstract to simplify impl of derived classes.
+    virtual size_t typeid_() const { hilti::rt::cannot_be_reached(); }
+    virtual std::string typename_() const { hilti::rt::cannot_be_reached(); }
+
 private:
     std::vector<::hilti::Node> _children;
     Meta _meta;
@@ -497,6 +503,9 @@ public:
      * this, use the singleton `type::unknown` instead.
      */
     static None create() { return None(); }
+
+    size_t typeid_() const override { return typeid(None).hash_code(); }
+    std::string typename_() const override { return typeid(None).name(); }
 
 private:
     None() : NodeBase(Meta()) {}
