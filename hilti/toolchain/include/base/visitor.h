@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <vector>
 
+#include <hilti/ast/type.h>
 #include <hilti/base/logger.h>
 #include <hilti/base/visitor-types.h>
 
@@ -53,6 +54,27 @@ DispatchResult<Result> do_dispatch_one(Erased& n, size_t ti, Dispatcher& d, type
     // Prefer most specific callback, so climb down first.
     if constexpr ( std::is_base_of_v<util::type_erasure::trait::TypeErased, Type> )
         result = do_dispatch<Result, T, Dispatcher, Iterator>(x, d, i, no_match_so_far);
+
+    // Also climb down into `hilti::Type` hierarchy.
+    if ( std::is_base_of_v<hilti::Type, Type> ) {
+        if constexpr ( has_callback<Dispatcher, CBc> ) {
+            no_match_so_far = false;
+            if constexpr ( std::is_void_v<Result> )
+                d(x);
+            else
+                result = {d(x)};
+        }
+
+        if constexpr ( has_callback<Dispatcher, CBcIP> ) {
+            no_match_so_far = false;
+            if constexpr ( std::is_void_v<Result> ) {
+                d(x, i);
+                abort();
+            }
+            else
+                result = {d(x, i)};
+        }
+    }
 
     if constexpr ( std::is_void_v<Result> ) {
         // No result expected, call all matching methods.

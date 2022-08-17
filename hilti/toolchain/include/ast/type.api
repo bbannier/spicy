@@ -92,4 +92,6 @@ class Type(hilti::trait::isType) : hilti::trait::isNode {
 
     /** Implements the `Node` interface. */
     bool pruneWalk() const;
+
+? dispatch(?);
 };

@@ -254,7 +254,7 @@ public:
           _typename(util::demangle(type_info_.name())),
           _typeid(type_info_.hash_code()) {}
 
-    virtual ~TypeBase() = default;
+    ~TypeBase() override = default;
 
     // Generic node stuff. {{{
     template<typename T>
@@ -312,6 +312,10 @@ public:
     Meta _meta;
 
     // }}}
+
+    // // FIXME(bbannier): maybe std::function as type-erased callback?
+    // template<typename R, typename F>
+    // virtual R dispatch(F) /*const?*/; // FIXME(bbannier)
 
 private:
     std::string _typename;

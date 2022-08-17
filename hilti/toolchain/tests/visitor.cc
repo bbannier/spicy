@@ -225,10 +225,12 @@ TEST_CASE("Retrieve parent") {
 TEST_CASE("Find specific parent") {
     struct Visitor : hilti::visitor::PreOrder<void, Visitor> {
         result_t operator()(const hilti::type::SignedInteger& n, const_position_t i) {
+            abort();
             x = to_node(i.findParent<hilti::Module>()).typename_();
         }
 
         result_t operator()(const hilti::type::String& n, const_position_t i) { CHECK(false); }
+
         result_t operator()(const hilti::Type& n, const_position_t i) {
             // CHECK_EQ(std::string(n.typename_()), std::string(i.node.data().get()->typename_()));
             // CHECK_EQ(&n, i.node.data().get());

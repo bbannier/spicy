@@ -78,3 +78,5 @@ for (btrait, bcls) in traits.items():
     output("")
 
 print("", file=out)
+
+# FIXME(bbannier): generate dispatcher code for hilti::Type? Oder in do_dispatch_one.
