@@ -353,7 +353,7 @@ public:
     template<typename T, typename = std::enable_if_t<std::is_base_of_v<TypeBase, T>>>
     Type(T t) : _data_(isocpp_p0201::make_polymorphic_value<TypeBase>(t)) {}
 
-    Type(const Type& t) : Type(t._clone()) {} // FIXME(bbannier): maybe remove this and force users to use `_clone`?
+    Type(const Type& t) = default;
     Type(Type&& t) = default;
 
     Type& operator=(const Type& t) = default;
