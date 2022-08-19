@@ -9,14 +9,14 @@
 namespace hilti::type {
 
 /** AST node for a floating point type. */
-class Real : public Type, trait::isAllocable {
+class Real : public TypeBase, trait::isAllocable {
 public:
-    Real(Meta m = Meta()) : Type(typeid(Real), std::move(m)), trait::isAllocable(&_traits()) {}
+    Real(Meta m = Meta()) : TypeBase(typeid(Real), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Real& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 

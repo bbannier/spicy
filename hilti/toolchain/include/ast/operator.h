@@ -197,7 +197,7 @@ struct Operand {
     Operand& operator=(Operand&&) = default;
     Operand& operator=(const Operand&) = default;
 
-    Operand(std::optional<ID> _id = {}, OperandType _type = {typeid(type::Unknown)}, bool _optional = false,
+    Operand(std::optional<ID> _id = {}, OperandType _type = type::unknown, bool _optional = false,
             std::optional<Expression> _default = {}, std::optional<std::string> _doc = {})
         : id(std::move(_id)),
           type(std::move(_type)),

@@ -9,15 +9,17 @@
 namespace hilti::type {
 
 /** AST node for a regexp type. */
-class RegExp : public Type, trait::isAllocable, public trait::isRuntimeNonTrivial {
+class RegExp : public TypeBase, trait::isAllocable, public trait::isRuntimeNonTrivial {
 public:
     RegExp(Meta m = Meta())
-        : Type(typeid(RegExp), std::move(m)), trait::isAllocable(&_traits()), trait::isRuntimeNonTrivial(&_traits()) {}
+        : TypeBase(typeid(RegExp), std::move(m)),
+          trait::isAllocable(&_traits()),
+          trait::isRuntimeNonTrivial(&_traits()) {}
 
     bool operator==(const RegExp& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Node` interface. */

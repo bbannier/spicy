@@ -15,16 +15,17 @@ namespace hilti::type {
  * auto-generated documentation. If it's used anywhere else, it'll cause
  * trouble.
  */
-class DocOnly : public Type {
+class DocOnly : public TypeBase {
 public:
-    DocOnly(std::string desc, Meta m = Meta()) : Type(typeid(DocOnly), std::move(m)), _description(std::move(desc)) {}
+    DocOnly(std::string desc, Meta m = Meta())
+        : TypeBase(typeid(DocOnly), std::move(m)), _description(std::move(desc)) {}
 
     auto description() const { return _description; }
 
     bool operator==(const DocOnly& /* other */) const { return false; }
 
     // Type interface.
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 

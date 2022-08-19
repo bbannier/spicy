@@ -9,14 +9,14 @@
 namespace hilti::type {
 
 /** AST node for a address type. */
-class Address : public Type, trait::isAllocable {
+class Address : public TypeBase, trait::isAllocable {
 public:
-    Address(Meta m = Meta()) : Type(typeid(Address), std::move(m)), trait::isAllocable(&_traits()) {}
+    Address(Meta m = Meta()) : TypeBase(typeid(Address), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Address& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Node` interface. */

@@ -68,17 +68,17 @@ using Kind = declaration::parameter::Kind;
 
 } // namespace function
 
-class Function : public hilti::Type, trait::isParameterized {
+class Function : public TypeBase, trait::isParameterized {
 public:
     Function(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Function), nodes(function::Result(type::Error(m))), std::move(m)),
+        : TypeBase(typeid(Function), nodes(function::Result(type::Error(m))), std::move(m)),
           trait::isParameterized(&_traits()),
           _wildcard(true) {}
     Function(function::Result result, const std::vector<function::Parameter>& params,
              function::Flavor flavor = function::Flavor::Standard, Meta m = Meta())
-        : Type(typeid(Function),
-               nodes(std::move(result), util::transform(params, [](const auto& p) { return Declaration(p); })),
-               std::move(m)),
+        : TypeBase(typeid(Function),
+                   nodes(std::move(result), util::transform(params, [](const auto& p) { return Declaration(p); })),
+                   std::move(m)),
           trait::isParameterized(&_traits()),
           _flavor(flavor) {}
 
@@ -94,7 +94,7 @@ public:
     }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {

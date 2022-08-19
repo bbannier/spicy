@@ -18,15 +18,15 @@
 namespace hilti::type {
 
 /** AST node for a struct type. */
-class Union : public Type, trait::isAllocable, trait::isParameterized, public trait::isMutable {
+class Union : public TypeBase, trait::isAllocable, trait::isParameterized, public trait::isMutable {
 public:
     Union(std::vector<Declaration> fields, Meta m = Meta())
-        : Type(typeid(Union), nodes(node::none, std::move(fields)), std::move(m)),
+        : TypeBase(typeid(Union), nodes(node::none, std::move(fields)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isMutable(&_traits()) {}
     Union(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Union), nodes(node::none), std::move(m)),
+        : TypeBase(typeid(Union), nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isMutable(&_traits()),
@@ -55,7 +55,7 @@ public:
     bool operator==(const Union& other) const { return fields() == other.fields(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {

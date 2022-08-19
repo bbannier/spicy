@@ -2,7 +2,12 @@
 
 #pragma once
 
+#include <hilti/rt/../../../3rdparty/polymorphic_value/polymorphic_value.h>
+// FIXME(bbannier): can 3rdparty/any be removed?
+
+#include <memory>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -11,6 +16,7 @@
 #include <hilti/ast/node.h>
 #include <hilti/base/type_erase.h>
 #include <hilti/base/util.h>
+#include <hilti/base/visitor-types.h>
 
 namespace hilti {
 
@@ -19,6 +25,7 @@ namespace trait {
 class isType : public isNode {};
 } // namespace trait
 
+class TypeBase;
 class Type;
 
 namespace declaration {
@@ -26,6 +33,12 @@ class Parameter;
 }
 
 namespace type {
+class Address;
+
+struct VisitorBase {
+    using position_t = visitor::Position<Node>;
+    virtual void operator()(const Type&, position_t&) {}
+};
 
 namespace function {
 using Parameter = declaration::Parameter;
@@ -237,6 +250,7 @@ struct State {
 
 } // namespace type
 
+
 /**
  * Base class for classes implementing the `Type` interface. This class
  * provides implementations for some interface methods shared that are shared
@@ -253,6 +267,9 @@ public:
         : NodeBase(std::move(children), std::move(meta)),
           _typename(util::demangle(type_info_.name())),
           _typeid(type_info_.hash_code()) {}
+
+    TypeBase(TypeBase&&) = default;
+    TypeBase(const TypeBase&) = default;
 
     ~TypeBase() override = default;
 
@@ -313,23 +330,89 @@ public:
 
     // }}}
 
-    // // FIXME(bbannier): maybe std::function as type-erased callback?
-    // template<typename R, typename F>
-    // virtual R dispatch(F) /*const?*/; // FIXME(bbannier)
+    // Type interface. {{{
+    virtual bool isEqual(const Type& other) const { return false; }
+    virtual bool _isResolved(type::ResolvedState* rstate) const { return false; }
+    // }}}
+
+    const type::trait::Traits& _traits() const { return _traits_; }
+    type::trait::Traits& _traits() { return _traits_; }
+
+protected:
+    type::trait::Traits _traits_;
 
 private:
-    std::string _typename;
-    size_t _typeid;
+    std::string _typename; // FIXME(bbannier): can compute dynamically?
+    size_t _typeid;        // FIXME(bbannier): can compute dynamically?
 };
 
-class Type : public TypeBase {
+class Type : public NodeBase {
 public:
-    using TypeBase::TypeBase;
+    Type() = default;
 
-    Type();
+    template<typename T, typename = std::enable_if_t<std::is_base_of_v<TypeBase, T>>>
+    Type(T t) : _data_(isocpp_p0201::make_polymorphic_value<TypeBase>(t)) {}
+
+    Type(const Type& t) : Type(t._clone()) {} // FIXME(bbannier): maybe remove this and force users to use `_clone`?
+    Type(Type&& t) = default;
+
+    Type& operator=(const Type& t) = default;
+    Type& operator=(Type&&) = default;
+
+    // Generic node stuff. {{{
+    template<typename T>
+    bool isA() const {
+        return _data_->isA<T>();
+    }
+
+    template<typename T>
+    T& as() {
+        return _data_->as<T>();
+    }
+
+    template<typename T>
+    const T& as() const {
+        return _data_->as<T>();
+    }
+
+    template<typename T>
+    optional_ref<const T> tryAs() const {
+        return _data_->tryAs<T>();
+    }
+
+    template<typename T>
+    optional_ref<T> tryAs() {
+        return _data_->tryAs<T>();
+    }
+
+    std::string typename_() const override { return _data_->typename_(); }
+    size_t typeid_() const override { return _data_->typeid_(); }
+
+    virtual uintptr_t identity() const {
+        // FIXME(bbannier): is this correct?
+        return reinterpret_cast<uintptr_t>(this);
+    }
+
+    /** Implements the `Node` interface. */
+    virtual node::Properties properties() const { return {}; }
+
+    /** Implements the `Node` interface. */
+    std::vector<hilti::Node>& children() const {
+        static std::vector<hilti::Node> _children; // FIXME(bbannier)
+        return _children;
+    }
+
+    /** Implements the `Node` interface. */
+    const Meta& meta() const { return _meta; }
+
+    /** Implements the `Node` interface. */
+    void setMeta(Meta m) { _meta = std::move(m); }
+    Meta _meta;
+
+    // }}}
 
     /** Returns true if the type is equivalent to another HILTI type. */
-    bool isEqual(const hilti::TypeBase& other) const { return node::isEqual(this, other); }
+    bool isEqual(const hilti::Type& other) const { return node::isEqual(&_data(), other._data()); }
 
     /** For internal use. Use ``type::isResolved` instead. */
     virtual bool _isResolved(type::ResolvedState* rstate) const { return false; }
@@ -337,37 +420,37 @@ public:
     Type _clone() const { return *this; }
 
     /** For internal use. Use ``type::isAllocable` instead. */
-    bool _isAllocable() const { return _traits_.isAllocable; }
+    bool _isAllocable() const { return _data_->_traits().isAllocable; }
 
     /** For internal use. Use ``type::isDereferenceable` instead. */
-    bool _isDereferenceable() const { return _traits_.isDereferenceable; }
+    bool _isDereferenceable() const { return _data_->_traits().isDereferenceable; }
 
     /** For internal use. Use ``type::isIterable` instead. */
-    bool _isIterable() const { return _traits_.isIterable; }
+    bool _isIterable() const { return _data_->_traits().isIterable; }
 
     /** For internal use. Use ``type::isViewable` instead. */
-    bool _isViewable() const { return _traits_.isViewable; }
+    bool _isViewable() const { return _data_->_traits().isViewable; }
 
     /** For internal use. Use ``type::isIterator` instead. */
-    bool _isIterator() const { return _traits_.isIterator; }
+    bool _isIterator() const { return _data_->_traits().isIterator; }
 
     /** For internal use. Use ``type::isView` instead. */
-    bool _isView() const { return _traits_.isView; }
+    bool _isView() const { return _data_->_traits().isView; }
 
     /** For internal use. Use ``type::isParameterized` instead. */
-    bool _isParameterized() const { return _traits_.isParameterized; }
+    bool _isParameterized() const { return _data_->_traits().isParameterized; }
 
     /** For internal use. Use ``type::isReferenceType` instead. */
-    bool _isReferenceType() const { return _traits_.isReferenceType; }
+    bool _isReferenceType() const { return _data_->_traits().isReferenceType; }
 
     /** For internal use. Use ``type::isMutable` instead. */
-    bool _isMutable() const { return _traits_.isMutable; }
+    bool _isMutable() const { return _data_->_traits().isMutable; }
 
     /** For internal use. Use ``type::isRuntimeNonTrivial` instead. */
-    bool _isRuntimeNonTrivial() const { return _traits_.isRuntimeNonTrivial; }
+    bool _isRuntimeNonTrivial() const { return _data_->_traits().isRuntimeNonTrivial; }
 
     /** For internal use. Use ``type::takesArguments` instead. */
-    bool _takesArguments() const { return _traits_.takesArguments; }
+    bool _takesArguments() const { return _data_->_traits().takesArguments; }
 
     std::optional<ID> resolvedID() const { return _state().resolved_id; }
 
@@ -392,18 +475,24 @@ public:
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
 
-    type::trait::Traits& _traits() { return _traits_; }
+    const TypeBase& _data() const { return *_data_; }
+
+    // FIXME(bbannier): Ideally this would be pure virtual, but then we couldn't have `Type` values anymore. Maybe
+    // reconsider this if we had reference semantics.
+
+    // FIXME(bbannier): this should be declared in the type at the base of the visitable hierarchy.
+    virtual void accept(type::VisitorBase& v, type::VisitorBase::position_t& p) { v(*this, p); }
 
 private:
     type::detail::State _state_;
-    type::trait::Traits _traits_;
+    isocpp_p0201::polymorphic_value<TypeBase> _data_; // FIXME(bbannier): use this.
 };
 
 /** Creates an AST node representing a `Type`. */
 inline Node to_node(Type t) { return Node(std::move(t)); }
 
 /** Renders a type as HILTI source code. */
-inline std::ostream& operator<<(std::ostream& out, Type t) { return out << to_node(std::move(t)); }
+inline std::ostream& operator<<(std::ostream& out, const Type& t) { return out << to_node(t); }
 
 namespace type {
 namespace detail {

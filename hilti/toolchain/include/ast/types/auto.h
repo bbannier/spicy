@@ -9,13 +9,11 @@
 namespace hilti::type {
 
 /** AST node for an "auto" type. */
-class Auto : public Type, type::trait::isAllocable {
+class Auto : public TypeBase, type::trait::isAllocable {
 public:
     bool operator==(const Auto& /* other */) const { return true; }
 
-    /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
-    /** Implements the `Type` interface. */
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other._data()); }
     bool _isResolved(ResolvedState* rstate) const override { return false; }
 
     /**
@@ -25,7 +23,7 @@ public:
     static Auto create(Meta m = Meta()) { return Auto(std::move(m)); }
 
 private:
-    Auto(Meta m = Meta()) : Type(typeid(Auto), std::move(m)), trait::isAllocable(&_traits()) {}
+    Auto(Meta m = Meta()) : TypeBase(typeid(Auto), std::move(m)), trait::isAllocable(&_traits_) {}
 };
 
 /** Singleton. */

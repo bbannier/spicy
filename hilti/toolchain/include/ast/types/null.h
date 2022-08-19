@@ -9,14 +9,14 @@
 namespace hilti::type {
 
 /** AST node for a null type. */
-class Null : public Type {
+class Null : public TypeBase {
 public:
-    Null(Meta m = Meta()) : Type(typeid(Null), std::move(m)) {}
+    Null(Meta m = Meta()) : TypeBase(typeid(Null), std::move(m)) {}
 
     bool operator==(const Null& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 };

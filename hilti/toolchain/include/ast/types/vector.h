@@ -13,7 +13,7 @@ namespace hilti::type {
 namespace vector {
 
 /** AST node for a vector iterator type. */
-class Iterator : public Type,
+class Iterator : public TypeBase,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -22,7 +22,7 @@ class Iterator : public Type,
                  trait::isParameterized {
 public:
     Iterator(Type etype, bool const_, Meta m = Meta())
-        : Type(typeid(Iterator), nodes(std::move(etype)), std::move(m)),
+        : TypeBase(typeid(Iterator), nodes(std::move(etype)), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -31,7 +31,7 @@ public:
           trait::isParameterized(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(typeid(Iterator), nodes(type::unknown), std::move(m)),
+        : TypeBase(typeid(Iterator), nodes(type::unknown), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -45,7 +45,7 @@ public:
     bool isConstant() const { return _const; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(dereferencedType(), rstate);
@@ -69,7 +69,7 @@ private:
 } // namespace vector
 
 /** AST node for a vector type. */
-class Vector : public Type,
+class Vector : public TypeBase,
                trait::isAllocable,
                public trait::isMutable,
                trait::isIterable,
@@ -77,14 +77,15 @@ class Vector : public Type,
                trait::isParameterized {
 public:
     Vector(const Type& t, const Meta& m = Meta())
-        : Type(typeid(Vector), nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m),
+        : TypeBase(typeid(Vector), nodes(vector::Iterator(t, true, m), vector::Iterator(t, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           trait::isParameterized(&_traits()) {}
     Vector(Wildcard /*unused*/, const Meta& m = Meta())
-        : Type(typeid(Vector), nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)), m),
+        : TypeBase(typeid(Vector), nodes(vector::Iterator(Wildcard{}, true, m), vector::Iterator(Wildcard{}, false, m)),
+                   m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
@@ -93,7 +94,7 @@ public:
           _wildcard(true) {}
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(iteratorType(true), rstate) &&

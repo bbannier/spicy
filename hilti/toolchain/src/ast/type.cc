@@ -7,8 +7,6 @@
 
 using namespace hilti;
 
-Type::Type() : TypeBase(typeid(type::Unknown)) {}
-
 bool type::isResolved(const Type& t) {
     ResolvedState rstate;
     return true; // FIXME(bbannier)

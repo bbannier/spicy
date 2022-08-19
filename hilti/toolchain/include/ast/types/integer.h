@@ -12,20 +12,20 @@ namespace hilti::type {
 namespace detail {
 
 /** Base class for an AST node representing an integer type. */
-class IntegerBase : public hilti::Type, trait::isAllocable, trait::isParameterized {
+class IntegerBase : public hilti::TypeBase, trait::isAllocable, trait::isParameterized {
 public:
     IntegerBase(const std::type_info& type_info, Wildcard /*unused*/, Meta m = Meta())
-        : Type(type_info, std::move(m)),
+        : TypeBase(type_info, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           _wildcard(true) {}
     IntegerBase(const std::type_info& type_info, int width, Meta m = Meta())
-        : Type(type_info, std::move(m)),
+        : TypeBase(type_info, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           _width(width) {}
     IntegerBase(const std::type_info& type_info, Meta m = Meta())
-        : Type(type_info, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
+        : TypeBase(type_info, std::move(m)), trait::isAllocable(&_traits()), trait::isParameterized(&_traits()) {}
 
     auto width() const { return _width; }
 
@@ -56,7 +56,7 @@ public:
     std::vector<Node> typeParameters() const override;
 
     /** Implements the `Node` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 };
 
 /** AST node for an unsigned integer type. */
@@ -73,7 +73,7 @@ public:
     std::vector<Node> typeParameters() const override;
 
     /** Implements the `Node` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 };
 
 } // namespace hilti::type

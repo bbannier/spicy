@@ -12,7 +12,7 @@ namespace hilti::type {
 namespace stream {
 
 /** AST node for a stream iterator type. */
-class Iterator : public Type,
+class Iterator : public TypeBase,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -20,7 +20,7 @@ class Iterator : public Type,
                  public trait::isRuntimeNonTrivial {
 public:
     Iterator(Meta m = Meta())
-        : Type(typeid(Iterator), nodes(type::UnsignedInteger(8)), std::move(m)),
+        : TypeBase(typeid(Iterator), nodes(type::UnsignedInteger(8)), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -30,7 +30,7 @@ public:
     bool operator==(const Iterator& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
@@ -40,10 +40,10 @@ public:
 };
 
 /** AST node for a stream view type. */
-class View : public Type, trait::isView, trait::isAllocable, public trait::isRuntimeNonTrivial {
+class View : public TypeBase, trait::isView, trait::isAllocable, public trait::isRuntimeNonTrivial {
 public:
     View(const Meta& m = Meta())
-        : Type(typeid(View), nodes(stream::Iterator(m)), m),
+        : TypeBase(typeid(View), nodes(stream::Iterator(m)), m),
           trait::isView(&_traits()),
           trait::isAllocable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()) {}
@@ -51,7 +51,7 @@ public:
     bool operator==(const View& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
@@ -67,7 +67,7 @@ public:
 } // namespace stream
 
 /** AST node for a stream type. */
-class Stream : public Type,
+class Stream : public TypeBase,
                trait::isAllocable,
                public trait::isMutable,
                trait::isIterable,
@@ -75,7 +75,7 @@ class Stream : public Type,
                public trait::isRuntimeNonTrivial {
 public:
     Stream(const Meta& m = Meta())
-        : Type(typeid(Stream), nodes(stream::View(m)), m),
+        : TypeBase(typeid(Stream), nodes(stream::View(m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
@@ -85,7 +85,7 @@ public:
     bool operator==(const Stream& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */

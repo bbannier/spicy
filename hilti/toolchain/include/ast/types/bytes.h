@@ -12,7 +12,7 @@ namespace hilti::type {
 namespace bytes {
 
 /** AST node for a list iterator type. */
-class Iterator : public Type,
+class Iterator : public TypeBase,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -20,7 +20,7 @@ class Iterator : public Type,
                  public trait::isRuntimeNonTrivial {
 public:
     Iterator(Meta m = Meta())
-        : Type(typeid(Iterator), nodes(Type(type::UnsignedInteger(8))), std::move(m)),
+        : TypeBase(typeid(Iterator), nodes(Type(type::UnsignedInteger(8))), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -30,7 +30,7 @@ public:
     bool operator==(const Iterator& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */
@@ -42,14 +42,14 @@ public:
 } // namespace bytes
 
 /** AST node for a bytes type. */
-class Bytes : public Type,
+class Bytes : public TypeBase,
               trait::isAllocable,
               public trait::isMutable,
               trait::isIterable,
               public trait::isRuntimeNonTrivial {
 public:
     Bytes(const Meta& m = Meta())
-        : Type(typeid(Bytes), nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m),
+        : TypeBase(typeid(Bytes), nodes(Type(type::UnsignedInteger(8)), Type(bytes::Iterator(m))), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
@@ -58,7 +58,7 @@ public:
     bool operator==(const Bytes& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */

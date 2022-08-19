@@ -11,16 +11,16 @@
 namespace hilti::type {
 
 /** AST node for a "result" type. */
-class Result : public Type, trait::isAllocable, trait::isParameterized, trait::isDereferenceable {
+class Result : public TypeBase, trait::isAllocable, trait::isParameterized, trait::isDereferenceable {
 public:
     Result(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Result), {type::unknown}, std::move(m)),
+        : TypeBase(typeid(Result), {type::unknown}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           _wildcard(true) {}
     Result(Type ct, Meta m = Meta())
-        : Type(typeid(Result), {std::move(ct)}, std::move(m)),
+        : TypeBase(typeid(Result), {std::move(ct)}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()) {}
@@ -30,7 +30,7 @@ public:
     bool operator==(const Result& other) const { return dereferencedType() == other.dereferencedType(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(dereferencedType(), rstate);

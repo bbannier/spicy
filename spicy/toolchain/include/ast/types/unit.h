@@ -55,7 +55,7 @@ struct AssignIndices {
 
 /** AST node for a Spicy unit. */
 class Unit : detail::AssignIndices,
-             public hilti::Type,
+             public hilti::TypeBase,
              hilti::type::trait::isAllocable,
              hilti::type::trait::isParameterized,
              hilti::type::trait::takesArguments,
@@ -63,22 +63,22 @@ class Unit : detail::AssignIndices,
 public:
     Unit(const std::vector<type::function::Parameter>& params, std::vector<unit::Item> i,
          const std::optional<AttributeSet>& /* attrs */ = {}, Meta m = Meta())
-        : Type(typeid(Unit),
-               hilti::nodes(node::none, node::none, node::none,
-                            hilti::util::transform(params,
-                                                   [](auto p) {
-                                                       p.setIsTypeParameter();
-                                                       return Declaration(p);
-                                                   }),
-                            assignIndices(std::move(i))),
-               std::move(m)),
+        : TypeBase(typeid(Unit),
+                   hilti::nodes(node::none, node::none, node::none,
+                                hilti::util::transform(params,
+                                                       [](auto p) {
+                                                           p.setIsTypeParameter();
+                                                           return Declaration(p);
+                                                       }),
+                                assignIndices(std::move(i))),
+                   std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::takesArguments(&_traits()),
           hilti::type::trait::isMutable(&_traits()) {}
 
     Unit(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Unit), std::move(m)),
+        : TypeBase(typeid(Unit), std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::takesArguments(&_traits()),
@@ -193,7 +193,7 @@ public:
     }
 
     // Type interface.
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 
     bool _isResolved(ResolvedState* rstate) const override {
         auto xs = items();

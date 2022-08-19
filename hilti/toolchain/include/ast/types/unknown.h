@@ -10,12 +10,12 @@ namespace hilti {
 namespace type {
 
 /** AST node for an unknown place-holder type. */
-class Unknown : public Type, public type::trait::isAllocable, public util::type_erasure::trait::Singleton {
+class Unknown : public TypeBase, public type::trait::isAllocable, public util::type_erasure::trait::Singleton {
 public:
     bool operator==(const Unknown& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; } // sic!
 
@@ -26,7 +26,7 @@ public:
     static Unknown create(Meta m = Meta()) { return Unknown(std::move(m)); }
 
 private:
-    Unknown(Meta m = Meta()) : Type(typeid(Unknown), std::move(m)), trait::isAllocable(&_traits()) {}
+    Unknown(Meta m = Meta()) : TypeBase(typeid(Unknown), std::move(m)), trait::isAllocable(&_traits()) {}
 };
 
 /** Singleton. */

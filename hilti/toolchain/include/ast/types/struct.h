@@ -29,31 +29,35 @@
 namespace hilti::type {
 
 /** AST node for a struct type. */
-class Struct : public Type, trait::isAllocable, trait::isParameterized, trait::takesArguments, public trait::isMutable {
+class Struct : public TypeBase,
+               trait::isAllocable,
+               trait::isParameterized,
+               trait::takesArguments,
+               public trait::isMutable {
 public:
     Struct(std::vector<Declaration> fields, Meta m = Meta())
-        : Type(typeid(Struct), nodes(node::none, std::move(fields)), std::move(m)),
+        : TypeBase(typeid(Struct), nodes(node::none, std::move(fields)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::takesArguments(&_traits()),
           trait::isMutable(&_traits()) {}
 
     Struct(const std::vector<type::function::Parameter>& params, std::vector<Declaration> fields, Meta m = Meta())
-        : Type(typeid(Struct),
-               nodes(node::none, std::move(fields),
-                     util::transform(params,
-                                     [](auto p) {
-                                         p.setIsTypeParameter();
-                                         return Declaration(p);
-                                     })),
-               std::move(m)),
+        : TypeBase(typeid(Struct),
+                   nodes(node::none, std::move(fields),
+                         util::transform(params,
+                                         [](auto p) {
+                                             p.setIsTypeParameter();
+                                             return Declaration(p);
+                                         })),
+                   std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::takesArguments(&_traits()),
           trait::isMutable(&_traits()) {}
 
     Struct(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Struct), nodes(node::none), std::move(m)),
+        : TypeBase(typeid(Struct), nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::takesArguments(&_traits()),
@@ -102,7 +106,7 @@ public:
     bool operator==(const Struct& other) const { return fields() == other.fields(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         const auto& cs = children();

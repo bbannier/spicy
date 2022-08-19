@@ -17,14 +17,15 @@ namespace hilti::type {
  * instantiated by a HILTI program. That's also why we don't use any child
  * nodes, but store the operands directly.
  */
-class OperandList : public Type {
+class OperandList : public TypeBase {
 public:
-    OperandList(std::vector<operator_::Operand> operands) : Type(typeid(OperandList)), _operands(std::move(operands)) {}
+    OperandList(std::vector<operator_::Operand> operands)
+        : TypeBase(typeid(OperandList)), _operands(std::move(operands)) {}
 
     const auto& operands() const { return _operands; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 

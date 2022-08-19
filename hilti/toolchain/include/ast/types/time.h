@@ -9,14 +9,14 @@
 namespace hilti::type {
 
 /** AST node for a time type. */
-class Time : public Type, trait::isAllocable {
+class Time : public TypeBase, trait::isAllocable {
 public:
-    Time(Meta m = Meta()) : Type(typeid(Time), std::move(m)), trait::isAllocable(&_traits()) {}
+    Time(Meta m = Meta()) : TypeBase(typeid(Time), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Time& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Node` interface. */

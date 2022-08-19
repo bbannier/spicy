@@ -10,18 +10,18 @@
 namespace hilti::type {
 
 /** AST node for an `exception` type. */
-class Exception : public Type, trait::isAllocable, trait::isParameterized {
+class Exception : public TypeBase, trait::isAllocable, trait::isParameterized {
 public:
     Exception(Meta m = Meta())
-        : Type(typeid(Exception), {node::none}, std::move(m)),
+        : TypeBase(typeid(Exception), {node::none}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()) {}
     Exception(Type base, Meta m = Meta())
-        : Type(typeid(Exception), {std::move(base)}, std::move(m)),
+        : TypeBase(typeid(Exception), {std::move(base)}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()) {}
     Exception(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Exception), {node::none}, std::move(m)),
+        : TypeBase(typeid(Exception), {node::none}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           _wildcard(true) {}
@@ -31,7 +31,7 @@ public:
     bool operator==(const Exception& other) const { return baseType() == other.baseType(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return baseType().has_value() ? type::detail::isResolved(baseType(), rstate) : true;

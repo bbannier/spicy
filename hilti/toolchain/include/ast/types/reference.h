@@ -13,27 +13,27 @@ namespace hilti::type {
 /*
  * AST node for a `strong_ref<T>` type.
  */
-class StrongReference : public Type,
+class StrongReference : public TypeBase,
                         trait::isAllocable,
                         trait::isParameterized,
                         trait::isDereferenceable,
                         public trait::isReferenceType {
 public:
     StrongReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(StrongReference), {type::unknown}, std::move(m)),
+        : TypeBase(typeid(StrongReference), {type::unknown}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()),
           _wildcard(true) {}
     StrongReference(Type ct, Meta m = Meta())
-        : Type(typeid(StrongReference), nodes(std::move(ct)), std::move(m)),
+        : TypeBase(typeid(StrongReference), nodes(std::move(ct)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()) {}
     StrongReference(NodeRef ct, Meta m = Meta())
-        : Type(typeid(StrongReference), nodes(node::none), std::move(m)),
+        : TypeBase(typeid(StrongReference), nodes(node::none), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
@@ -50,7 +50,7 @@ public:
     bool operator==(const StrongReference& other) const { return dereferencedType() == other.dereferencedType(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(dereferencedType(), rstate);
@@ -69,21 +69,21 @@ private:
 };
 
 /** AST node for a `weak_ref<T>` type. */
-class WeakReference : public Type,
+class WeakReference : public TypeBase,
                       trait::isAllocable,
                       trait::isParameterized,
                       trait::isDereferenceable,
                       public trait::isReferenceType {
 public:
     WeakReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(WeakReference), {type::unknown}, std::move(m)),
+        : TypeBase(typeid(WeakReference), {type::unknown}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()),
           _wildcard(true) {}
     WeakReference(Type ct, Meta m = Meta())
-        : Type(typeid(WeakReference), {std::move(ct)}, std::move(m)),
+        : TypeBase(typeid(WeakReference), {std::move(ct)}, std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
@@ -94,7 +94,7 @@ public:
     bool operator==(const WeakReference& other) const { return dereferencedType() == other.dereferencedType(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(dereferencedType(), rstate);
@@ -109,27 +109,27 @@ private:
 };
 
 /** AST node for a `val_ref<T>` type. */
-class ValueReference : public Type,
+class ValueReference : public TypeBase,
                        trait::isAllocable,
                        trait::isParameterized,
                        trait::isDereferenceable,
                        public trait::isReferenceType {
 public:
     ValueReference(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(ValueReference), nodes(type::unknown), std::move(m)),
+        : TypeBase(typeid(ValueReference), nodes(type::unknown), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()),
           _wildcard(true) {}
     ValueReference(Type ct, Meta m = Meta())
-        : Type(typeid(ValueReference), nodes(std::move(ct)), std::move(m)),
+        : TypeBase(typeid(ValueReference), nodes(std::move(ct)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isReferenceType(&_traits()) {}
     ValueReference(NodeRef ct, Meta m = Meta())
-        : Type(typeid(ValueReference), nodes(type::unknown), std::move(m)),
+        : TypeBase(typeid(ValueReference), nodes(type::unknown), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           trait::isDereferenceable(&_traits()),
@@ -146,7 +146,7 @@ public:
     bool operator==(const ValueReference& other) const { return dereferencedType() == other.dereferencedType(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(dereferencedType(), rstate);

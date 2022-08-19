@@ -9,14 +9,14 @@
 namespace hilti::type {
 
 /** AST node for a string type. */
-class String : public Type, trait::isAllocable {
+class String : public TypeBase, trait::isAllocable {
 public:
-    String(Meta m = Meta()) : Type(typeid(String), std::move(m)), trait::isAllocable(&_traits()) {}
+    String(Meta m = Meta()) : TypeBase(typeid(String), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const String& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 };

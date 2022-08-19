@@ -74,19 +74,19 @@ inline hilti::Node to_node(Bits f) { return hilti::Node(std::move(f)); }
 } // namespace bitfield
 
 /** AST node for a struct type. */
-class Bitfield : public hilti::Type,
+class Bitfield : public hilti::TypeBase,
                  hilti::type::trait::isAllocable,
                  hilti::type::trait::isParameterized,
                  public hilti::type::trait::isMutable {
 public:
     Bitfield(int width, std::vector<bitfield::Bits> bits, const Meta& m = Meta())
-        : Type(typeid(Bitfield), nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m),
+        : TypeBase(typeid(Bitfield), nodes(type::UnsignedInteger(width, m), hilti::type::auto_, std::move(bits)), m),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::isMutable(&_traits()),
           _width(width) {}
     Bitfield(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Bitfield), {hilti::type::unknown, hilti::type::unknown}, std::move(m)),
+        : TypeBase(typeid(Bitfield), {hilti::type::unknown, hilti::type::unknown}, std::move(m)),
           hilti::type::trait::isAllocable(&_traits()),
           hilti::type::trait::isParameterized(&_traits()),
           hilti::type::trait::isMutable(&_traits()),
@@ -105,7 +105,7 @@ public:
     bool operator==(const Bitfield& other) const { return width() == other.width() && bits() == other.bits(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Type` interface. */

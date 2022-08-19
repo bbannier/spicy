@@ -36,18 +36,18 @@ inline Node to_node(Element f) { return Node(std::move(f)); }
 } // namespace tuple
 
 /** AST node for a tuple type. */
-class Tuple : public Type, trait::isAllocable, trait::isParameterized {
+class Tuple : public TypeBase, trait::isAllocable, trait::isParameterized {
 public:
     Tuple(std::vector<Type> t, Meta m = Meta())
-        : Type(typeid(Tuple), nodes(_typesToElements(std::move(t))), std::move(m)),
+        : TypeBase(typeid(Tuple), nodes(_typesToElements(std::move(t))), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()) {}
     Tuple(std::vector<tuple::Element> e, Meta m = Meta())
-        : Type(typeid(Tuple), nodes(std::move(e)), std::move(m)),
+        : TypeBase(typeid(Tuple), nodes(std::move(e)), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()) {}
     Tuple(Wildcard /*unused*/, Meta m = Meta())
-        : Type(typeid(Tuple), std::move(m)),
+        : TypeBase(typeid(Tuple), std::move(m)),
           trait::isAllocable(&_traits()),
           trait::isParameterized(&_traits()),
           _wildcard(true) {}
@@ -63,7 +63,7 @@ public:
     }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         const auto& cs = children();

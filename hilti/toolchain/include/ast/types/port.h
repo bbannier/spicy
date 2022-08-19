@@ -9,14 +9,14 @@
 namespace hilti::type {
 
 /** AST node for a port type. */
-class Port : public Type, trait::isAllocable {
+class Port : public TypeBase, trait::isAllocable {
 public:
-    Port(Meta m = Meta()) : Type(typeid(Port), std::move(m)), trait::isAllocable(&_traits()) {}
+    Port(Meta m = Meta()) : TypeBase(typeid(Port), std::move(m)), trait::isAllocable(&_traits()) {}
 
     bool operator==(const Port& /* other */) const { return true; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
     /** Implements the `Node` interface. */

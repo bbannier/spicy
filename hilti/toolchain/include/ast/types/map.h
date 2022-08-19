@@ -14,7 +14,7 @@ namespace hilti::type {
 namespace map {
 
 /** AST node for a map iterator type. */
-class Iterator : public Type,
+class Iterator : public TypeBase,
                  trait::isIterator,
                  trait::isDereferenceable,
                  trait::isAllocable,
@@ -23,7 +23,7 @@ class Iterator : public Type,
                  trait::isParameterized {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
-        : Type(typeid(Iterator), nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
+        : TypeBase(typeid(Iterator), nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -32,7 +32,7 @@ public:
           trait::isParameterized(&_traits()),
           _const(const_) {}
     Iterator(Wildcard /*unused*/, bool const_ = true, Meta m = Meta())
-        : Type(typeid(Iterator), nodes(type::unknown, type::unknown), std::move(m)),
+        : TypeBase(typeid(Iterator), nodes(type::unknown, type::unknown), std::move(m)),
           trait::isIterator(&_traits()),
           trait::isDereferenceable(&_traits()),
           trait::isAllocable(&_traits()),
@@ -60,7 +60,7 @@ public:
     bool isConstant() const { return _const; }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(dereferencedType(), rstate);
@@ -86,7 +86,7 @@ private:
 } // namespace map
 
 /** AST node for a map type. */
-class Map : public Type,
+class Map : public TypeBase,
             trait::isAllocable,
             public trait::isMutable,
             trait::isIterable,
@@ -94,14 +94,14 @@ class Map : public Type,
             trait::isParameterized {
 public:
     Map(const Type& k, const Type& v, const Meta& m = Meta())
-        : Type(typeid(Map), nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m),
+        : TypeBase(typeid(Map), nodes(map::Iterator(k, v, true, m), map::Iterator(k, v, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
           trait::isRuntimeNonTrivial(&_traits()),
           trait::isParameterized(&_traits()) {}
     Map(Wildcard /*unused*/, const Meta& m = Meta())
-        : Type(typeid(Map), nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
+        : TypeBase(typeid(Map), nodes(map::Iterator(Wildcard{}, true, m), map::Iterator(Wildcard{}, false, m)), m),
           trait::isAllocable(&_traits()),
           trait::isMutable(&_traits()),
           trait::isIterable(&_traits()),
@@ -113,7 +113,7 @@ public:
     const Type& valueType() const { return child<map::Iterator>(0).valueType(); }
 
     /** Implements the `Type` interface. */
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override {
         return type::detail::isResolved(iteratorType(true), rstate) &&

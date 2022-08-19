@@ -9,12 +9,12 @@
 namespace hilti::type {
 
 /** AST node for a void type. */
-class Void : public Type {
+class Void : public TypeBase {
 public:
     bool operator==(const Void& /* other */) const { return true; }
 
     // Type interface.
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return true; }
 
@@ -25,7 +25,7 @@ public:
     static Void create(Meta m = Meta()) { return Void(std::move(m)); }
 
 private:
-    Void(Meta m = Meta()) : Type(typeid(Void), std::move(m)) {}
+    Void(Meta m = Meta()) : TypeBase(typeid(Void), std::move(m)) {}
 };
 
 /** Singleton. */

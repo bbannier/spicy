@@ -13,16 +13,16 @@
 namespace hilti::type {
 
 /** AST node for an unresolved type ID. */
-class UnresolvedID : public Type {
+class UnresolvedID : public TypeBase {
 public:
-    UnresolvedID(::hilti::ID id, Meta m = Meta()) : Type(typeid(UnresolvedID), {std::move(id)}, std::move(m)) {}
+    UnresolvedID(::hilti::ID id, Meta m = Meta()) : TypeBase(typeid(UnresolvedID), {std::move(id)}, std::move(m)) {}
 
     const auto& id() const { return child<::hilti::ID>(0); }
 
     bool operator==(const UnresolvedID& other) const { return id() == other.id(); }
 
     // Type interface.
-    auto isEqual(const Type& other) const { return node::isEqual(this, other); }
+    bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
     /** Implements the `Type` interface. */
     bool _isResolved(ResolvedState* rstate) const override { return false; }
 };
