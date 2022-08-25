@@ -13,7 +13,7 @@ namespace detail {
 
 // CHECK: IntegerBase = TypeBase
 /** Base class for an AST node representing an integer type. */
-class IntegerBase : public TypeBase, trait::isParameterized {
+class IntegerBase : public TypeBase {
 public:
     IntegerBase(Wildcard /*unused*/, Meta m = Meta()) : TypeBase(std::move(m)), _wildcard(true) {}
     IntegerBase(int width, Meta m = Meta()) : TypeBase(std::move(m)), _width(width) {}
@@ -21,8 +21,7 @@ public:
 
     auto width() const { return _width; }
 
-    /** Implements the `Type` interface. */
-    auto isWildcard() const { return _wildcard; }
+    bool isWildcard() const override { return _wildcard; }
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Node` interface. */
@@ -30,6 +29,7 @@ public:
 
     bool _isAllocable() const override { return true; }
     bool _isSortable() const override { return true; }
+    bool _isParameterized() const override { return true; }
 
 private:
     bool _wildcard = false;
