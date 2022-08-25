@@ -202,8 +202,6 @@ public:
     type::detail::State& _state() { return _state_; }
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
-
-    bool _isAllocable() const { return data()->_isAllocable(); }
 };
 
 /** Creates an AST node representing a `Type`. */
