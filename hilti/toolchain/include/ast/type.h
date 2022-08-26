@@ -11,6 +11,9 @@
 #include <hilti/base/optional-ref.h>
 #include <hilti/base/type_erase.h>
 
+// FIXME(bbannier): Add proper dependency with CMake.
+#include "polymorphic_value/polymorphic_value.h"
+
 namespace hilti {
 
 namespace trait {
@@ -225,24 +228,25 @@ public:
     void setTypeID(ID id) { _state().id = std::move(id); }
     void addFlag(type::Flag f) { _state().flags += f; }
 
-    /** Implements the `Type` interface. */
     bool hasFlag(type::Flag f) const { return _state().flags.has(f); }
-    /** Implements the `Type` interface. */
     const type::Flags& flags() const { return _state().flags; }
-    /** Implements the `Type` interface. */
     bool _isConstant() const { return _state().flags.has(type::Flag::Constant); }
-    /** Implements the `Type` interface. */
     const std::optional<ID>& typeID() const { return _state().id; }
-    /** Implements the `Type` interface. */
     const std::optional<ID>& cxxID() const { return _state().cxx; }
-    /** Implements the `Type` interface. */
     const type::detail::State& _state() const { return _state_; }
-    /** Implements the `Type` interface. */
     type::detail::State& _state() { return _state_; }
+
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
+    node::Properties properties() const { return _data_->properties(); }
+    const std::vector<hilti::Node>& children() const { return _data_->children(); }
+    std::vector<hilti::Node>& children() { return _data_->children(); }
+    const Meta& meta() const { return _data_->meta(); }
+    void setMeta(Meta m) { return _data_->setMeta(std::move(m)); }
 
 private:
+    isocpp_p0201::polymorphic_value<TypeBase> _data_;
+
     /** Internal state managed by derived class. */
     type::detail::State _state_;
 };
