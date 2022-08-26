@@ -46,7 +46,7 @@ public:
     bool operator==(const SignedInteger& other) const { return width() == other.width(); }
 
     /** Implements the `Type` interface. */
-    std::vector<Node> typeParameters() const;
+    std::vector<Node> typeParameters() const override;
 
     /** Implements the `Node` interface. */
     auto isEqual(const Type& other) const { return node::isEqual(this, other); }
