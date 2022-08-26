@@ -38,3 +38,5 @@ void type::detail::applyPruneWalk(hilti::Type& t) {
             applyPruneWalk(const_cast<hilti::Type&>(*x));
     }
 }
+
+const Type& TypeBase::dereferencedType() const { return type::unknown; }

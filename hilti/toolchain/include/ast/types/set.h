@@ -13,7 +13,7 @@ namespace hilti::type {
 namespace set {
 
 /** AST node for a set iterator type. */
-class Iterator : public TypeBase, trait::isIterator, trait::isDereferenceable {
+class Iterator : public TypeBase, trait::isIterator {
 public:
     Iterator(Type etype, bool const_, Meta m = Meta())
         : TypeBase(nodes(std::move(etype)), std::move(m)), _const(const_) {}
@@ -28,13 +28,14 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return type::detail::isResolved(dereferencedType(), rstate); }
     /** Implements the `Type` interface. */
-    const Type& dereferencedType() const { return child<Type>(0); }
+    const Type& dereferencedType() const override { return child<Type>(0); }
     bool isWildcard() const override { return _wildcard; }
     std::vector<Node> typeParameters() const override { return children(); }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{{"const", _const}}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isMutable() const override { return true; }
     bool _isParameterized() const override { return true; }
     bool _isRuntimeNonTrivial() const override { return true; }

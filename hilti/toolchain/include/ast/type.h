@@ -30,7 +30,6 @@ using Parameter = declaration::Parameter;
 }
 
 namespace trait {
-class isDereferenceable {};
 class isIterable {};
 class isIterator {};
 class isReferenceType {};
@@ -164,6 +163,9 @@ public:
 
     virtual ~TypeBase() = default;
 
+    /** Returns the type of elements the iterator traverse. */
+    virtual const hilti::Type& dereferencedType() const;
+
     /**
      * Returns true if all instances of the same type class can be coerced
      * into the current instance, independent of their pararameters. In HILTI
@@ -180,6 +182,9 @@ public:
 
     /** For internal use. Use ``type::isAllocable` instead. */
     virtual bool _isAllocable() const { return false; }
+
+    /** For internal use. Use ``type::isDereferenceable` instead. */
+    virtual bool _isDereferenceable() const { return false; }
 
     /** For internal use. Use ``type::isMutable` instead. */
     virtual bool _isMutable() const { return false; }

@@ -13,13 +13,13 @@ namespace hilti::type {
 /*
  * AST node for a `strong_ref<T>` type.
  */
-class StrongReference : public TypeBase, trait::isDereferenceable, trait::isReferenceType {
+class StrongReference : public TypeBase, trait::isReferenceType {
 public:
     StrongReference(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
     StrongReference(Type ct, Meta m = Meta()) : TypeBase(nodes(std::move(ct)), std::move(m)) {}
     StrongReference(NodeRef ct, Meta m = Meta()) : TypeBase(nodes(node::none), std::move(m)), _type(std::move(ct)) {}
 
-    const Type& dereferencedType() const {
+    const Type& dereferencedType() const override {
         if ( _type )
             return _type->as<Type>();
         else
@@ -39,6 +39,7 @@ public:
     auto properties() const { return node::Properties{{"type", _type.renderedRid()}}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:
@@ -47,12 +48,12 @@ private:
 };
 
 /** AST node for a `weak_ref<T>` type. */
-class WeakReference : public TypeBase, trait::isDereferenceable, trait::isReferenceType {
+class WeakReference : public TypeBase, trait::isReferenceType {
 public:
     WeakReference(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
     WeakReference(Type ct, Meta m = Meta()) : TypeBase({std::move(ct)}, std::move(m)) {}
 
-    const Type& dereferencedType() const { return children()[0].as<Type>(); }
+    const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 
     bool operator==(const WeakReference& other) const { return dereferencedType() == other.dereferencedType(); }
 
@@ -69,6 +70,7 @@ public:
     auto properties() const { return node::Properties{}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:
@@ -76,14 +78,14 @@ private:
 };
 
 /** AST node for a `val_ref<T>` type. */
-class ValueReference : public TypeBase, trait::isDereferenceable, trait::isReferenceType {
+class ValueReference : public TypeBase, trait::isReferenceType {
 public:
     ValueReference(Wildcard /*unused*/, Meta m = Meta())
         : TypeBase(nodes(type::unknown), std::move(m)), _wildcard(true) {}
     ValueReference(Type ct, Meta m = Meta()) : TypeBase(nodes(std::move(ct)), std::move(m)) {}
     ValueReference(NodeRef ct, Meta m = Meta()) : TypeBase(nodes(type::unknown), std::move(m)), _node(std::move(ct)) {}
 
-    const Type& dereferencedType() const {
+    const Type& dereferencedType() const override {
         if ( _node )
             return _node->as<Type>();
         else
@@ -105,6 +107,7 @@ public:
     auto properties() const { return node::Properties{{"rid", (_node ? _node->rid() : 0U)}}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:

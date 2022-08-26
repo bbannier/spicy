@@ -11,12 +11,12 @@
 namespace hilti::type {
 
 /** AST node for an "optional" type. */
-class Optional : public TypeBase, trait::isDereferenceable {
+class Optional : public TypeBase {
 public:
     Optional(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
     Optional(Type ct, Meta m = Meta()) : TypeBase({std::move(ct)}, std::move(m)) {}
 
-    const Type& dereferencedType() const { return children()[0].as<Type>(); }
+    const Type& dereferencedType() const override { return children()[0].as<Type>(); }
 
     bool operator==(const Optional& other) const { return dereferencedType() == other.dereferencedType(); }
 
@@ -33,6 +33,7 @@ public:
     auto properties() const { return node::Properties{}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:

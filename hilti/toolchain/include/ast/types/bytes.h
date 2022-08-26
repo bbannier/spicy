@@ -12,7 +12,7 @@ namespace hilti::type {
 namespace bytes {
 
 /** AST node for a list iterator type. */
-class Iterator : public TypeBase, trait::isIterator, trait::isDereferenceable {
+class Iterator : public TypeBase, trait::isIterator {
 public:
     Iterator(Meta m = Meta()) : TypeBase(nodes(Type(type::UnsignedInteger(8))), std::move(m)) {}
 
@@ -23,11 +23,12 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return true; }
     /** Implements the `Type` interface. */
-    const Type& dereferencedType() const { return child<Type>(0); }
+    const Type& dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Node` interface. */
     auto properties() const { return node::Properties{}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isMutable() const override { return true; }
     bool _isRuntimeNonTrivial() const override { return true; }
 };

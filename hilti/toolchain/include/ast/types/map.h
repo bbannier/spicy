@@ -14,7 +14,7 @@ namespace hilti::type {
 namespace map {
 
 /** AST node for a map iterator type. */
-class Iterator : public TypeBase, trait::isIterator, trait::isDereferenceable {
+class Iterator : public TypeBase, trait::isIterator {
 public:
     Iterator(Type ktype, Type vtype, bool const_, const Meta& m = Meta())
         : TypeBase(nodes(type::Tuple({std::move(ktype), std::move(vtype)}, m)), m), _const(const_) {}
@@ -43,7 +43,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return type::detail::isResolved(dereferencedType(), rstate); }
     /** Implements the `Type` interface. */
-    const Type& dereferencedType() const { return child<Type>(0); }
+    const Type& dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
     /** Implements the `Type` interface. */
@@ -52,6 +52,7 @@ public:
     auto properties() const { return node::Properties{{"const", _const}}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isDereferenceable() const override { return true; }
     bool _isMutable() const override { return true; }
     bool _isParameterized() const override { return true; }
     bool _isRuntimeNonTrivial() const override { return true; }
