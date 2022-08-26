@@ -147,7 +147,7 @@ inline auto dereferencedType(unsigned int op, const char* doc = "<dereferenced t
                                              op, resolved_ops.size()));
 
         if ( type::isDereferenceable(resolved_ops[op].type()) ) {
-            auto t = resolved_ops[op].type().dereferencedType();
+            auto t = *resolved_ops[op].type().dereferencedType();
 
             if ( ! infer_const )
                 return std::move(t);

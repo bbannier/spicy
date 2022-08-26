@@ -7,6 +7,7 @@
 
 #include <hilti/ast/type.h>
 #include <hilti/ast/types/unknown.h>
+#include <hilti/base/optional-ref.h>
 
 namespace hilti::type {
 
@@ -19,7 +20,7 @@ public:
     StrongReference(Type ct, Meta m = Meta()) : TypeBase(nodes(std::move(ct)), std::move(m)) {}
     StrongReference(NodeRef ct, Meta m = Meta()) : TypeBase(nodes(node::none), std::move(m)), _type(std::move(ct)) {}
 
-    const Type& dereferencedType() const override {
+    optional_ref<const Type> dereferencedType() const override {
         if ( _type )
             return _type->as<Type>();
         else
@@ -53,7 +54,7 @@ public:
     WeakReference(Wildcard /*unused*/, Meta m = Meta()) : TypeBase({type::unknown}, std::move(m)), _wildcard(true) {}
     WeakReference(Type ct, Meta m = Meta()) : TypeBase({std::move(ct)}, std::move(m)) {}
 
-    const Type& dereferencedType() const override { return children()[0].as<Type>(); }
+    optional_ref<const Type> dereferencedType() const override { return children()[0].as<Type>(); }
 
     bool operator==(const WeakReference& other) const { return dereferencedType() == other.dereferencedType(); }
 
@@ -85,7 +86,7 @@ public:
     ValueReference(Type ct, Meta m = Meta()) : TypeBase(nodes(std::move(ct)), std::move(m)) {}
     ValueReference(NodeRef ct, Meta m = Meta()) : TypeBase(nodes(type::unknown), std::move(m)), _node(std::move(ct)) {}
 
-    const Type& dereferencedType() const override {
+    optional_ref<const Type> dereferencedType() const override {
         if ( _node )
             return _node->as<Type>();
         else

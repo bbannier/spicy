@@ -8,6 +8,7 @@
 #include <hilti/ast/type.h>
 #include <hilti/ast/types/tuple.h>
 #include <hilti/ast/types/unknown.h>
+#include <hilti/base/optional-ref.h>
 
 namespace hilti::type {
 
@@ -43,7 +44,7 @@ public:
     /** Implements the `Type` interface. */
     auto _isResolved(ResolvedState* rstate) const { return type::detail::isResolved(dereferencedType(), rstate); }
     /** Implements the `Type` interface. */
-    const Type& dereferencedType() const override { return child<Type>(0); }
+    optional_ref<const Type> dereferencedType() const override { return child<Type>(0); }
     /** Implements the `Type` interface. */
     bool isWildcard() const override { return _wildcard; }
     /** Implements the `Type` interface. */

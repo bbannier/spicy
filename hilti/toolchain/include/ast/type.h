@@ -8,6 +8,7 @@
 
 #include <hilti/ast/id.h>
 #include <hilti/ast/node.h>
+#include <hilti/base/optional-ref.h>
 #include <hilti/base/type_erase.h>
 
 namespace hilti {
@@ -164,7 +165,7 @@ public:
     virtual ~TypeBase() = default;
 
     /** Returns the type of elements the iterator traverse. */
-    virtual const hilti::Type& dereferencedType() const;
+    virtual optional_ref<const Type> dereferencedType() const { return {}; }
 
     /**
      * Returns true if all instances of the same type class can be coerced
