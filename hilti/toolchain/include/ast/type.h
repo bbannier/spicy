@@ -241,6 +241,10 @@ public:
     type::detail::State& _state() { return _state_; }
     /** Implements the `Node` interface. */
     bool pruneWalk() const { return hasFlag(type::Flag::PruneWalk); }
+
+private:
+    /** Internal state managed by derived class. */
+    type::detail::State _state_;
 };
 
 /** Creates an AST node representing a `Type`. */

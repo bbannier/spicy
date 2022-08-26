@@ -58,9 +58,6 @@ class Type(hilti::trait::isType) : hilti::trait::isNode {
     /** For internal use. Use ``type::isResolved` instead. */
     bool _isResolved(type::ResolvedState* rstate) const;
 
-    /** Internal state managed by derived class. */
-    member type::detail::State _state_;
-
     /** Implements the `Node` interface. */
     hilti::node::Properties properties() const;
 
