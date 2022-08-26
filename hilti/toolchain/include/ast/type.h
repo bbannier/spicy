@@ -168,7 +168,7 @@ public:
     virtual optional_ref<const Type> dereferencedType() const { return {}; }
 
     /** Returns the type of an iterator for this type. */
-    virtual optional_ref<const hilti::Type> iteratorType(bool const_) const { return {}; };
+    virtual optional_ref<const hilti::Type> iteratorType(bool const_) const { return {}; }
 
     /**
      * Returns true if all instances of the same type class can be coerced
