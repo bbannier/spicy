@@ -50,6 +50,7 @@ public:
     auto properties() const { return node::Properties{}; }
 
     bool _isAllocable() const override { return true; }
+    bool _isIterable() const override { return true; }
     bool _isRuntimeNonTrivial() const override { return true; }
 };
 
