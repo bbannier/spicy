@@ -40,7 +40,6 @@ public:
     auto properties() const { return node::Properties{{"type", _type.renderedRid()}}; }
 
     bool _isAllocable() const override { return true; }
-    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:
@@ -71,7 +70,6 @@ public:
     auto properties() const { return node::Properties{}; }
 
     bool _isAllocable() const override { return true; }
-    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:
@@ -108,7 +106,6 @@ public:
     auto properties() const { return node::Properties{{"rid", (_node ? _node->rid() : 0U)}}; }
 
     bool _isAllocable() const override { return true; }
-    bool _isDereferenceable() const override { return true; }
     bool _isParameterized() const override { return true; }
 
 private:

@@ -184,9 +184,6 @@ public:
     /** For internal use. Use ``type::isAllocable` instead. */
     virtual bool _isAllocable() const { return false; }
 
-    /** For internal use. Use ``type::isDereferenceable` instead. */
-    virtual bool _isDereferenceable() const { return false; }
-
     /** For internal use. Use ``type::isMutable` instead. */
     virtual bool _isMutable() const { return false; }
 
@@ -307,9 +304,6 @@ inline bool isAllocable(const Type& t) { return t._isAllocable(); }
 
 /** Returns true for HILTI types that can be compared for ordering at runtime. */
 inline bool isSortable(const Type& t) { return t._isSortable(); }
-
-/** Returns true for HILTI types that one can iterator over. */
-inline bool isDereferenceable(const Type& t) { return t._isDereferenceable(); }
 
 /** Returns true for HILTI types that one can iterator over. */
 inline bool isIterable(const Type& t) { return t._isIterable(); }
