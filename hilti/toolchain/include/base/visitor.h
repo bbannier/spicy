@@ -40,8 +40,6 @@ DispatchResult<Result> do_dispatch_one(Erased& n, const std::type_info& ti, Disp
     if ( ti != typeid(Type) )
         return {};
 
-    std::cerr << "NOPE " << ti.name() << '\n';
-
     using T = std::conditional_t<std::is_const_v<Erased>, const Type, Type>;
 
     using CBc = Result(T const&);
