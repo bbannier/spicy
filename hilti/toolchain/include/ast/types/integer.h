@@ -49,7 +49,7 @@ public:
 
     bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 
-    void dispatch(type::VisitorBase& v, type::VisitorBase::position_t& p) const override { v(*this, p); }
+    void dispatch(type::Visitor& v, type::Visitor::position_t& p) const override { v(*this, p); }
 };
 
 /** AST node for an unsigned integer type. */

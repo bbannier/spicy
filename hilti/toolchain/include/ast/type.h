@@ -149,7 +149,7 @@ struct State {
 
 class SignedInteger;
 
-class VisitorBase {
+class Visitor {
 public:
     using position_t = visitor::Position<const Node&>;
 
@@ -231,7 +231,7 @@ public:
 
     virtual const std::type_info& typeid_() const { return typeid(decltype(*this)); }
 
-    virtual void dispatch(type::VisitorBase& v, type::VisitorBase::position_t& p) const { v(*this, p); }
+    virtual void dispatch(type::Visitor& v, type::Visitor::position_t& p) const { v(*this, p); }
 };
 
 class Type : public type::detail::Type {
@@ -272,7 +272,7 @@ public:
 
     const std::type_info& typeid_() const { return _data_->typeid_(); }
 
-    void dispatch(type::VisitorBase& v, type::VisitorBase::position_t& p) const { _data_->dispatch(v, p); }
+    void dispatch(type::Visitor& v, type::Visitor::position_t& p) const { _data_->dispatch(v, p); }
 
 private:
     isocpp_p0201::polymorphic_value<TypeBase> _data_;
