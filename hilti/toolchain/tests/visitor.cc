@@ -161,14 +161,16 @@ TEST_CASE("Visitor, pre-order, constant nodes") {
 }
 
 TEST_CASE("Visitor, post-order") {
-    struct Visitor : hilti::visitor::PostOrder<void, Visitor> {
+    struct Visitor : hilti::visitor::PostOrder<void, Visitor>, hilti::type::Visitor {
         using base_t::base_t;
 
         result_t operator()(const hilti::Module& m) { x += "(mo)"; }
         result_t operator()(const hilti::ID& id) { x += "(id)"; }
         result_t operator()(const hilti::Type& t) { x += "(t)"; }
-        result_t operator()(const hilti::type::String& s) { x += "(ts)"; }
-        result_t operator()(const hilti::type::SignedInteger& i) { x += "(ti)"; }
+        result_t operator()(const hilti::type::String& s, hilti::type::Visitor::position_t&) override { x += "(ts)"; }
+        result_t operator()(const hilti::type::SignedInteger& i, hilti::type::Visitor::position_t&) override {
+            x += "(ti)";
+        }
         result_t operator()(const hilti::expression::Ctor& c) { x += "(e:c)"; }
         result_t operator()(const hilti::ctor::Bool& b) { x += "(c:b)"; }
 
