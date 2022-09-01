@@ -277,6 +277,11 @@ public:
     }
 
     template<typename T>
+    T& as() {
+        return *dynamic_cast<T*>(&*_data_);
+    }
+
+    template<typename T>
     optional_ref<const T> tryAs() const {
         if ( auto d = dynamic_cast<const T*>(&*_data_) )
             return {*d};
