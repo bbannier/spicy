@@ -197,8 +197,11 @@ TEST_CASE("Visitor, post-order") {
 }
 
 TEST_CASE("Retrieve parent") {
-    struct Visitor : hilti::visitor::PreOrder<void, Visitor> {
-        result_t operator()(const hilti::type::SignedInteger& n, const_position_t i) { x = i.parent().typename_(); }
+    struct Visitor : hilti::visitor::PreOrder<void, Visitor>, hilti::type::Visitor {
+        void operator()(const hilti::type::SignedInteger& n, hilti::type::Visitor::position_t& i) override {
+            x = i.parent().typename_();
+        }
+
         std::string x;
     };
 
