@@ -126,36 +126,29 @@ TEST_CASE("Visitor, pre-order, no result, constant nodes") {
     CHECK(c == 25);
 }
 
-TEST_CASE("Visitor, pre-order, with result, constant nodes") {
-    struct Visitor : hilti::visitor::PreOrder<std::string, Visitor> {
+TEST_CASE("Visitor, pre-order, constant nodes") {
+    struct Visitor : hilti::visitor::PreOrder<void, Visitor>, hilti::type::Visitor {
         using base_t::base_t;
 
-        result_t operator()(const hilti::Module& m) { return "(mo)"; }
-        result_t operator()(const hilti::ID& id) { return "(id)"; }
-        result_t operator()(const hilti::Type& t, const_position_t i) { return "(t)"; }
-        result_t operator()(const hilti::type::String& s) { return "(ts)"; }
-        result_t operator()(const hilti::type::SignedInteger& i) { return "(ti)"; }
-        result_t operator()(const hilti::expression::Ctor& c, const_position_t i) { return "(e:c)"; }
-        result_t operator()(const hilti::ctor::Bool& b) { return "(c:b)"; }
-
-        void testDispatch(iterator_t::Position i) {
-            if ( auto s = dispatch(i) )
-                x += *s;
-            else
-                x += "-";
-            x += ",";
+        void operator()(const hilti::Module& m) { x += "(mo)"; }
+        void operator()(const hilti::ID& id) { x += "(id)"; }
+        void operator()(const hilti::Type& t, const_position_t i) { x += "(t)"; }
+        void operator()(const hilti::type::String& s, hilti::type::Visitor::position_t&) override { x += "(ts)"; }
+        void operator()(const hilti::type::SignedInteger& i, hilti::type::Visitor::position_t&) override {
+            x += "(ti)";
         }
+        void operator()(const hilti::expression::Ctor& c, const_position_t i) { x += "(e:c)"; }
+        void operator()(const hilti::ctor::Bool& b) { x += "(c:b)"; }
+
         void testDispatch(const_iterator_t::Position i) {
-            if ( auto s = dispatch(i) )
-                x += *s;
-            else
+            if ( ! dispatch(i) )
                 x += "-";
             x += ",";
         }
 
         std::string x;
         const std::string expected =
-            "(mo),(id),-,-,(id),(ts),-,-,(id),(ti),-,-,(id),(t),-,-,(id),(t),-,-,(id),(t),(e:c),(c:b),(t),";
+            "(mo),(id),-,-,(id),(ts)(t),-,-,(id),(ti)(t),-,-,(id),(t),-,-,(id),(t),-,-,(id),(t),(e:c),(c:b),(t),";
     };
 
 
