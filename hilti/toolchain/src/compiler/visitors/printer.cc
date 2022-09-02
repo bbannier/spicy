@@ -89,7 +89,7 @@ static std::string renderOperand(operator_::Operand op, const node::Range<Expres
 
 namespace {
 
-struct Visitor : visitor::PreOrder<void, Visitor> {
+struct Visitor : visitor::PreOrder<void, Visitor>, type::Visitor {
     Visitor(printer::Stream& out) : out(out) {} // NOLINT
 
     void printFunctionType(const type::Function& ftype, const std::optional<ID>& id) {
@@ -846,7 +846,9 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
             out << const_(n) << fmt("iterator<vector<%s>>", *n.dereferencedType());
     }
 
-    void operator()(const type::stream::View& n) { out << const_(n) << "view<stream>"; }
+    void operator()(const type::stream::View& n, type::Visitor::position_t& p) override {
+        out << const_(n) << "view<stream>";
+    }
 
     void operator()(const type::Library& n, position_t p) {
         if ( auto id = p.node.as<Type>().typeID() )
@@ -903,14 +905,14 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
         }
     }
 
-    void operator()(const type::SignedInteger& n) {
+    void operator()(const type::SignedInteger& n, type::Visitor::position_t&) override {
         if ( n.isWildcard() )
             out << const_(n) << "int<*>";
         else
             out << const_(n) << fmt("int<%d>", n.width());
     }
 
-    void operator()(const type::String& n) { out << const_(n) << "string"; }
+    void operator()(const type::String& n, type::Visitor::position_t&) override { out << const_(n) << "string"; }
 
     void operator()(const type::Struct& n, position_t p) {
         if ( ! out.isExpandSubsequentType() ) {
@@ -942,11 +944,13 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
         out << "}";
     }
 
-    void operator()(const type::Time& n) { out << const_(n) << "time"; }
+    void operator()(const type::Time& n, type::Visitor::position_t&) override { out << const_(n) << "time"; }
 
-    void operator()(const type::Type_& n) { out << const_(n) << fmt("type<%s>", n.typeValue()); }
+    void operator()(const type::Type_& n, type::Visitor::position_t&) override {
+        out << const_(n) << fmt("type<%s>", n.typeValue());
+    }
 
-    void operator()(const type::Union& n, position_t p) {
+    void operator()(const type::Union& n, type::Visitor::position_t& p) override {
         if ( ! out.isExpandSubsequentType() ) {
             if ( auto id = p.node.as<Type>().typeID() ) {
                 out << *id;
@@ -964,7 +968,9 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
         out << "}";
     }
 
-    void operator()(const type::Unknown& n) { out << const_(n) << "<unknown type>"; }
+    void operator()(const type::Unknown& n, type::Visitor::position_t&) override {
+        out << const_(n) << "<unknown type>";
+    }
 
     void operator()(const type::UnsignedInteger& n) {
         if ( n.isWildcard() )
@@ -987,9 +993,9 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
         }
     }
 
-    void operator()(const type::UnresolvedID& n) { out << const_(n) << n.id(); }
+    void operator()(const type::UnresolvedID& n, type::Visitor::position_t&) override { out << const_(n) << n.id(); }
 
-    void operator()(const type::Vector& n) {
+    void operator()(const type::Vector& n, type::Visitor::position_t&) override {
         if ( n.isWildcard() )
             out << const_(n) << "vector<*>";
         else {
@@ -997,7 +1003,7 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
         }
     }
 
-    void operator()(const type::Void& n) { out << const_(n) << "void"; }
+    void operator()(const type::Void& n, type::Visitor::position_t&) override { out << const_(n) << "void"; }
 
     void operator()(const type::WeakReference& n) {
         if ( n.isWildcard() )
@@ -1006,7 +1012,7 @@ struct Visitor : visitor::PreOrder<void, Visitor> {
             out << const_(n) << "weak_ref<" << *n.dereferencedType() << ">";
     }
 
-    void operator()(const type::ValueReference& n) {
+    void operator()(const type::ValueReference& n, type::Visitor::position_t&) override {
         if ( n.isWildcard() )
             out << const_(n) << "value_ref<*>";
         else
