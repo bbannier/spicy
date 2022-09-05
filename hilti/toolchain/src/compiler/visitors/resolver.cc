@@ -460,7 +460,7 @@ struct Visitor : public visitor::PostOrder<void, Visitor>, type::Visitor {
         }
     }
 
-    void operator()(const type::Enum& m, position_t p) {
+    void operator()(const type::Enum& m, type::Visitor::position_t& p) override {
         if ( type::isResolved(p.node.as<Type>()) )
             return;
 
