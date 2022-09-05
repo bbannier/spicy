@@ -83,12 +83,7 @@ std::string Node::render(bool include_location) const {
             s += (type::isResolved(t->type()) ? " (resolved)" : " (not resolved)");
     }
 
-    uintptr_t identity_;
-    if ( auto t = this->tryAs<Type>() )
-        identity_ = t->identity();
-    else
-        identity_ = identity();
-    s += util::fmt(" [@%s:%p]", util::tolower(name.substr(0, 1)), identity_);
+    s += util::fmt(" [@%s:%p]", util::tolower(name.substr(0, 1)), identity());
 
     // Format errors last on the line since they are not properly delimited.
     if ( hasErrors() )

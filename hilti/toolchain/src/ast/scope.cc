@@ -117,14 +117,8 @@ void Scope::render(std::ostream& out, const std::string& prefix) const {
             if ( x ) {
                 if ( auto d = x->tryAs<declaration::Expression>() )
                     s += util::fmt(" (type: %s @t:%p)", d->expression().type(), d->expression().type().identity());
-                else {
-                    uintptr_t identity_;
-                    if ( auto t = x->tryAs<Type>() )
-                        identity_ = t->identity();
-                    else
-                        identity_ = x->identity();
-                    s += util::fmt(" ([@d:%p])", identity_);
-                }
+                else
+                    s += util::fmt(" ([@d:%p])", x->identity());
             }
 
             out << s << '\n';
