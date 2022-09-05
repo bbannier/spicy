@@ -14,6 +14,7 @@
 #include <hilti/ast/node.h>
 #include <hilti/base/optional-ref.h>
 #include <hilti/base/type_erase.h>
+#include <hilti/base/util.h>
 #include <hilti/base/visitor-types.h>
 
 namespace spicy::type {
@@ -423,7 +424,7 @@ public:
             return {};
     }
 
-    auto typename_() const { return _data_->typeid_().name(); }
+    auto typename_() const { return util::demangle(_data_->typeid_().name()); }
 
     const std::type_info& typeid_() const { return _data_->typeid_(); }
 
