@@ -399,6 +399,11 @@ public:
     void setMeta(Meta m) { return _data_->setMeta(std::move(m)); }
 
     template<typename T>
+    bool isA() const {
+        return dynamic_cast<const T*>(&*_data_);
+    }
+
+    template<typename T>
     const T& as() const {
         return *dynamic_cast<const T*>(&*_data_);
     }
