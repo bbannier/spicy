@@ -17,10 +17,15 @@ bool type::detail::isResolved(const hilti::Type& t, ResolvedState* rstate) {
         return type::isResolved(t);
 
     if ( type::isParameterized(t) ) {
-        if ( rstate->find(t.identity()) != rstate->end() )
+        uintptr_t identity_;
+        if ( auto t_ = t.tryAs<Type>() )
+            identity_ = t_->identity();
+        else
+            identity_ = t.identity();
+        if ( rstate->find(identity_) != rstate->end() )
             return true;
 
-        rstate->insert(t.identity());
+        rstate->insert(identity_);
     }
 
     return t._isResolved(rstate);
