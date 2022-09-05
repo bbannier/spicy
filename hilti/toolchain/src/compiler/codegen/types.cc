@@ -252,8 +252,6 @@ struct VisitorDeclaration : hilti::visitor::PreOrder<void, VisitorDeclaration>, 
                                            .add_ctors = true};
                 return cxx::declaration::Type{id, t, t.inlineCode()};
             });
-
-        util::cannot_be_reached();
     }
 
     result_t operator()(const type::Tuple& n, type::Visitor::position_t&) override {
