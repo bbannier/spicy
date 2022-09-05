@@ -944,7 +944,7 @@ struct VisitorTypeInfoDynamic : hilti::visitor::PreOrder<void, VisitorTypeInfoDy
                 cg->typeInfo(*n.dereferencedType()), cg->compile(*n.dereferencedType(), codegen::TypeUsage::Storage));
     }
 
-    result_t operator()(const type::Struct& n, position_t p) {
+    result_t operator()(const type::Struct& n, type::Visitor::position_t& p) override {
         std::vector<std::string> fields;
 
         for ( const auto& f : n.fields() ) {
@@ -973,7 +973,7 @@ struct VisitorTypeInfoDynamic : hilti::visitor::PreOrder<void, VisitorTypeInfoDy
                       util::join(fields, ", "));
     }
 
-    result_t operator()(const type::Tuple& n, position_t p) {
+    result_t operator()(const type::Tuple& n, type::Visitor::position_t& p) override {
         std::vector<std::string> elems;
         auto ttype = cg->compile(p.node.as<Type>(), codegen::TypeUsage::Storage);
 
