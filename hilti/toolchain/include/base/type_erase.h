@@ -246,14 +246,13 @@ private:
     template<typename T>
     const T* _tryAs() const {
         // TypeBase maintains its own hierarchy.
-        if constexpr ( std::is_base_of_v<TypeBase, T> ) {
-            auto&& t = as<Type>();
-
-            if ( t.template isA<T>() )
-                return &t.template as<T>();
-            else
-                return nullptr;
-        }
+        if constexpr ( std::is_base_of_v<TypeBase, T> )
+            if ( auto&& t = _tryAs<Type>() ) {
+                if ( t->template isA<T>() )
+                    return &t->template as<T>();
+                else
+                    return nullptr;
+            }
 
         if constexpr ( std::is_base_of<ErasedBase, T>::value )
             return static_cast<const T*>(this);
@@ -276,14 +275,13 @@ private:
     template<typename T>
     T* _tryAs() {
         // TypeBase maintains its own hierarchy.
-        if constexpr ( std::is_base_of_v<TypeBase, T> ) {
-            auto&& t = as<Type>();
-
-            if ( t.template isA<T>() )
-                return &t.template as<T>();
-            else
-                return nullptr;
-        }
+        if constexpr ( std::is_base_of_v<TypeBase, T> )
+            if ( auto&& t = _tryAs<Type>() ) {
+                if ( t->template isA<T>() )
+                    return &t->template as<T>();
+                else
+                    return nullptr;
+            }
 
         if constexpr ( std::is_base_of<ErasedBase, T>::value )
             return static_cast<T*>(this);
