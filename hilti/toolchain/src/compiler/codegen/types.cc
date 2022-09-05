@@ -986,7 +986,7 @@ struct VisitorTypeInfoDynamic : hilti::visitor::PreOrder<void, VisitorTypeInfoDy
                       util::join(elems, ", "));
     }
 
-    result_t operator()(const type::Union& n, position_t p) {
+    result_t operator()(const type::Union& n, type::Visitor::position_t& p) override {
         std::vector<std::string> fields;
 
         for ( const auto& f : n.fields() )
