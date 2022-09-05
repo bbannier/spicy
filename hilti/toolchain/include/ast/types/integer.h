@@ -51,6 +51,8 @@ public:
 
     bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
 
+    const std::type_info& typeid_() const override { return typeid(decltype(*this)); }
+
     HILTI_TYPE_VISITOR_IMPLEMENT
 };
 
@@ -64,6 +66,8 @@ public:
     std::vector<Node> typeParameters() const override;
 
     bool isEqual(const Type& other) const override { return node::isEqual(this, other); }
+
+    const std::type_info& typeid_() const override { return typeid(decltype(*this)); }
 
     HILTI_TYPE_VISITOR_IMPLEMENT
 };
