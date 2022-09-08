@@ -491,9 +491,6 @@ public:
 
 private:
     isocpp_p0201::polymorphic_value<TypeBase> _data_;
-
-    /** Internal state managed by derived class. */
-    type::detail::State _state_;
 };
 
 /** Creates an AST node representing a `Type`. */
