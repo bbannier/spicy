@@ -4,6 +4,7 @@
 
 #include <polymorphic_value/polymorphic_value.h>
 
+#include <memory>
 #include <type_traits>
 #include <typeinfo>
 #include <unordered_set>
@@ -372,7 +373,7 @@ public:
     Type(Type&&) = default;
 
     template<typename T, typename = std::enable_if_t<std::is_base_of_v<TypeBase, T>>>
-    Type(const T& data) : _data_(isocpp_p0201::make_polymorphic_value<TypeBase, T>(data)) {}
+    Type(const T& data) : _data_(std::make_shared<T>(data)) {}
 
     Type& operator=(const Type&) = default;
     Type& operator=(Type&&) = default;
@@ -432,6 +433,7 @@ public:
 
     void dispatch(type::Visitor& v, type::Visitor::position_t& p) const { _data_->dispatch(v, p); }
 
+    Type _clone() const;
 
     /** Implements the `Type interface. */
 
@@ -492,7 +494,7 @@ public:
     bool _isResolved(type::ResolvedState* rstate) const { return _data_->_isResolved(rstate); }
 
 private:
-    isocpp_p0201::polymorphic_value<TypeBase> _data_;
+    std::shared_ptr<TypeBase> _data_;
 };
 
 /** Creates an AST node representing a `Type`. */
