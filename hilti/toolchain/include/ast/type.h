@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <polymorphic_value/polymorphic_value.h>
-
 #include <memory>
 #include <type_traits>
 #include <typeinfo>
