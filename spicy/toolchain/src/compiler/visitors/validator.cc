@@ -13,6 +13,7 @@
 #include <hilti/ast/expressions/type.h>
 #include <hilti/ast/operators/reference.h>
 #include <hilti/ast/statements/switch.h>
+#include <hilti/ast/type.h>
 #include <hilti/ast/types/stream.h>
 #include <hilti/base/logger.h>
 #include <hilti/base/result.h>
@@ -203,7 +204,9 @@ struct VisitorBase {
 
 struct VisitorPre : public hilti::visitor::PreOrder<void, VisitorPre>, public VisitorBase {};
 
-struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public VisitorBase {
+struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>,
+                     public VisitorBase,
+                     public hilti::type::Visitor {
     template<typename GlobalOrLocalVariable>
     void checkVariable(const GlobalOrLocalVariable& n, position_t p) {
         // A variable initialized from a struct initializer always needs an explicit type.
@@ -551,7 +554,7 @@ struct VisitorPost : public hilti::visitor::PreOrder<void, VisitorPost>, public 
         }
     }
 
-    void operator()(const spicy::type::Unit& u, position_t p) {
+    void operator()(const spicy::type::Unit& u, position_t& p) override {
         if ( auto attrs = u.attributes() ) {
             if ( AttributeSet::find(attrs, "&size") && AttributeSet::find(attrs, "&max-size") )
                 error(("attributes cannot be combined: &size, &max-size"), p);
