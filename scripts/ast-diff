@@ -14,17 +14,4 @@ function filter
     sed 's/%[0-9-]\{1,\}/%xxx/g'
 }
 
-if [ $# != 2 ]; then
-    echo "usage: $(basename $0) <ast1> <ast2>"
-    exit 1
-fi
-
-tmp1=/tmp/$(basename $0).$$.1
-tmp2=/tmp/$(basename $0).$$.2
-
-trap "rm -f ${tmp1} ${tmp2}" EXIT
-
-cat $1 | filter >${tmp1}
-cat $2 | filter >${tmp2}
-
-diff -u ${tmp1} ${tmp2}
+cat $1 | filter
