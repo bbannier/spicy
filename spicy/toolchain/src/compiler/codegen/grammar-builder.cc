@@ -40,6 +40,7 @@ struct Visitor : public hilti::visitor::PreOrder<void, Visitor>, type::Visitor {
         if ( field )
             pushField({*field, NodeRef(item)});
 
+        _result.reset();
         dispatch(item);
 
         if ( field )
@@ -53,6 +54,7 @@ struct Visitor : public hilti::visitor::PreOrder<void, Visitor>, type::Visitor {
     }
 
     Production productionForType(const Type& t, const ID& id) {
+        _result.reset();
         if ( dispatch(t); _result )
             return std::move(*_result);
 
@@ -220,6 +222,7 @@ struct Visitor : public hilti::visitor::PreOrder<void, Visitor>, type::Visitor {
     }
 
     void operator()(const hilti::declaration::Type& t) {
+        _result.reset();
         dispatch(t.type());
         assert(_result);
     }
@@ -256,6 +259,7 @@ struct Visitor : public hilti::visitor::PreOrder<void, Visitor>, type::Visitor {
 
     void operator()(const type::ValueReference& n, type::Visitor::position_t& /* p */) override {
         // Forward to referenced type, which will usually be a unit.
+        _result.reset();
         dispatch(*n.dereferencedType());
         assert(_result);
     }
