@@ -409,21 +409,33 @@ public:
 
     template<typename T, typename = std::enable_if<std::is_base_of_v<TypeBase, T>>>
     bool isA() const {
+        if constexpr ( std::is_same_v<Type, T> )
+            return true;
+
         return dynamic_cast<const T*>(&*_data_);
     }
 
     template<typename T, typename = std::enable_if<std::is_base_of_v<TypeBase, T>>>
     const T& as() const {
+        if constexpr ( std::is_same_v<Type, T> )
+            return *this;
+
         return *dynamic_cast<const T*>(&*_data_);
     }
 
     template<typename T, typename = std::enable_if<std::is_base_of_v<TypeBase, T>>>
     T& as() {
+        if constexpr ( std::is_same_v<Type, T> )
+            return *this;
+
         return *dynamic_cast<T*>(&*_data_);
     }
 
     template<typename T, typename = std::enable_if<std::is_base_of_v<TypeBase, T>>>
     optional_ref<const T> tryAs() const {
+        if constexpr ( std::is_same_v<Type, T> )
+            return *this;
+
         if ( auto d = dynamic_cast<const T*>(&*_data_) )
             return {*d};
         else
