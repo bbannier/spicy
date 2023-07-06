@@ -1,0 +1,19 @@
+# @TEST-EXEC: spicyc -dj %INPUT -o foo.hlto -T
+# @TEST-EXEC: ${SCRIPTS}/printf 'FF\x01\x02' | spicy-driver foo.hlto >output 2>&1
+# @TEST-EXEC: btest-diff output
+
+module foo;
+
+public type X = unit {
+    : bytes &size=2; # FF
+    : Y;
+};
+
+type Y = unit {
+    payload: bytes &eod { print self.offset(); }
+    : uint8[2] &parse-from=self.payload foreach {
+        print self.offset();
+    } {
+        print self.offset();
+    }
+};

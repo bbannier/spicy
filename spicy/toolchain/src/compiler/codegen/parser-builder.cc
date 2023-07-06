@@ -34,6 +34,8 @@
 #include <spicy/compiler/detail/codegen/production.h>
 #include <spicy/compiler/detail/codegen/productions/all.h>
 
+#include "ast/builder/expression.h"
+
 // Enable visitor usage for Production. Order of includes is important here.
 #include <spicy/autogen/__dispatchers-productions.h>
 
@@ -663,6 +665,8 @@ struct ProductionVisitor
         if ( auto a = AttributeSet::find(field->attributes(), "&parse-at") )
             redirectInputToStreamPosition(*a->valueAsExpression());
 
+        // pb->saveParsePosition();
+
         // `&size` and `&max-size` share the same underlying infrastructure
         // so try to extract both of them and compute the ultimate value.
         std::optional<Expression> length;
@@ -1226,6 +1230,10 @@ struct ProductionVisitor
         pstate.ncur = {};
         builder()->addMemberCall(tmp, "freeze", {});
 
+        // // FIXME(bbannier): guard feature code?
+        builder()->addAssign(builder::member(pstate.self, "__begin"), builder::begin(pstate.cur));
+        // builder()->addAssign(builder::member(pstate.self, "__position"), builder::begin(pstate.cur));
+
         pushState(std::move(pstate));
     }
 
@@ -1240,6 +1248,9 @@ struct ProductionVisitor
         auto cur = builder::memberCall(state().cur, "advance", {position});
         pstate.cur = builder()->addTmp("parse_cur", cur);
         pstate.ncur = {};
+
+        // FIXME(bbannier): update __begin/__position?
+
         pushState(std::move(pstate));
     }
 
@@ -1367,6 +1378,8 @@ struct ProductionVisitor
 
         if ( auto a = AttributeSet::find(p.attributes(), "&parse-at") )
             redirectInputToStreamPosition(*a->valueAsExpression());
+
+        // pb->saveParsePosition();
 
         std::optional<Expression> ncur;
         if ( const auto& a = AttributeSet::find(p.attributes(), "&size") ) {
