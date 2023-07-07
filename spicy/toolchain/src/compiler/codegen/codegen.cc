@@ -201,8 +201,9 @@ struct VisitorPass2 : public hilti::visitor::PreOrder<void, VisitorPass2> {
     }
 
     result_t operator()(const operator_::unit::Offset& n, position_t p) {
-        auto begin = builder::memberCall(builder::deref(builder::member(n.op0(), ID("__begin"))), "offset", {});
-        auto cur = builder::memberCall(builder::deref(builder::member(n.op0(), ID("__position"))), "offset", {});
+        // // FIXME(bbannier): subtract offsets after done.
+        auto begin = builder::deref(builder::member(n.op0(), ID("__begin")));
+        auto cur = builder::deref(builder::member(n.op0(), ID("__position")));
         replaceNode(&p, builder::grouping(builder::difference(cur, begin)));
     }
 

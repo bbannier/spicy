@@ -99,7 +99,7 @@ const bool __feat%foo__X6%supports_sinks = True;
 const bool __feat%foo__X6%synchronization = False;
 
 method hook void foo::X0::__on_0x25_init() {
-    ((*self.__position).offset() - (*self.__begin).offset());
+    ((*self.__position) - (*self.__begin));
 }
 
 init function void __register_foo_X0() {
