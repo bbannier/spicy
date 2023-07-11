@@ -34,8 +34,6 @@
 #include <spicy/compiler/detail/codegen/production.h>
 #include <spicy/compiler/detail/codegen/productions/all.h>
 
-#include "ast/builder/expression.h"
-
 // Enable visitor usage for Production. Order of includes is important here.
 #include <spicy/autogen/__dispatchers-productions.h>
 
