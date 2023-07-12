@@ -238,6 +238,8 @@ private:
         if constexpr ( std::is_base_of<ErasedBase, T>::value )
             return static_cast<const T*>(this);
 
+        assert(_data);
+
         if ( typeid(Model<T>) == typeid(*_data) )
             return &(::hilti::cast_intrusive<const Model<T>>(_data))->data();
 
