@@ -32,6 +32,10 @@ inline bool operator==(const Expression& x, const Expression& y) {
     if ( &x == &y )
         return true;
 
+    // FIXME(bbannier): workaround to compare two default-constructed expressions.
+    if ( ! x.data() && ! y.data() )
+        return true;
+
     assert(x.isEqual(y) == y.isEqual(x)); // Expected to be symmetric.
     return x.isEqual(y);
 }

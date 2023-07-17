@@ -1,5 +1,5 @@
-# @TEST-EXEC: spicyc -dj %INPUT -o foo.hlto -T
-# @TEST-EXEC: ${SCRIPTS}/printf 'FF\x01\x02' | spicy-driver foo.hlto >output 2>&1
+# @TEST-EXEC: spicyc -dj %INPUT -o foo.hlto -T >>output 2>&1
+# @TEST-EXEC: ${SCRIPTS}/printf 'FF\x01\x02' | spicy-driver foo.hlto >>output 2>&1
 # @TEST-EXEC: btest-diff output
 
 module foo;
@@ -17,3 +17,5 @@ type Y = unit {
         print self.offset();
     }
 };
+
+# FIXME(bbannier): also check with limited via, e.g., `&max-size`/`&size` on subunit.
