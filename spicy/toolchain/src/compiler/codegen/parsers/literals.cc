@@ -141,6 +141,7 @@ struct Visitor : public hilti::visitor::PreOrder<std::optional<Expression>, Visi
             auto pstate = pb->state();
             pstate.self = hilti::expression::UnresolvedID(ID("self"));
             pstate.cur = builder::id("ncur");
+            pstate.begin = builder::begin(pstate.cur);
             pb->pushState(std::move(pstate));
 
             builder()->addComment("NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)");

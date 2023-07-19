@@ -60,7 +60,8 @@ ParserState::ParserState(const type::Unit& unit, const Grammar& grammar, Express
       needs_look_ahead(grammar.needsLookAhead()),
       self(hilti::expression::UnresolvedID(ID("self"))),
       data(std::move(data)),
-      cur(std::move(cur)) {}
+      cur(std::move(cur)),
+      begin(builder::begin(cur)) {}
 
 void ParserState::printDebug(const std::shared_ptr<builder::Builder>& builder) const {
     builder->addCall("spicy_rt::printParserState", {builder::string(unit_id), data, cur, lahead, lahead_end,
@@ -268,6 +269,7 @@ struct ProductionVisitor
                     pstate.self = hilti::expression::UnresolvedID(ID("self"));
                     pstate.data = builder::id("__data");
                     pstate.cur = builder::id("__cur");
+                    pstate.begin = builder::begin(pstate.cur);
                     pstate.ncur = {};
                     pstate.trim = builder::id("__trim");
                     pstate.lahead = builder::id("__lah");
@@ -385,6 +387,7 @@ struct ProductionVisitor
                     pstate.self = hilti::expression::UnresolvedID(ID("self"));
                     pstate.data = builder::id("__data");
                     pstate.cur = builder::id("__cur");
+                    pstate.begin = builder::begin(pstate.cur);
                     pstate.ncur = {};
                     pstate.trim = builder::id("__trim");
                     pstate.lahead = builder::id("__lah");
@@ -683,6 +686,7 @@ struct ProductionVisitor
             // Establish limited view, remembering position to continue at.
             auto pstate = state();
             pstate.cur = limited;
+            pstate.begin = builder::begin(pstate.cur);
             pstate.ncur = builder()->addTmp("ncur", builder::memberCall(state().cur, "advance", {*length}));
             pushState(std::move(pstate));
         }
@@ -859,6 +863,7 @@ struct ProductionVisitor
         pushBuilder(no_match_try_again);
         auto pstate = pb->state();
         pstate.cur = ncur;
+        pstate.begin = builder::begin(pstate.cur);
         pb->pushState(std::move(pstate));
         builder()->addExpression(pb->waitForInputOrEod());
         pb->popState();
@@ -1223,6 +1228,7 @@ struct ProductionVisitor
         auto tmp = builder()->addTmp("parse_from", type::ValueReference(type::Stream()), value);
         pstate.data = tmp;
         pstate.cur = builder()->addTmp("parse_cur", type::stream::View(), builder::deref(tmp));
+        pstate.begin = builder::begin(pstate.cur);
         pstate.ncur = {};
         builder()->addMemberCall(tmp, "freeze", {});
 
@@ -1239,6 +1245,7 @@ struct ProductionVisitor
 
         auto cur = builder::memberCall(state().cur, "advance", {position});
         pstate.cur = builder()->addTmp("parse_cur", cur);
+        pstate.begin = builder::begin(pstate.cur);
         pstate.ncur = {};
         pushState(std::move(pstate));
     }
@@ -1377,6 +1384,7 @@ struct ProductionVisitor
             // Establish limited view, remembering position to continue at.
             auto pstate = state();
             pstate.cur = limited;
+            pstate.begin = builder::begin(pstate.cur);
             // NOTE: We do not store `ncur` in `pstate` since builders
             // for different cases might update `pstate.ncur` as well.
             ncur = builder()->addTmp("ncur", builder::memberCall(state().cur, "advance", {length}));
@@ -1443,6 +1451,7 @@ struct ProductionVisitor
             // Establish limited view, remembering position to continue at.
             auto pstate = state();
             pstate.cur = limited;
+            pstate.begin = builder::begin(pstate.cur);
             pstate.ncur = builder()->addTmp("ncur", builder::memberCall(state().cur, "advance", {*length}));
             pushState(std::move(pstate));
         }
