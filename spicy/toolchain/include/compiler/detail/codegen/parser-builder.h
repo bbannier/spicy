@@ -126,9 +126,6 @@ struct ParserState {
     /**< Expression referencing the current view inside 'data'. */
     Expression cur;
 
-    // FIXME(bbannier): document.
-    Expression begin;
-
     /**< If set, expression referencing a new `cur` to set after parsing the current rule. */
     std::optional<Expression> ncur;
 

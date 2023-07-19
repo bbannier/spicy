@@ -34,9 +34,6 @@
 #include <spicy/compiler/detail/codegen/production.h>
 #include <spicy/compiler/detail/codegen/productions/all.h>
 
-#include "ast/aliases.h"
-#include "ast/builder/expression.h"
-
 // Enable visitor usage for Production. Order of includes is important here.
 #include <spicy/autogen/__dispatchers-productions.h>
 
@@ -63,8 +60,7 @@ ParserState::ParserState(const type::Unit& unit, const Grammar& grammar, Express
       needs_look_ahead(grammar.needsLookAhead()),
       self(hilti::expression::UnresolvedID(ID("self"))),
       data(std::move(data)),
-      cur(std::move(cur)),
-      begin(builder::begin(cur)) {}
+      cur(std::move(cur)) {}
 
 void ParserState::printDebug(const std::shared_ptr<builder::Builder>& builder) const {
     builder->addCall("spicy_rt::printParserState", {builder::string(unit_id), data, cur, lahead, lahead_end,
@@ -272,7 +268,6 @@ struct ProductionVisitor
                     pstate.self = hilti::expression::UnresolvedID(ID("self"));
                     pstate.data = builder::id("__data");
                     pstate.cur = builder::id("__cur");
-                    pstate.begin = builder::begin(pstate.cur);
                     pstate.ncur = {};
                     pstate.trim = builder::id("__trim");
                     pstate.lahead = builder::id("__lah");
@@ -390,7 +385,6 @@ struct ProductionVisitor
                     pstate.self = hilti::expression::UnresolvedID(ID("self"));
                     pstate.data = builder::id("__data");
                     pstate.cur = builder::id("__cur");
-                    pstate.begin = builder::begin(pstate.cur);
                     pstate.ncur = {};
                     pstate.trim = builder::id("__trim");
                     pstate.lahead = builder::id("__lah");
@@ -668,8 +662,6 @@ struct ProductionVisitor
 
         if ( auto a = AttributeSet::find(field->attributes(), "&parse-at") )
             redirectInputToStreamPosition(*a->valueAsExpression());
-
-        // pb->saveParsePosition();
 
         // `&size` and `&max-size` share the same underlying infrastructure
         // so try to extract both of them and compute the ultimate value.
@@ -1234,14 +1226,6 @@ struct ProductionVisitor
         pstate.ncur = {};
         builder()->addMemberCall(tmp, "freeze", {});
 
-        // // FIXME(bbannier): guard feature code?
-        // std::cerr << "NOPE before " << pstate.begin << '\n';
-        // assert(pstate.begin != Expression());
-        // pstate.begin = builder::begin(pstate.cur);
-        // std::cerr << "NOPE after " << pstate.begin << '\n';
-        // builder()->addAssign(builder::member(pstate.self, "__begin"), builder::begin(pstate.begin));
-        // builder()->addAssign(builder::member(pstate.self, "__position"), builder::begin(pstate.cur));
-
         pushState(std::move(pstate));
     }
 
@@ -1256,9 +1240,6 @@ struct ProductionVisitor
         auto cur = builder::memberCall(state().cur, "advance", {position});
         pstate.cur = builder()->addTmp("parse_cur", cur);
         pstate.ncur = {};
-
-        // FIXME(bbannier): update __begin/__position?
-
         pushState(std::move(pstate));
     }
 
@@ -1386,8 +1367,6 @@ struct ProductionVisitor
 
         if ( auto a = AttributeSet::find(p.attributes(), "&parse-at") )
             redirectInputToStreamPosition(*a->valueAsExpression());
-
-        // pb->saveParsePosition();
 
         std::optional<Expression> ncur;
         if ( const auto& a = AttributeSet::find(p.attributes(), "&size") ) {
@@ -1985,11 +1964,9 @@ hilti::type::Struct ParserBuilder::addParserMethods(hilti::type::Struct s, const
 
             init_context();
 
-            std::cerr << "NOPE FOO " << builder::begin(builder::id("cur")) << '\n';
             auto pstate = ParserState(t, grammar, builder::id("data"), builder::id("cur"));
             pstate.self = builder::id("unit");
             pstate.cur = builder::id("ncur");
-            pstate.begin = builder::begin(pstate.cur);
             pstate.trim = builder::bool_(true);
             pstate.lahead = builder::id("lahead");
             pstate.lahead_end = builder::id("lahead_end");
@@ -2036,7 +2013,6 @@ hilti::type::Struct ParserBuilder::addParserMethods(hilti::type::Struct s, const
             pstate = ParserState(t, grammar, builder::id("data"), builder::id("cur"));
             pstate.self = builder::id("unit");
             pstate.cur = builder::id("ncur");
-            pstate.begin = builder::begin(pstate.cur);
             pstate.trim = builder::bool_(true);
             pstate.lahead = builder::id("lahead");
             pstate.lahead_end = builder::id("lahead_end");
@@ -2076,7 +2052,6 @@ hilti::type::Struct ParserBuilder::addParserMethods(hilti::type::Struct s, const
         auto pstate = ParserState(t, grammar, builder::id("data"), builder::id("cur"));
         pstate.self = builder::id("unit");
         pstate.cur = builder::id("ncur");
-        pstate.begin = builder::begin(pstate.cur);
         pstate.trim = builder::bool_(true);
         pstate.lahead = builder::id("lahead");
         pstate.lahead_end = builder::id("lahead_end");
@@ -2456,10 +2431,6 @@ void ParserBuilder::afterHook() {
 void ParserBuilder::saveParsePosition() {
     const auto& unit = state().unit.get();
     guardFeatureCode(unit, {"uses_random_access"}, [&]() {
-        // const auto& b = state().begin;
-        // std::cerr << "NOPE " << b.typename_() << '\n';
-
-        // builder()->addAssign(builder::member(state().self, ID("__begin")), state().begin);
         builder()->addAssign(builder::member(state().self, ID("__position")), builder::begin(state().cur));
     });
 }
