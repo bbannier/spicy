@@ -1964,9 +1964,8 @@ hilti::type::Struct ParserBuilder::addParserMethods(hilti::type::Struct s, const
 
             init_context();
 
-            auto pstate = ParserState(t, grammar, builder::id("data"), builder::id("cur"));
+            auto pstate = ParserState(t, grammar, builder::id("data"), builder::id("ncur"));
             pstate.self = builder::id("unit");
-            pstate.cur = builder::id("ncur");
             pstate.trim = builder::bool_(true);
             pstate.lahead = builder::id("lahead");
             pstate.lahead_end = builder::id("lahead_end");
@@ -2010,9 +2009,8 @@ hilti::type::Struct ParserBuilder::addParserMethods(hilti::type::Struct s, const
 
             init_context();
 
-            pstate = ParserState(t, grammar, builder::id("data"), builder::id("cur"));
+            pstate = ParserState(t, grammar, builder::id("data"), builder::id("ncur"));
             pstate.self = builder::id("unit");
-            pstate.cur = builder::id("ncur");
             pstate.trim = builder::bool_(true);
             pstate.lahead = builder::id("lahead");
             pstate.lahead_end = builder::id("lahead_end");
@@ -2049,9 +2047,8 @@ hilti::type::Struct ParserBuilder::addParserMethods(hilti::type::Struct s, const
 
         init_context();
 
-        auto pstate = ParserState(t, grammar, builder::id("data"), builder::id("cur"));
+        auto pstate = ParserState(t, grammar, builder::id("data"), builder::id("ncur"));
         pstate.self = builder::id("unit");
-        pstate.cur = builder::id("ncur");
         pstate.trim = builder::bool_(true);
         pstate.lahead = builder::id("lahead");
         pstate.lahead_end = builder::id("lahead_end");
