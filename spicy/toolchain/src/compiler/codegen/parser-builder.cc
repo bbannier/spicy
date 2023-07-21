@@ -725,7 +725,8 @@ struct ProductionVisitor
         // elements inside e.g., this unit's fields hooks. Temporarily restore the previously stored offset.
         std::optional<Expression> prev;
         if ( pre_container_offset ) {
-            prev = builder()->addTmp("prev", builder::member(state().self, "__position"));
+            prev = builder()->addTmp("prev", builder::tuple({builder::member(state().self, "__begin"),
+                                                             builder::member(state().self, "__position")}));
             builder()->addAssign(builder::member(state().self, "__position"), *pre_container_offset);
         }
 
@@ -807,7 +808,9 @@ struct ProductionVisitor
             popState();
 
         if ( prev )
-            builder()->addAssign(builder::member(state().self, "__position"), *prev);
+            builder()->addAssign(builder::tuple({builder::member(state().self, "__begin"),
+                                                 builder::member(state().self, "__position")}),
+                                 *prev);
 
         if ( field->condition() )
             popBuilder();
