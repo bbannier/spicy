@@ -568,6 +568,8 @@ public:
      */
     void debugPrint(std::ostream& out) const;
 
+    const void* get_chain() const { return _chain.get(); }
+
 protected:
     friend class hilti::rt::stream::View;
     friend class hilti::rt::stream::detail::Chain;
@@ -709,6 +711,8 @@ public:
     using Chunk = stream::detail::Chunk;
     using Offset = stream::Offset;
     using Size = stream::Size;
+
+    const void* get_chain() const { return _chain; }
 
     /** Constructor. */
     UnsafeConstIterator() = default;
