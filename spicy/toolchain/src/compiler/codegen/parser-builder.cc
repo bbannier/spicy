@@ -2473,7 +2473,7 @@ void ParserBuilder::finishBacktracking() {
 Expression ParserBuilder::initLoopBody() { return builder()->addTmp("old_begin", builder::begin(state().cur)); }
 
 void ParserBuilder::finishLoopBody(const Expression& cookie, const Location& l) {
-    auto not_moved = builder::and_(builder::equal(builder::begin(state().cur), cookie), builder::not_(atEod()));
+    auto not_moved = builder::and_(builder::equal(state().begin, cookie), builder::not_(atEod()));
     auto body = builder()->addIf(not_moved);
     pushBuilder(std::move(body),
                 [&]() { parseError("loop body did not change input position, possible infinite loop", l); });
