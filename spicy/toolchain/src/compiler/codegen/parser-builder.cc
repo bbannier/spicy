@@ -518,13 +518,13 @@ struct ProductionVisitor
 
         builder()->setLocation(p.location());
 
-        std::optional<Expression> pre_container_offset;
+        std::optional<Expression> pre_container_offsets;
         std::optional<PathTracker> path_tracker;
         std::optional<Expression> profiler;
         if ( is_field_owner ) {
             path_tracker = PathTracker(&_path, field->id());
             profiler = builder()->startProfiler(fmt("spicy/unit/%s", hilti::util::join(_path, "::")));
-            pre_container_offset = preParseField(p, meta);
+            pre_container_offsets = preParseField(p, meta);
         }
 
         beginProduction(p);
@@ -573,7 +573,7 @@ struct ProductionVisitor
         endProduction(p);
 
         if ( is_field_owner ) {
-            postParseField(p, meta, pre_container_offset);
+            postParseField(p, meta, pre_container_offsets);
 
             if ( profiler )
                 builder()->stopProfiler(*profiler);
@@ -627,10 +627,11 @@ struct ProductionVisitor
         // If the field holds a container we expect to see the offset of the field, not the individual container
         // elements inside e.g., this unit's fields hooks. Store the value before parsing of a container starts so we
         // can restore it later.
-        std::optional<Expression> pre_container_offset;
+        std::optional<Expression> pre_container_offsets;
         if ( field && field->isContainer() ) {
-            pre_container_offset =
-                builder()->addTmp("pre_container_offset", builder::member(state().self, "__position"));
+            pre_container_offsets =
+                builder()->addTmp("pre_container_offsets", (builder::member(state().self, "__begin"),
+                                                            builder::member(state().self, "__position")));
         }
 
         if ( field && field->convertExpression() ) {
@@ -713,21 +714,23 @@ struct ProductionVisitor
         if ( auto a = AttributeSet::find(field->attributes(), "&try") )
             pb->initBacktracking();
 
-        return pre_container_offset;
+        return pre_container_offsets;
     }
 
     void postParseField(const Production& p, const production::Meta& meta,
-                        const std::optional<Expression>& pre_container_offset) {
+                        const std::optional<Expression>& pre_container_offsets) {
         const auto& field = meta.field();
         assert(field); // Must only be called if we have a field.
 
         // If the field holds a container we expect to see the offset of the field, not the individual container
         // elements inside e.g., this unit's fields hooks. Temporarily restore the previously stored offset.
         std::optional<Expression> prev;
-        if ( pre_container_offset ) {
+        if ( pre_container_offsets ) {
             prev = builder()->addTmp("prev", builder::tuple({builder::member(state().self, "__begin"),
                                                              builder::member(state().self, "__position")}));
-            builder()->addAssign(builder::member(state().self, "__position"), *pre_container_offset);
+            builder()->addAssign((builder::member(state().self, "__begin"),
+                                  builder::member(state().self, "__position")),
+                                 *pre_container_offsets);
         }
 
 
