@@ -502,7 +502,7 @@ std::string hilti::rt::detail::adl::to_string(const stream::SafeConstIterator& x
     if ( x.isUnset() )
         return "<uninitialized>";
 
-    return fmt("<offset=%" PRIu64 " data=%s chain=%p>", x.offset(), str(x), x.get_chain());
+    return fmt("<offset=%" PRIu64 " data=%s>", x.offset(), str(x));
 }
 
 void SafeConstIterator::debugPrint(std::ostream& out) const {
@@ -541,7 +541,7 @@ std::string hilti::rt::detail::adl::to_string(const UnsafeConstIterator& x, adl:
     if ( x.isUnset() )
         return "<uninitialized>";
 
-    return fmt("<offset=%" PRIu64 " data=%s>", x.offset(), str(x), x.get_chain());
+    return fmt("<offset=%" PRIu64 " data=%s>", x.offset(), str(x));
 }
 
 void UnsafeConstIterator::debugPrint(std::ostream& out) const {
