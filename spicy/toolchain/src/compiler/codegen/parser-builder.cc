@@ -799,7 +799,6 @@ struct ProductionVisitor
              AttributeSet::find(field->attributes(), "&parse-at") ) {
             ncur = {};
             popState();
-            pb->saveParsePosition();
         }
 
         if ( ncur )
