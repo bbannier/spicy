@@ -284,8 +284,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X0%uses_random_access ) 
+        if ( __feat%foo__X0%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -334,8 +336,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:13:11-15:2"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X0%uses_random_access ) 
+    if ( __feat%foo__X0%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -375,8 +379,10 @@ method extern method view<stream> foo::X0::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X0 ->
 
-    if ( __feat%foo__X0%uses_random_access ) 
+    if ( __feat%foo__X0%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -399,8 +405,10 @@ method extern method view<stream> foo::X0::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X0 ->
 
-    if ( __feat%foo__X0%uses_random_access ) 
+    if ( __feat%foo__X0%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -421,8 +429,10 @@ method extern method view<stream> foo::X0::parse2(inout value_ref<X0> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X0 ->
 
-    if ( __feat%foo__X0%uses_random_access ) 
+    if ( __feat%foo__X0%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -498,8 +508,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X1%uses_random_access ) 
+        if ( __feat%foo__X1%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -548,8 +560,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:18:11-20:2"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X1%uses_random_access ) 
+    if ( __feat%foo__X1%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -589,8 +603,10 @@ method extern method view<stream> foo::X1::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X1 ->
 
-    if ( __feat%foo__X1%uses_random_access ) 
+    if ( __feat%foo__X1%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -613,8 +629,10 @@ method extern method view<stream> foo::X1::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X1 ->
 
-    if ( __feat%foo__X1%uses_random_access ) 
+    if ( __feat%foo__X1%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -635,8 +653,10 @@ method extern method view<stream> foo::X1::parse2(inout value_ref<X1> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X1 ->
 
-    if ( __feat%foo__X1%uses_random_access ) 
+    if ( __feat%foo__X1%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -708,8 +728,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X2%uses_random_access ) 
+        if ( __feat%foo__X2%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -758,8 +780,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:23:11"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X2%uses_random_access ) 
+    if ( __feat%foo__X2%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -799,8 +823,10 @@ method extern method view<stream> foo::X2::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X2 ->
 
-    if ( __feat%foo__X2%uses_random_access ) 
+    if ( __feat%foo__X2%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -823,8 +849,10 @@ method extern method view<stream> foo::X2::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X2 ->
 
-    if ( __feat%foo__X2%uses_random_access ) 
+    if ( __feat%foo__X2%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -845,8 +873,10 @@ method extern method view<stream> foo::X2::parse2(inout value_ref<X2> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X2 ->
 
-    if ( __feat%foo__X2%uses_random_access ) 
+    if ( __feat%foo__X2%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -918,8 +948,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X3%uses_random_access ) 
+        if ( __feat%foo__X3%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -972,8 +1004,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:26:11-28:2"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X3%uses_random_access ) 
+    if ( __feat%foo__X3%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -1017,8 +1051,10 @@ method extern method view<stream> foo::X3::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X3 ->
 
-    if ( __feat%foo__X3%uses_random_access ) 
+    if ( __feat%foo__X3%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1041,8 +1077,10 @@ method extern method view<stream> foo::X3::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X3 ->
 
-    if ( __feat%foo__X3%uses_random_access ) 
+    if ( __feat%foo__X3%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1063,8 +1101,10 @@ method extern method view<stream> foo::X3::parse2(inout value_ref<X3> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X3 ->
 
-    if ( __feat%foo__X3%uses_random_access ) 
+    if ( __feat%foo__X3%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1136,8 +1176,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X4%uses_random_access ) 
+        if ( __feat%foo__X4%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -1190,8 +1232,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:32:11-34:2"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X4%uses_random_access ) 
+    if ( __feat%foo__X4%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -1235,8 +1279,10 @@ method extern method view<stream> foo::X4::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X4 ->
 
-    if ( __feat%foo__X4%uses_random_access ) 
+    if ( __feat%foo__X4%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1259,8 +1305,10 @@ method extern method view<stream> foo::X4::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X4 ->
 
-    if ( __feat%foo__X4%uses_random_access ) 
+    if ( __feat%foo__X4%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1281,8 +1329,10 @@ method extern method view<stream> foo::X4::parse2(inout value_ref<X4> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X4 ->
 
-    if ( __feat%foo__X4%uses_random_access ) 
+    if ( __feat%foo__X4%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1358,8 +1408,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X5%uses_random_access ) 
+        if ( __feat%foo__X5%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -1408,8 +1460,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:36:18-40:2"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X5%uses_random_access ) 
+    if ( __feat%foo__X5%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -1449,8 +1503,10 @@ method extern method view<stream> foo::X5::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X5 ->
 
-    if ( __feat%foo__X5%uses_random_access ) 
+    if ( __feat%foo__X5%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1473,8 +1529,10 @@ method extern method view<stream> foo::X5::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X5 ->
 
-    if ( __feat%foo__X5%uses_random_access ) 
+    if ( __feat%foo__X5%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1495,8 +1553,10 @@ method extern method view<stream> foo::X5::parse2(inout value_ref<X5> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X5 ->
 
-    if ( __feat%foo__X5%uses_random_access ) 
+    if ( __feat%foo__X5%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1568,8 +1628,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     }
     catch ( hilti::SystemException __except ) {
 
-        if ( __feat%foo__X6%uses_random_access ) 
+        if ( __feat%foo__X6%uses_random_access ) {
+            (*self).__begin = begin(__cur);
             (*self).__position = begin(__cur);
+        }
 
         (*self).__on_0x25_error(hilti::exception_what(__except));
 
@@ -1619,8 +1681,10 @@ method method tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::Rec
     # "<...>/feature_requirements.spicy:43:11-46:2"
     local tuple<view<stream>, int<64>, iterator<stream>, optional<hilti::RecoverableFailure>> __result;
 
-    if ( __feat%foo__X6%uses_random_access ) 
+    if ( __feat%foo__X6%uses_random_access ) {
+        (*self).__begin = begin(__cur);
         (*self).__position = begin(__cur);
+    }
 
     (*self).__error = __error;
 
@@ -1661,8 +1725,10 @@ method extern method view<stream> foo::X6::parse1(inout value_ref<stream> data, 
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X6 ->
 
-    if ( __feat%foo__X6%uses_random_access ) 
+    if ( __feat%foo__X6%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1685,8 +1751,10 @@ method extern method view<stream> foo::X6::parse3(inout value_ref<spicy_rt::Pars
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X6 ->
 
-    if ( __feat%foo__X6%uses_random_access ) 
+    if ( __feat%foo__X6%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
@@ -1707,8 +1775,10 @@ method extern method view<stream> foo::X6::parse2(inout value_ref<X6> unit, inou
     (ncur, lahead, lahead_end, error) = (*unit).__parse_stage1(data, ncur, True, lahead, lahead_end, error);
     # End parsing production: Unit: foo_X6 ->
 
-    if ( __feat%foo__X6%uses_random_access ) 
+    if ( __feat%foo__X6%uses_random_access ) {
+        (*unit).__begin = begin(ncur);
         (*unit).__position = begin(ncur);
+    }
 
 
     if ( error ) 
