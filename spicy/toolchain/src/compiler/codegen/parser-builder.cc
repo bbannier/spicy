@@ -714,6 +714,8 @@ struct ProductionVisitor
         if ( auto a = AttributeSet::find(field->attributes(), "&try") )
             pb->initBacktracking();
 
+        pb->saveParsePosition();
+
         return pre_container_offsets;
     }
 
@@ -797,6 +799,7 @@ struct ProductionVisitor
              AttributeSet::find(field->attributes(), "&parse-at") ) {
             ncur = {};
             popState();
+            pb->saveParsePosition();
         }
 
         if ( ncur )
@@ -1254,6 +1257,7 @@ struct ProductionVisitor
         pstate.begin = builder::begin(pstate.cur);
         pstate.ncur = {};
         pushState(std::move(pstate));
+        pb->saveParsePosition();
     }
 
     // Start sync and trial mode.
@@ -1424,8 +1428,10 @@ struct ProductionVisitor
             builder()->addAssign(state().cur, *ncur);
         }
 
-        if ( AttributeSet::find(p.attributes(), "&parse-from") || AttributeSet::find(p.attributes(), "&parse-at") )
+        if ( AttributeSet::find(p.attributes(), "&parse-from") || AttributeSet::find(p.attributes(), "&parse-at") ) {
             popState();
+            pb->saveParsePosition();
+        }
 
         builder()->addCall("hilti::debugDedent", {builder::string("spicy")});
     }
@@ -2443,6 +2449,7 @@ void ParserBuilder::afterHook() {
 void ParserBuilder::saveParsePosition() {
     const auto& unit = state().unit.get();
     guardFeatureCode(unit, {"uses_random_access"}, [&]() {
+        builder()->addAssign(builder::member(state().self, ID("__begin")), state().begin);
         builder()->addAssign(builder::member(state().self, ID("__position")), builder::begin(state().cur));
     });
 }
