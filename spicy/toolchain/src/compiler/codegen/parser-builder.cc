@@ -529,6 +529,11 @@ struct ProductionVisitor
 
         beginProduction(p);
 
+        // Remember where we parsed the production from.
+        auto pstate = state();
+        pstate.begin = builder()->addTmp("begin", state().begin);
+        pushState(std::move(pstate));
+
         if ( const auto& x = p.tryAs<production::Enclosure>() ) {
             // Recurse.
             parseProduction(x->child());
@@ -569,6 +574,8 @@ struct ProductionVisitor
             parseNonAtomicProduction(p, unit->unitType());
         else
             parseNonAtomicProduction(p, {});
+
+        popState(); // begin.
 
         endProduction(p);
 
@@ -666,6 +673,8 @@ struct ProductionVisitor
 
         if ( auto a = AttributeSet::find(field->attributes(), "&parse-at") )
             redirectInputToStreamPosition(*a->valueAsExpression());
+
+        pb->saveParsePosition();
 
         // `&size` and `&max-size` share the same underlying infrastructure
         // so try to extract both of them and compute the ultimate value.
@@ -1241,6 +1250,8 @@ struct ProductionVisitor
         builder()->addMemberCall(tmp, "freeze", {});
 
         pushState(std::move(pstate));
+
+        pb->saveParsePosition();
     }
 
     // Redirects input to be read from given stream position next.

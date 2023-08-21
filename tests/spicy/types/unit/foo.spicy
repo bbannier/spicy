@@ -10,12 +10,17 @@ public type X = unit {
 };
 
 type Y = unit {
-    payload: bytes &eod { print self.offset(); }
-    : uint8[2] &parse-from=self.payload foreach {
-        print self.offset();
-    } {
-        print self.offset();
+    payload: bytes &eod { print $$, offsets(self); }
+    xyz: uint8[2] &parse-from=self.payload foreach {
+        print $$, offsets(self);
+    }
+    {
+        print $$, offsets(self);
     }
 };
+
+function offsets(x: Y): string {
+    return "offset=%s input=%s position=%s" % (x.offset(), x.input(), x.position());
+}
 
 # FIXME(bbannier): also check with limited via, e.g., `&max-size`/`&size` on subunit.
