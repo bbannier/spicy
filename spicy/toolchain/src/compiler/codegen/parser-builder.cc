@@ -269,7 +269,8 @@ struct ProductionVisitor
                     pstate.self = hilti::expression::UnresolvedID(ID("self"));
                     pstate.data = builder::id("__data");
                     pstate.cur = builder::id("__cur");
-                    pstate.begin = builder::begin(pstate.cur);
+                    // We inherit the begin position of the containing unit.
+                    pstate.begin = builder::member(pstate.self, "__begin");
                     pstate.ncur = {};
                     pstate.trim = builder::id("__trim");
                     pstate.lahead = builder::id("__lah");
@@ -387,7 +388,8 @@ struct ProductionVisitor
                     pstate.self = hilti::expression::UnresolvedID(ID("self"));
                     pstate.data = builder::id("__data");
                     pstate.cur = builder::id("__cur");
-                    pstate.begin = builder::begin(pstate.cur);
+                    // We inherit the begin position of the containing unit.
+                    pstate.begin = builder::member(pstate.self, "__begin");
                     pstate.ncur = {};
                     pstate.trim = builder::id("__trim");
                     pstate.lahead = builder::id("__lah");
