@@ -160,6 +160,9 @@ struct ParserState {
      * Expression holding the last parse error if any. This field is set only in sync or trial mode.
      */
     Expression error;
+
+    // FIXME(bbannier): document.
+    Expression begin;
 };
 
 /** Generates the parsing logic for a unit type. */

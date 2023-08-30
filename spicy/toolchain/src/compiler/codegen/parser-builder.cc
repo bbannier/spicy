@@ -60,7 +60,8 @@ ParserState::ParserState(const type::Unit& unit, const Grammar& grammar, Express
       needs_look_ahead(grammar.needsLookAhead()),
       self(hilti::expression::UnresolvedID(ID("self"))),
       data(std::move(data)),
-      cur(std::move(cur)) {}
+      cur(std::move(cur)),
+      begin(builder::begin(this->cur)) {}
 
 void ParserState::printDebug(const std::shared_ptr<builder::Builder>& builder) const {
     builder->addCall("spicy_rt::printParserState", {builder::string(unit_id), data, cur, lahead, lahead_end,
