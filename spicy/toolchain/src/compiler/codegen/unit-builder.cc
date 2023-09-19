@@ -211,7 +211,7 @@ Type CodeGen::compileUnit(const type::Unit& unit, bool declare_only) {
     auto attr_random_access = Attribute("&needed-by-feature", builder::string("uses_random_access"));
     auto f1 = hilti::declaration::Field(ID("__begin"), hilti::type::Optional(hilti::type::stream::Iterator()),
                                         AttributeSet({Attribute("&internal"), attr_random_access}));
-    auto f2 = hilti::declaration::Field(ID("__position"), hilti::type::Optional(hilti::type::stream::Iterator()),
+    auto f2 = hilti::declaration::Field(ID("__offset"), hilti::type::UnsignedInteger(64),
                                         AttributeSet({Attribute("&internal"), attr_random_access}));
     auto f3 = hilti::declaration::Field(ID("__position_update"), hilti::type::Optional(hilti::type::stream::Iterator()),
                                         AttributeSet({Attribute("&internal"), attr_random_access}));
