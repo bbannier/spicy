@@ -265,7 +265,7 @@ struct ProductionVisitor
 
                     if ( unit ) {
                         auto pstate = state();
-                        pstate.begin = builder()->addTmp("begin", builder::begin(state().cur));
+                        pstate.begin = builder()->addTmp("begin", builder::optional(builder::begin(state().cur)));
                         pushState(std::move(pstate));
                         pb->initializeUnit(p.location());
                     }
