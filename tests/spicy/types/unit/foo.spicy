@@ -1,0 +1,8 @@
+# @TEST-EXEC: spicyc -dp %INPUT | grep '^# ' >output 2>&1
+# @TEST-EXEC: btest-diff output
+
+module foo;
+
+public type X = unit {
+    on %init { print self.offset(); }
+};
