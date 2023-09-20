@@ -34,6 +34,7 @@ Checks: '
   -misc-const-correctness,
   -misc-confusable-identifiers,
   -misc-const-correctness,
+  -misc-use-anonymous-namespace,
 
   modernize-*,
   -modernize-avoid-c-arrays,
