@@ -77,6 +77,11 @@ hilti::Expression featureConstant(const hilti::ID& typeID, std::string_view feat
     return builder::id(ID(hilti::rt::fmt("%s::__feat%%%s%%%s", ns, id, feature)));
 }
 
+Expression _begin(const ID& typeID, const Expression& expression) {
+    return builder::ternary(featureConstant(typeID, "uses_random_access"), expression,
+                            builder::optional(type::stream::Iterator()));
+}
+
 struct ProductionVisitor
     : public hilti::detail::visitor::Visitor<void, ProductionVisitor, Production, hilti::detail::visitor::Order::Pre> {
     ProductionVisitor(ParserBuilder* pb, const Grammar& g) : pb(pb), grammar(g) {}
@@ -315,8 +320,10 @@ struct ProductionVisitor
                     build_parse_stage1_logic();
 
                     // Call stage 2.
-                    std::vector<Expression> args = {state().data,   state().begin,      state().cur,  state().trim,
-                                                    state().lahead, state().lahead_end, state().error};
+                    std::vector<Expression> args = {state().data,   _begin(*unit->id(), state().begin),
+                                                    state().cur,    state().trim,
+                                                    state().lahead, state().lahead_end,
+                                                    state().error};
 
                     if ( addl_param )
                         args.push_back(builder::id(addl_param->id()));
@@ -464,12 +471,9 @@ struct ProductionVisitor
                 return id_stage1;
             });
 
-        std::vector<Expression> args = {state().data,
-                                        (unit ? builder::optional(type::stream::Iterator()) : state().begin),
-                                        state().cur,
-                                        state().trim,
-                                        state().lahead,
-                                        state().lahead_end,
+        std::vector<Expression> args = {state().data,   (unit ? _begin(*unit->id(), state().begin) : state().begin),
+                                        state().cur,    state().trim,
+                                        state().lahead, state().lahead_end,
                                         state().error};
 
         if ( ! unit && p.meta().field() )
@@ -560,8 +564,9 @@ struct ProductionVisitor
         else if ( auto unit = p.tryAs<production::Unit>(); unit && ! top_level ) {
             // Parsing a different unit type. We call the other unit's parse
             // function, but don't have to create it here.
-            std::vector<Expression> args = {pb->state().data, pb->state().begin,  pb->state().cur,
-                                            pb->state().trim, pb->state().lahead, pb->state().lahead_end,
+            std::vector<Expression> args = {pb->state().data,   _begin(*unit->unitType().id(), pb->state().begin),
+                                            pb->state().cur,    pb->state().trim,
+                                            pb->state().lahead, pb->state().lahead_end,
                                             pb->state().error};
 
             Location location;
