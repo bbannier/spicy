@@ -48,6 +48,12 @@ struct FiberContext {
     FiberContext();
     ~FiberContext();
 
+    FiberContext(const FiberContext&) = delete;
+    FiberContext(FiberContext&&) = default;
+
+    FiberContext& operator=(const FiberContext&) = delete;
+    FiberContext& operator=(FiberContext&&) = default;
+
     /** (Pseudo-)fiber representing the main function. */
     std::unique_ptr<detail::Fiber> main;
 
@@ -74,6 +80,11 @@ struct StackBuffer {
      * @param fiber fiber of which to track its current stack region
      */
     StackBuffer(const ::Fiber* fiber) : _fiber(fiber) {}
+
+    StackBuffer(const StackBuffer&) = delete;
+    StackBuffer(StackBuffer&&) = default;
+    StackBuffer& operator=(const StackBuffer&) = delete;
+    StackBuffer& operator=(StackBuffer&&) = default;
 
     /** Destructor. */
     ~StackBuffer();
@@ -139,6 +150,8 @@ public:
 
     Callback& operator=(const Callback&) = default;
     Callback& operator=(Callback&&) = default;
+
+    ~Callback() = default;
 
     hilti::rt::any operator()(resumable::Handle* h) const { return _invoke(_f, h); }
 
