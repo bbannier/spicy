@@ -151,6 +151,8 @@ public:
     Callback& operator=(const Callback&) = default;
     Callback& operator=(Callback&&) = default;
 
+    ~Callback() = default;
+
     hilti::rt::any operator()(resumable::Handle* h) const { return _invoke(_f, h); }
 
 private:
