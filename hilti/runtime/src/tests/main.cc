@@ -7,11 +7,6 @@
 
 struct RuntimeWrapper {
     ~RuntimeWrapper() { hilti::rt::done(); }
-    RuntimeWrapper() = default;
-    RuntimeWrapper(const RuntimeWrapper&) = delete;
-    RuntimeWrapper(RuntimeWrapper&&) = default;
-    RuntimeWrapper& operator=(const RuntimeWrapper&) = delete;
-    RuntimeWrapper& operator=(RuntimeWrapper&&) = default;
 };
 
 int main(int argc, char** argv) {

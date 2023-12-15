@@ -14,11 +14,7 @@ namespace hilti {
 struct Optimizer {
 public:
     Optimizer(const std::vector<std::shared_ptr<Unit>>& units) : _units(units) {}
-    Optimizer(const Optimizer&) = default;
-    Optimizer(Optimizer&&) = default;
-    Optimizer& operator=(const Optimizer&) = delete;
-    Optimizer& operator=(Optimizer&&) = delete;
-    ~Optimizer() = default;
+    ~Optimizer() {}
 
     void run();
 

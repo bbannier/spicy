@@ -392,8 +392,6 @@ public:
     /** Move constructor. */
     StrongReference(StrongReference&& other) noexcept : Base(std::move(other)) {}
 
-    ~StrongReference() = default;
-
     /**
      * Returns true if the reference does not refer any value.
      */

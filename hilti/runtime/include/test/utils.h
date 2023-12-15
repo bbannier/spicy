@@ -55,11 +55,6 @@ public:
             hilti::rt::filesystem::remove_all(_path, ec); // Swallow any error from removal.
     }
 
-    TemporaryFile(const TemporaryFile&) = delete;
-    TemporaryFile(TemporaryFile&&) = default;
-    TemporaryFile& operator=(const TemporaryFile&) = delete;
-    TemporaryFile& operator=(TemporaryFile&&) = default;
-
 private:
     hilti::rt::filesystem::path _path;
 };
@@ -69,11 +64,6 @@ class CaptureIO {
 public:
     CaptureIO(std::ostream& stream) : _old(stream.rdbuf(_buffer.rdbuf())), _stream(&stream) {}
     ~CaptureIO() { _stream->rdbuf(_old); }
-
-    CaptureIO(const CaptureIO&) = delete;
-    CaptureIO(CaptureIO&&) = default;
-    CaptureIO& operator=(const CaptureIO&) = delete;
-    CaptureIO& operator=(CaptureIO&&) = default;
 
     auto str() const { return _buffer.str(); }
 
@@ -92,11 +82,6 @@ public:
     }
 
     ~TestContext() { context::detail::current() = _prev; }
-
-    TestContext(const TestContext&) = delete;
-    TestContext(TestContext&&) = default;
-    TestContext& operator=(const TestContext&) = delete;
-    TestContext& operator=(TestContext&&) = default;
 
 private:
     Context* _prev = nullptr;

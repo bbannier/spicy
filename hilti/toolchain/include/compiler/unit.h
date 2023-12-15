@@ -48,13 +48,6 @@ using MetaData = detail::cxx::linker::MetaData;
  */
 class Unit {
 public:
-    Unit() = default;
-    Unit(const Unit&) = default;
-    Unit(Unit&&) = default;
-
-    Unit& operator=(const Unit&) = default;
-    Unit& operator=(Unit&&) = default;
-
     /** Destructor. */
     ~Unit();
 

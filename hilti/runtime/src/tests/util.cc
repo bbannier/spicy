@@ -134,10 +134,6 @@ TEST_CASE("createTemporaryFile") {
 
         struct Cleanup {
             Cleanup(hilti::rt::filesystem::path& tmp) : _tmp(tmp) {}
-            Cleanup(const Cleanup&) = delete;
-            Cleanup(Cleanup&&) = default;
-            Cleanup& operator=(const Cleanup&) = delete;
-            Cleanup& operator=(Cleanup&&) = delete;
             ~Cleanup() {
                 std::error_code ec;
                 if ( hilti::rt::filesystem::exists(_tmp, ec) )
