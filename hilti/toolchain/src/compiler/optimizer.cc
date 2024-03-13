@@ -2,7 +2,7 @@
 
 #include "hilti/compiler/detail/optimizer.h"
 
-#include <numeric>
+#include <memory>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -16,6 +16,7 @@
 #include <hilti/ast/declarations/constant.h>
 #include <hilti/ast/declarations/function.h>
 #include <hilti/ast/declarations/imported-module.h>
+#include <hilti/ast/declarations/module.h>
 #include <hilti/ast/expressions/ctor.h>
 #include <hilti/ast/expressions/logical-and.h>
 #include <hilti/ast/expressions/logical-not.h>
@@ -36,6 +37,7 @@
 #include <hilti/base/logger.h>
 #include <hilti/base/timing.h>
 #include <hilti/base/util.h>
+#include <hilti/compiler/detail/cfg.h>
 
 namespace hilti {
 
@@ -89,7 +91,7 @@ public:
     virtual bool prune_uses(Node*) { return false; }
     virtual bool prune_decls(Node*) { return false; }
 
-    void operator()(declaration::Module* n) final { _current_module = n; }
+    void operator()(declaration::Module* n) override { _current_module = n; }
 };
 
 struct FunctionVisitor : OptimizerVisitor {
@@ -1428,6 +1430,30 @@ struct MemberVisitor : OptimizerVisitor {
     }
 };
 
+struct FunctionBodyVisitor : OptimizerVisitor {
+    using OptimizerVisitor::OptimizerVisitor;
+
+    void collect(Node* node) override { visitor::visit(*this, node); }
+
+    void operator()(declaration::Function* f) override {
+        auto&& body = f->function()->body();
+        if ( ! body )
+            return;
+
+        auto cfg = detail::cfg::CFG(body);
+    }
+
+    void operator()(declaration::Module* m) override {
+        OptimizerVisitor::operator()(m);
+
+        auto&& body = m->statements();
+        if ( ! body )
+            return;
+
+        auto cfg = detail::cfg::CFG(body);
+    }
+};
+
 void detail::optimizer::optimize(Builder* builder, ASTRoot* root) {
     util::timing::Collector _("hilti/compiler/optimizer");
 
@@ -1446,22 +1472,28 @@ void detail::optimizer::optimize(Builder* builder, ASTRoot* root) {
         v.transform(root);
     }
 
-    const std::map<std::string, std::unique_ptr<OptimizerVisitor> (*)(Builder* builder)> creators =
-        {{"constant_folding",
-          [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
-              return std::make_unique<ConstantFoldingVisitor>(builder, hilti::logging::debug::Optimizer);
-          }},
-         {"functions",
-          [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
-              return std::make_unique<FunctionVisitor>(builder, hilti::logging::debug::Optimizer);
-          }},
-         {"members",
-          [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
-              return std::make_unique<MemberVisitor>(builder, hilti::logging::debug::Optimizer);
-          }},
-         {"types", [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
-              return std::make_unique<TypeVisitor>(builder, hilti::logging::debug::Optimizer);
-          }}};
+    const std::map<std::string, std::unique_ptr<OptimizerVisitor> (*)(Builder* builder)> creators = {
+        {"constant_folding",
+         [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
+             return std::make_unique<ConstantFoldingVisitor>(builder, hilti::logging::debug::Optimizer);
+         }},
+        {"functions",
+         [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
+             return std::make_unique<FunctionVisitor>(builder, hilti::logging::debug::Optimizer);
+         }},
+        {"members",
+         [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
+             return std::make_unique<MemberVisitor>(builder, hilti::logging::debug::Optimizer);
+         }},
+        {"types",
+         [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
+             return std::make_unique<TypeVisitor>(builder, hilti::logging::debug::Optimizer);
+         }},
+        {"cfg",
+         [](Builder* builder) -> std::unique_ptr<OptimizerVisitor> {
+             return std::make_unique<FunctionBodyVisitor>(builder, hilti::logging::debug::Optimizer);
+         }},
+    };
 
     // If no user-specified passes are given enable all of them.
     if ( ! passes ) {
