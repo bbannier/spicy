@@ -1433,24 +1433,41 @@ struct MemberVisitor : OptimizerVisitor {
 struct FunctionBodyVisitor : OptimizerVisitor {
     using OptimizerVisitor::OptimizerVisitor;
 
-    void collect(Node* node) override { visitor::visit(*this, node); }
+    bool prune_uses(Node* node) override {
+        visitor::visit(*this, node);
+        return isModified();
+    }
+
+    void visit_body(Statement* body) {
+        auto cfg = detail::cfg::CFG(body);
+        for ( auto&& n : cfg.unreachable_nodes() ) {
+            const auto& data = n->getData();
+
+            if ( data->isA<Statement>() && data->hasParent() )
+                removeNode(data, "unreachable code");
+
+            else if ( data->isA<Expression>() ) {
+                auto* p = data->parent();
+
+                while ( p && ! p->isA<Statement>() )
+                    p = p->parent();
+
+                if ( p && p->hasParent() )
+                    removeNode(p, "unreachable code");
+            }
+        }
+    }
 
     void operator()(declaration::Function* f) override {
-        auto&& body = f->function()->body();
-        if ( ! body )
-            return;
-
-        auto cfg = detail::cfg::CFG(body);
+        if ( auto&& body = f->function()->body() )
+            visit_body(body);
     }
 
     void operator()(declaration::Module* m) override {
         OptimizerVisitor::operator()(m);
 
-        auto&& body = m->statements();
-        if ( ! body )
-            return;
-
-        auto cfg = detail::cfg::CFG(body);
+        if ( auto&& body = m->statements() )
+            visit_body(body);
     }
 };
 
