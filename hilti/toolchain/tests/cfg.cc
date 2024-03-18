@@ -34,6 +34,33 @@ void save_as(const CFG& g, const char* filename) {
 
 TEST_SUITE_BEGIN("cfg");
 
+TEST_CASE("unreachable statements") {
+    auto ctx = std::make_unique<hilti::ASTContext>(nullptr);
+    auto builder = hilti::Builder(ctx.get());
+    builder.addReturn();
+    builder.addExpression(builder.expression(builder.ctorString("foo1", true)));
+    builder.addExpression(builder.expression(builder.ctorString("foo2", true)));
+
+    auto&& ast = builder.block();
+
+    const auto cfg = CFG(ast);
+
+    auto nodes = cfg.nodes();
+    auto foo1 =
+        std::find_if(nodes.begin(), nodes.end(), [](const auto& n) { return n->getData()->print() == "\"foo1\";"; });
+    REQUIRE_NE(foo1, nodes.end());
+    auto foo2 =
+        std::find_if(nodes.begin(), nodes.end(), [](const auto& n) { return n->getData()->print() == "\"foo2\";"; });
+    REQUIRE_NE(foo2, nodes.end());
+
+    auto unreachable = cfg.unreachable_nodes();
+    CHECK_EQ(unreachable.size(), 1);
+    // Node `foo1` is unreachable since it has no parent.
+    CHECK(unreachable.count(*foo1));
+    // Node `foo2` is reachable from `foo1`.
+    CHECK_FALSE(unreachable.count(*foo2));
+}
+
 TEST_CASE("build empty") {
     auto ctx = std::make_unique<hilti::ASTContext>(nullptr);
     auto builder = hilti::Builder(ctx.get());

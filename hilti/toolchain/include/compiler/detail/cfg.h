@@ -80,6 +80,8 @@ public:
     const auto& edges() const { return g.getEdgeSet(); }
     auto nodes() const { return g.getNodeSet(); }
 
+    CXXGraph::T_NodeSet<N> unreachable_nodes() const;
+
     std::string dot() const;
 
 private:

@@ -2,6 +2,8 @@
 
 #include "hilti/compiler/detail/cfg.h"
 
+#include <algorithm>
+#include <iterator>
 #include <utility>
 
 #include <hilti/ast/node.h>
@@ -209,6 +211,29 @@ std::string CFG::dot() const {
     ss << "}";
 
     return ss.str();
+}
+
+CXXGraph::T_NodeSet<CFG::N> CFG::unreachable_nodes() const {
+    auto xs = nodes();
+
+    // We cannot use `inOutEdges` to get a list of unreachable non-meta nodes
+    // since it is completely broken for directed graphs,
+    // https://github.com/ZigRazor/CXXGraph/issues/406.
+
+    std::unordered_set<CXXGraph::id_t> has_in_edge;
+    for ( auto&& e : g.getEdgeSet() ) {
+        auto&& [_, to] = e->getNodePair();
+        has_in_edge.insert(to->getId());
+    }
+
+    CXXGraph::T_NodeSet<N> result;
+    for ( auto&& n : xs ) {
+        auto&& data = n->getData();
+        if ( data && (! has_in_edge.count(n->getId()) && ! data->isA<MetaNode>()) )
+            result.insert(n);
+    }
+
+    return result;
 }
 
 } // namespace detail::cfg
