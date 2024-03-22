@@ -84,9 +84,9 @@ public:
 
     std::string dot() const;
 
-private:
     CXXGraph::Graph<N> g;
 
+private:
     std::unordered_set<std::unique_ptr<MetaNode>> meta_nodes;
     NodeP begin;
     NodeP end;

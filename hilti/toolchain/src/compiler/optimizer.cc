@@ -1440,20 +1440,39 @@ struct FunctionBodyVisitor : OptimizerVisitor {
 
     void visit_body(Statement* body) {
         auto cfg = detail::cfg::CFG(body);
-        for ( auto&& n : cfg.unreachable_nodes() ) {
-            const auto& data = n->getData();
 
-            if ( data->isA<Statement>() && data->hasParent() )
-                removeNode(data, "unreachable code");
+        while ( true ) {
+            auto unreachable_nodes = cfg.unreachable_nodes();
+            if ( unreachable_nodes.empty() )
+                break;
 
-            else if ( data->isA<Expression>() ) {
-                auto* p = data->parent();
+            for ( auto&& n : unreachable_nodes ) {
+                const auto& data = n->getData();
 
-                while ( p && ! p->isA<Statement>() )
-                    p = p->parent();
+                Node* dead = nullptr;
 
-                if ( p && p->hasParent() )
-                    removeNode(p, "unreachable code");
+                if ( data->isA<Statement>() && data->hasParent() )
+                    dead = data;
+
+                else if ( data->isA<Expression>() ) {
+                    auto* p = data->parent();
+
+                    while ( p && ! p->isA<Statement>() )
+                        p = p->parent();
+
+                    if ( p && p->hasParent() )
+                        dead = p;
+                }
+
+                if ( dead ) {
+                    // Edit AST.
+                    removeNode(dead, "unreachable code");
+
+                    // Make equivalen edit to control flow graph.
+                    for ( auto&& e : cfg.g.outEdges(n) )
+                        cfg.g.removeEdge(e->getId());
+                    cfg.g.removeNode(n->getUserId());
+                }
             }
         }
     }
