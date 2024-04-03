@@ -4,17 +4,25 @@
 
 #include <algorithm>
 #include <iterator>
+#include <optional>
 #include <utility>
 
+#include <hilti/ast/declaration.h>
+#include <hilti/ast/declarations/local-variable.h>
+#include <hilti/ast/expressions/assign.h>
+#include <hilti/ast/expressions/name.h>
 #include <hilti/ast/node.h>
 #include <hilti/ast/statement.h>
 #include <hilti/ast/statements/block.h>
+#include <hilti/ast/statements/declaration.h>
 #include <hilti/ast/statements/expression.h>
 #include <hilti/ast/statements/if.h>
 #include <hilti/ast/statements/return.h>
 #include <hilti/ast/statements/throw.h>
 #include <hilti/ast/statements/try.h>
 #include <hilti/ast/statements/while.h>
+#include <hilti/ast/type.h>
+#include <hilti/ast/visitor.h>
 #include <hilti/base/util.h>
 
 namespace hilti {
@@ -23,6 +31,39 @@ std::istream& operator>>(std::istream&, Node*) { util::cannotBeReached(); }
 std::string node_id(const Node* n) { return util::fmt("%d", n ? n->identity() : 0); }
 
 namespace detail::cfg {
+
+uint64_t MetaNode::instances = 0;
+
+// Ad-hoc sorting for nodes.
+//
+// FIXME(bbannier): We only need this as we have no way to access graph nodes
+// in a deterministic order below. Drop this should we switch to a graph
+// library which provides that.
+bool operator<(const Node& a, const Node& b) {
+    auto* metaA = a.tryAs<MetaNode>();
+    auto* metaB = b.tryAs<MetaNode>();
+
+    // Distinguish MetaNodes by counter.
+    if ( metaA && metaB ) {
+        if ( metaA != metaB )
+            assert(metaA->counter != metaB->counter);
+        return metaA->counter < metaB->counter;
+    }
+
+    // MetaNodes sort before other Nodes.
+    else if ( metaA && ! metaB ) {
+        return true;
+    }
+    else if ( ! metaA && metaB ) {
+        return false;
+    }
+
+    // Other nodes are distinguished by content hash.
+    else {
+        auto hasher = std::hash<std::string>();
+        return hasher(a.print()) < hasher(b.print());
+    }
+}
 
 CFG::CFG(const N& root)
     : begin(get_or_add_node(create_meta_node<Start>())), end(get_or_add_node(create_meta_node<End>())) {
@@ -145,7 +186,8 @@ CFG::NodeP CFG::add_try_catch(const NodeP& parent, const statement::Try& try_cat
 
 CFG::NodeP CFG::add_return(const NodeP& parent, const N& expression) {
     if ( expression ) {
-        auto r = get_or_add_node(expression);
+        // We store the return statement to make us of it in data flow analysis.
+        auto r = get_or_add_node(expression->parent());
         add_edge(parent, r);
         return r;
     }
@@ -183,29 +225,99 @@ std::string CFG::dot() const {
 
     ss << "digraph {\n";
 
-    for ( auto&& n : g.getNodeSet() ) {
+    std::unordered_map<CXXGraph::id_t, size_t> node_ids; // Deterministic node ids.
+
+    const auto& nodes = g.getNodeSet();
+    auto sorted_nodes = std::vector(nodes.begin(), nodes.end());
+    std::sort(sorted_nodes.begin(), sorted_nodes.end(),
+              [](const auto& a, const auto& b) { return *a->getData() < *b->getData(); });
+
+    for ( auto&& n : sorted_nodes ) {
+        auto id = node_ids.size();
+        node_ids.insert({n->getId(), id});
+
         auto&& data = n->getData();
+
+        std::optional<std::string> xlabel;
+        if ( auto it = dataflow.find(n.get()); it != dataflow.end() ) {
+            const auto& transfer = it->second;
+
+            auto use = [&]() {
+                auto xs = util::transformToVector(transfer.use, [](auto* decl) {
+                    return rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true);
+                });
+                std::sort(xs.begin(), xs.end());
+                return util::join(xs, ", ");
+            }();
+
+            auto gen = [&]() {
+                auto xs = util::transformToVector(transfer.gen, [](auto&& kv) {
+                    auto&& [decl, node] = kv;
+                    return util::fmt("%s: %s",
+                                     rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true),
+                                     rt::escapeUTF8(node->getData()->print(), true));
+                });
+                std::sort(xs.begin(), xs.end());
+                return util::join(xs, ", ");
+            }();
+
+            auto kill = [&]() {
+                auto xs = util::transformToVector(transfer.kill, [&](auto&& kv) {
+                    auto&& decl = kv.first;
+                    auto&& nodes = kv.second;
+
+                    return util::fmt("%s: [%s]",
+                                     rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true),
+                                     util::join(
+                                         [&]() {
+                                             auto xs = util::transformToVector(nodes, [](auto&& x) {
+                                                 return rt::escapeUTF8(x->getData()->print(), true);
+                                             });
+
+                                             std::sort(xs.begin(), xs.end());
+                                             return xs;
+                                         }(),
+
+                                         ", "));
+                });
+                std::sort(xs.begin(), xs.end());
+                return util::join(xs, " ");
+            }();
+
+            xlabel = util::fmt("xlabel=\"use: [%s] gen: [%s] kill: [%s]\"", use, gen, kill);
+        }
+
         if ( auto&& meta = data->tryAs<MetaNode>() ) {
             if ( data->isA<Start>() )
-                ss << util::fmt("\t%s [label=start shape=Mdiamond];\n", n->getId());
+                ss << util::fmt("\t%s [label=start shape=Mdiamond %s];\n", id, xlabel ? *xlabel : "");
 
             else if ( data->isA<End>() )
-                ss << util::fmt("\t%s [label=end shape=Msquare];\n", n->getId());
+                ss << util::fmt("\t%s [label=end shape=Msquare %s];\n", id, xlabel ? *xlabel : "");
 
             else if ( data->isA<Flow>() )
-                ss << util::fmt("\t%s [shape=point];\n", n->getId());
+                ss << util::fmt("\t%s [shape=point %s];\n", id, xlabel ? *xlabel : "");
 
             else
                 util::cannotBeReached();
         }
 
-        else
-            ss << util::fmt("\t%s [label=\"%s\"];\n", n->getId(), rt::escapeUTF8(data->print(), true));
+        else {
+            ss << util::fmt("\t%s [label=\"%s\" %s];\n", id, rt::escapeUTF8(data->print(), true),
+                            xlabel ? *xlabel : "");
+        }
     }
 
-    for ( auto&& e : g.getEdgeSet() ) {
+    const auto& edges = g.getEdgeSet();
+    auto sorted_edges = std::vector(edges.begin(), edges.end());
+    std::sort(sorted_edges.begin(), sorted_edges.end(), [](const auto& a, const auto& b) {
+        // Edges have deterministic IDs derived from the insertion order.
+        return a->getId() < b->getId();
+    });
+
+    for ( auto&& e : sorted_edges ) {
         auto&& [from, to] = e->getNodePair();
-        ss << util::fmt("\t%s -> %s [label=\"%s\"];\n", from->getId(), to->getId(), e->getId());
+        ss << util::fmt("\t%s -> %s [label=\"%s\"];\n", node_ids.at(from->getId()), node_ids.at(to->getId()),
+                        e->getId());
     }
 
     ss << "}";
@@ -213,27 +325,115 @@ std::string CFG::dot() const {
     return ss.str();
 }
 
-CXXGraph::T_NodeSet<CFG::N> CFG::unreachable_nodes() const {
-    auto xs = nodes();
+// We cannot use `inEdges` since it is completely broken for directed graphs,
+// https://github.com/ZigRazor/CXXGraph/issues/406.
+CXXGraph::T_EdgeSet<CFG::N> inEdges(const CXXGraph::Graph<CFG::N>& g, const CFG::NodeP& n) {
+    CXXGraph::T_EdgeSet<CFG::N> in;
 
-    // We cannot use `inOutEdges` to get a list of unreachable non-meta nodes
-    // since it is completely broken for directed graphs,
-    // https://github.com/ZigRazor/CXXGraph/issues/406.
-
-    std::unordered_set<CXXGraph::id_t> has_in_edge;
     for ( auto&& e : g.getEdgeSet() ) {
         auto&& [_, to] = e->getNodePair();
-        has_in_edge.insert(to->getId());
+
+        if ( to == n )
+            in.insert(e);
     }
+
+    return in;
+}
+
+CXXGraph::T_NodeSet<CFG::N> CFG::unreachable_nodes() const {
+    auto xs = nodes();
 
     CXXGraph::T_NodeSet<N> result;
     for ( auto&& n : xs ) {
         auto&& data = n->getData();
-        if ( data && (! has_in_edge.count(n->getId()) && ! data->isA<MetaNode>()) )
+        if ( data && ! data->isA<MetaNode>() && inEdges(g, n).empty() )
             result.insert(n);
     }
 
     return result;
+}
+
+struct DataflowVisitor : visitor::PreOrder {
+    DataflowVisitor(const CXXGraph::Node<CFG::N>* root_) : root(root_) {}
+
+    const CXXGraph::Node<CFG::N>* root = nullptr;
+    Transfer transfer;
+
+    void getTransfer(const Node& x, const Declaration& decl, Transfer& transfer) const {
+        auto* parent = x.parent();
+
+        if ( ! parent )
+            return;
+
+        if ( auto* assign = parent->tryAs<expression::Assign>() ) {
+            if ( assign->source() == &x )
+                transfer.use.insert(&decl);
+
+            if ( assign->target() == &x )
+                transfer.gen[&decl] = root;
+        }
+
+        else if ( auto* declaration = parent->tryAs<statement::Declaration>() )
+            // Outputs declared in matcher for `statement::Declaration`.
+            transfer.use.insert(&decl);
+
+        else if ( auto* return_ = parent->tryAs<statement::Return>() )
+            // Simply flows a value but does not generate or kill any.
+            transfer.use.insert(&decl);
+
+        if ( parent != root->getData() )
+            getTransfer(*parent, decl, transfer);
+    }
+
+    void operator()(expression::Name* x) override {
+        if ( auto* decl = x->resolvedDeclaration() )
+            getTransfer(*x, *decl, transfer);
+    }
+
+    void operator()(statement::Declaration* x) override { transfer.gen[x->declaration()] = root; }
+};
+
+void CFG::populate_dataflow() {
+    auto visit_node = [](const CXXGraph::Node<N>* n) -> Transfer {
+        if ( auto x = n->getData()->tryAs<MetaNode>() )
+            return {};
+
+        auto v = DataflowVisitor(n);
+        visitor::visit(v, n->getData());
+
+        return std::move(v.transfer);
+    };
+
+    // Populate uses and the gen sets.
+    for ( auto&& n : g.getNodeSet() ) {
+        if ( n->getData() )
+            dataflow[n.get()] = visit_node(n.get());
+    }
+
+    { // Populate the kill sets.
+        std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> gens;
+        for ( auto&& [_, transfer] : dataflow ) {
+            for ( auto&& [d, n] : transfer.gen )
+                gens[d].insert(n);
+        }
+
+        for ( auto&& n : g.getNodeSet() ) {
+            auto& transfer = dataflow[n.get()];
+
+            for ( auto&& [d, ns] : gens ) {
+                auto x = transfer.gen.find(d);
+                // Only kill gens also generated in this node.
+                if ( x == transfer.gen.end() )
+                    continue;
+
+                for ( auto&& nn : ns ) {
+                    // Do not kill the gen in this node.
+                    if ( x->second != nn )
+                        transfer.kill[d].insert(nn);
+                }
+            }
+        }
+    }
 }
 
 } // namespace detail::cfg

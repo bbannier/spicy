@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -31,6 +32,8 @@ enum : uint16_t {
 namespace detail::cfg {
 struct MetaNode : Node {
     MetaNode(node::Tags node_tags) : Node(nullptr, node_tags, {}, {}) {}
+    uint64_t counter = instances++;
+    static uint64_t instances;
     HILTI_NODE_0(MetaNode, override);
 };
 
@@ -50,6 +53,12 @@ struct End : MetaNode {
 struct Flow : MetaNode {
     Flow() : MetaNode(NodeTags) {}
     HILTI_NODE_1(Flow, MetaNode, final);
+};
+
+struct Transfer {
+    std::unordered_set<const Node*> use;
+    std::unordered_map<const Node*, const CXXGraph::Node<Node*>*> gen;
+    std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> kill;
 };
 
 class CFG {
@@ -84,10 +93,13 @@ public:
 
     std::string dot() const;
 
+    void populate_dataflow();
+
     CXXGraph::Graph<N> g;
 
 private:
     std::unordered_set<std::unique_ptr<MetaNode>> meta_nodes;
+    std::unordered_map<const CXXGraph::Node<CFG::N>*, Transfer> dataflow;
     NodeP begin;
     NodeP end;
 };

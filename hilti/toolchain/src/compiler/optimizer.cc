@@ -24,6 +24,7 @@
 #include <hilti/ast/expressions/member.h>
 #include <hilti/ast/expressions/name.h>
 #include <hilti/ast/expressions/ternary.h>
+#include <hilti/ast/function.h>
 #include <hilti/ast/node.h>
 #include <hilti/ast/scope-lookup.h>
 #include <hilti/ast/statements/block.h>
@@ -1440,6 +1441,20 @@ struct FunctionBodyVisitor : OptimizerVisitor {
 
     void visit_body(Statement* body) {
         auto cfg = detail::cfg::CFG(body);
+        cfg.populate_dataflow();
+
+        // FIXME(bbannier): Make this a proper debug stream.
+        if ( rt::getenv("HILTI_DEBUG_DUMP_CFG").has_value() ) {
+            // Fallback scope identifier is just a hash of the body.
+            std::string scope = std::to_string(std::hash<std::string>{}(body->print()));
+
+            if ( auto* fn = body->parent()->tryAs<Function>() )
+                scope = util::fmt("Function %s", fn->id());
+            else if ( auto* mod = body->parent()->tryAs<declaration::Module>() )
+                scope = util::fmt("Module %s", mod->id());
+
+            std::cerr << "# " << scope << '\n' << cfg.dot() << '\n';
+        }
 
         while ( true ) {
             auto unreachable_nodes = cfg.unreachable_nodes();

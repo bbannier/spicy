@@ -559,19 +559,19 @@ TEST_CASE("return multiple") {
     {
         auto&& [from, to] = (it++)->get()->getNodePair();
         CHECK_EQ(from->getData()->print(), "1;");
-        CHECK_EQ(to->getData()->print(), "\"return1\"");
+        CHECK_EQ(to->getData()->print(), "return \"return1\";");
     }
 
     {
         auto&& [from, to] = (it++)->get()->getNodePair();
         CHECK_EQ(from->getData()->print(), "2;");
-        CHECK_EQ(to->getData()->print(), "\"return2\"");
+        CHECK_EQ(to->getData()->print(), "return \"return2\";");
     }
 
     CXXGraph::id_t mix1;
     {
         auto&& [from, to] = (it++)->get()->getNodePair();
-        CHECK_EQ(from->getData()->print(), "\"return2\"");
+        CHECK_EQ(from->getData()->print(), "return \"return2\";");
         CHECK(to->getData()->isA<Flow>());
         mix1 = to->getId();
     }
@@ -586,7 +586,7 @@ TEST_CASE("return multiple") {
     CXXGraph::id_t mix2;
     {
         auto&& [from, to] = (it++)->get()->getNodePair();
-        CHECK_EQ(from->getData()->print(), "\"return1\"");
+        CHECK_EQ(from->getData()->print(), "return \"return1\";");
         CHECK(to->getData()->isA<Flow>());
         mix2 = to->getId();
     }
@@ -629,12 +629,12 @@ TEST_CASE("throw") {
     {
         auto&& [from, to] = (it++)->get()->getNodePair();
         CHECK_EQ(from->getData()->print(), "1;");
-        CHECK_EQ(to->getData()->print(), "\"throw\"");
+        CHECK_EQ(to->getData()->print(), "throw \"throw\";");
     }
 
     {
         auto&& [from, to] = (it++)->get()->getNodePair();
-        CHECK_EQ(from->getData()->print(), "\"throw\"");
+        CHECK_EQ(from->getData()->print(), "throw \"throw\";");
         CHECK(to->getData()->isA<Flow>());
     }
 
