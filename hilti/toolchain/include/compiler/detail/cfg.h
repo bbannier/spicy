@@ -94,12 +94,14 @@ public:
     std::string dot() const;
 
     void populate_dataflow();
+    void populate_reachable_expressions();
 
     CXXGraph::Graph<N> g;
 
 private:
     std::unordered_set<std::unique_ptr<MetaNode>> meta_nodes;
     std::unordered_map<const CXXGraph::Node<CFG::N>*, Transfer> dataflow;
+    std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> reachable;
     NodeP begin;
     NodeP end;
 };

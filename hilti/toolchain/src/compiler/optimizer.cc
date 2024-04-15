@@ -1441,7 +1441,7 @@ struct FunctionBodyVisitor : OptimizerVisitor {
 
     void visit_body(Statement* body) {
         auto cfg = detail::cfg::CFG(body);
-        cfg.populate_dataflow();
+        cfg.populate_reachable_expressions();
 
         // FIXME(bbannier): Make this a proper debug stream.
         if ( rt::getenv("HILTI_DEBUG_DUMP_CFG").has_value() ) {
