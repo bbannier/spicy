@@ -60,6 +60,8 @@ struct Transfer {
     std::unordered_map<const Node*, const CXXGraph::Node<Node*>*> gen;
     std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> kill;
 
+    std::unordered_set<const CXXGraph::Node<Node*>*> in;
+    std::unordered_set<const CXXGraph::Node<Node*>*> out;
     std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> reachable;
 };
 

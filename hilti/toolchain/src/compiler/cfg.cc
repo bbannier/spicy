@@ -463,9 +463,6 @@ void CFG::populate_reachable_expressions() {
     if ( dataflow.empty() )
         populate_dataflow();
 
-    std::unordered_map<const CXXGraph::Node<Node*>*, std::unordered_set<const CXXGraph::Node<Node*>*>> in;
-    std::unordered_map<const CXXGraph::Node<Node*>*, std::unordered_set<const CXXGraph::Node<Node*>*>> out;
-
     auto nodes = g.getNodeSet();
 
     // Compute in and out sets for each node.
@@ -473,43 +470,41 @@ void CFG::populate_reachable_expressions() {
         bool changed = false;
 
         for ( const auto& n : nodes ) {
-            // The in set is the union of all incoming nodes.
-            changed |= ! in.count(n.get());
-            auto& in_ = in[n.get()]; // Insert if missing.
+            auto& transfer = dataflow[n.get()];
+            auto& in = transfer.in;
+            auto& out = transfer.out;
 
-            std::unordered_set<const CXXGraph::Node<Node*>*> in2;
+            // The in set is the union of all incoming nodes.
             for ( const auto& e : inEdges(g, n) ) {
                 const auto& [from, _] = e->getNodePair();
 
-                const auto& from_ = out.at(from.get()); // Must already exist.
-                std::copy(from_.begin(), from_.end(), std::inserter(in2, in2.begin()));
-            }
-
-            if ( in_ != in2 ) {
-                in_ = in2;
-                changed = true;
+                const auto& from_ = dataflow.at(from.get()).out; // Must already exist.
+                std::copy(from_.begin(), from_.end(), std::inserter(in, in.begin()));
+                for ( auto&& f : from_ ) {
+                    auto [_, inserted] = in.insert(f);
+                    changed |= inserted;
+                }
             }
 
             // The out set of a node is gen + (in - kill)
-            changed |= ! out.count(n.get());
-            auto& out_ = out[n.get()]; // Insert if missing.
-            // No need to clear the out set as it can only grow.
-
             const auto& gen = dataflow.at(n.get()).gen;
             const auto& kill = dataflow.at(n.get()).kill;
 
-            for ( auto [decl, g] : gen ) {
-                if ( ! out_.count(g) ) {
-                    out_.insert(g);
-                    changed = true;
-                }
-
-                if ( ! kill.count(decl) || ! kill.at(decl).count(g) ) {
-                }
+            for ( auto&& [decl, g] : gen ) {
+                auto [_, inserted] = out.insert(g);
+                changed |= inserted;
             }
 
-            // std::set_difference(in_.begin(), in_.end(), kill.begin(), kill.end(), std::inserter(out2, out2.begin()));
-            // std::copy(gen.begin(), gen.end(), std::inserter(out2, out2.begin()));
+            for ( auto&& i : in ) {
+                if ( std::any_of(kill.begin(), kill.end(), [&](auto&& kv) {
+                         auto&& [_, n] = kv;
+                         return n.count(i);
+                     }) )
+                    continue;
+
+                auto [_, inserted] = out.insert(i);
+                changed |= inserted;
+            }
         }
 
         if ( ! changed )
