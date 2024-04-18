@@ -59,6 +59,8 @@ struct Transfer {
     std::unordered_set<const Node*> use;
     std::unordered_map<const Node*, const CXXGraph::Node<Node*>*> gen;
     std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> kill;
+
+    std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> reachable;
 };
 
 class CFG {
@@ -101,7 +103,6 @@ public:
 private:
     std::unordered_set<std::unique_ptr<MetaNode>> meta_nodes;
     std::unordered_map<const CXXGraph::Node<CFG::N>*, Transfer> dataflow;
-    std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> reachable;
     NodeP begin;
     NodeP end;
 };
