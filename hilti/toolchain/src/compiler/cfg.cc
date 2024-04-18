@@ -508,68 +508,6 @@ void CFG::populate_reachable_expressions() {
         if ( ! changed )
             break;
     }
-
-    while ( true ) {
-        bool changed = false;
-
-        // for ( const auto& n : g.getNodeSet() ) {
-        //     assert(dataflow.count(n.get()));
-        //     auto& transfer = dataflow.at(n.get());
-        //     auto& reachable = dataflow.at(n.get()).reachable;
-
-        //     for ( const auto& e : inEdges(g, n) ) {
-        //         const auto& [from, _] = e->getNodePair();
-
-        //         assert(dataflow.count(from.get()));
-        //         auto& transfer_from = dataflow.at(from.get());
-
-
-        //         //     // Everything reachable by incoming nodes is reachable.
-        //         //     {
-        //         //         for ( auto& [d, nodes] : transfer_from.reachable ) {
-        //         //             changed |= ! reachable.count(d);
-        //         //             auto& r = reachable[d]; // Insert if missing.
-
-        //         //             const auto num_entries0 = r.size();
-        //         //             std::copy(nodes.begin(), nodes.end(), std::inserter(r, r.begin()));
-        //         //             changed |= num_entries0 != r.size();
-        //         //             std::cerr << num_entries0 << ' ' << r.size() << '\n';
-        //         //         }
-        //         //     }
-
-        //         //     // Everything erated by incoming nodes is reachable.
-        //         //     for ( const auto& [d, node] : transfer_from.gen ) {
-        //         //         changed |= ! reachable.count(d);
-        //         //         auto& r = reachable[d]; // Insert if missing.
-
-        //         //         auto&& [_, inserted] = r.insert(node);
-        //         //         changed |= inserted;
-        //         //     }
-
-        //         //     // Everything killed by incoming nodes is unreachable.
-        //         //     for ( const auto& [d, nodes] : transfer_from.kill ) {
-        //         //         if ( ! reachable.count(d) )
-        //         //             continue;
-        //         //         auto& r = reachable.at(d);
-
-        //         //         for ( const auto& node : nodes ) {
-        //         //             changed |= r.count(node); // `node` will be erased.
-        //         //             r.erase(node);
-        //         //         }
-        //         //     }
-        //         // }
-
-        //         // // Everything killed by this node is unreachable.
-        //         // for ( auto&& [decl, node] : transfer.kill ) {
-        //         //     assert(reachable.count(decl)); // To be killed already needs to be reachable.
-        //         //     reachable.at(decl).erase(node);
-        //         //     changed = true;
-        //     }
-        // }
-
-        if ( ! changed )
-            break;
-    }
 }
 
 } // namespace detail::cfg
