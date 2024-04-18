@@ -247,7 +247,7 @@ std::string CFG::dot() const {
                     return rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true);
                 });
                 std::sort(xs.begin(), xs.end());
-                return util::join(xs, ", ");
+                return util::fmt("use: [%s]", util::join(xs, ", "));
             }();
 
             auto gen = [&]() {
@@ -258,7 +258,7 @@ std::string CFG::dot() const {
                                      rt::escapeUTF8(node->getData()->print(), true));
                 });
                 std::sort(xs.begin(), xs.end());
-                return util::join(xs, ", ");
+                return util::fmt("gen: [%s]", util::join(xs, ", "));
             }();
 
             auto kill = [&]() {
@@ -281,33 +281,26 @@ std::string CFG::dot() const {
                                          ", "));
                 });
                 std::sort(xs.begin(), xs.end());
-                return util::join(xs, " ");
+                return util::fmt("kill: [%s]", util::join(xs, " "));
             }();
 
-            auto reachable = [&]() {
-                auto xs = util::transformToVector(transfer.reachable, [&](auto&& kv) {
-                    auto&& decl = kv.first;
-                    auto&& nodes = kv.second;
+            auto reachability = [&]() -> std::string {
+                auto&& r = transfer.reachability;
+                if ( ! r )
+                    return "";
 
-                    return util::fmt("%s: [%s]",
-                                     rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true),
-                                     util::join(
-                                         [&]() {
-                                             auto xs = util::transformToVector(nodes, [](auto&& x) {
-                                                 return rt::escapeUTF8(x->getData()->print(), true);
-                                             });
+                auto to_str = [](auto&& xs) {
+                    auto ys = util::transformToVector(xs, [](auto&& x) {
+                        return rt::escapeUTF8(x->getData()->print(), true);
+                    });
+                    std::sort(ys.begin(), ys.end());
+                    return util::join(ys, ", ");
+                };
 
-                                             std::sort(xs.begin(), xs.end());
-                                             return xs;
-                                         }(),
-
-                                         ", "));
-                });
-                std::sort(xs.begin(), xs.end());
-                return util::join(xs, " ");
+                return util::fmt("reach: { in: [%s] out: [%s] }", to_str(r->in), to_str(r->out));
             }();
 
-            xlabel = util::fmt("xlabel=\"use: [%s] gen: [%s] kill: [%s] reachable: [%s]\"", use, gen, kill, reachable);
+            xlabel = util::fmt("xlabel=\"%s\"", util::join({use, gen, kill, reachability}, " "));
         }
 
         if ( auto&& meta = data->tryAs<MetaNode>() ) {
@@ -465,20 +458,25 @@ void CFG::populate_reachable_expressions() {
 
     auto nodes = g.getNodeSet();
 
+    // Reset reachability information.
+    for ( auto&& n : nodes ) {
+        dataflow.at(n.get()).reachability = Reachability();
+    }
+
     // Compute in and out sets for each node.
     while ( true ) {
         bool changed = false;
 
         for ( const auto& n : nodes ) {
-            auto& transfer = dataflow[n.get()];
-            auto& in = transfer.in;
-            auto& out = transfer.out;
+            auto& reachability = dataflow[n.get()].reachability;
+            auto& in = reachability->in;
+            auto& out = reachability->out;
 
             // The in set is the union of all incoming nodes.
             for ( const auto& e : inEdges(g, n) ) {
                 const auto& [from, _] = e->getNodePair();
 
-                const auto& from_ = dataflow.at(from.get()).out; // Must already exist.
+                const auto& from_ = dataflow.at(from.get()).reachability->out; // Must already exist.
                 std::copy(from_.begin(), from_.end(), std::inserter(in, in.begin()));
                 for ( auto&& f : from_ ) {
                     auto [_, inserted] = in.insert(f);

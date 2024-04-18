@@ -55,14 +55,17 @@ struct Flow : MetaNode {
     HILTI_NODE_1(Flow, MetaNode, final);
 };
 
+struct Reachability {
+    std::unordered_set<const CXXGraph::Node<Node*>*> in;
+    std::unordered_set<const CXXGraph::Node<Node*>*> out;
+};
+
 struct Transfer {
     std::unordered_set<const Node*> use;
     std::unordered_map<const Node*, const CXXGraph::Node<Node*>*> gen;
     std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> kill;
 
-    std::unordered_set<const CXXGraph::Node<Node*>*> in;
-    std::unordered_set<const CXXGraph::Node<Node*>*> out;
-    std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> reachable;
+    std::optional<Reachability> reachability;
 };
 
 class CFG {
