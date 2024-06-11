@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include <hilti/ast/ast-context.h>
 #include <hilti/ast/node.h>
@@ -102,6 +103,7 @@ public:
 
     void populate_dataflow();
     void populate_reachable_expressions();
+    std::vector<const CXXGraph::Node<N>*> unreachable_statements() const;
 
     CXXGraph::Graph<N> g;
 
@@ -111,6 +113,9 @@ private:
     NodeP begin;
     NodeP end;
 };
+
+CXXGraph::T_EdgeSet<CFG::N> inEdges(const CXXGraph::Graph<CFG::N>& g, const CXXGraph::Node<CFG::N>* n);
+CXXGraph::T_EdgeSet<CFG::N> outEdges(const CXXGraph::Graph<CFG::N>& g, const CXXGraph::Node<CFG::N>* n);
 } // namespace detail::cfg
 
 } // namespace hilti

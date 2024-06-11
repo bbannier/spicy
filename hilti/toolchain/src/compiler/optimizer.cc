@@ -1440,8 +1440,62 @@ struct FunctionBodyVisitor : OptimizerVisitor {
     }
 
     void visit_body(Statement* body) {
+        auto remove_node = [&](detail::cfg::CFG& cfg, const CXXGraph::Node<detail::cfg::CFG::N>* n,
+                               const std::string& msg = {}) {
+            auto* data = n->getData();
+            assert(data);
+
+            Node* dead = nullptr;
+
+            if ( data->isA<Statement>() && data->hasParent() )
+                dead = data;
+
+            else if ( data->isA<Expression>() ) {
+                auto* p = data->parent();
+
+                while ( p && ! p->isA<Statement>() )
+                    p = p->parent();
+
+                if ( p && p->hasParent() )
+                    dead = p;
+            }
+
+            if ( dead ) {
+                // Edit AST.
+                removeNode(data, msg);
+
+                // Make equivalent edit to control flow graph.
+                auto out = detail::cfg::outEdges(cfg.g, n);
+                auto in = detail::cfg::inEdges(cfg.g, n);
+
+                // Create new edges between incoming and outgoing nodes.
+                for ( auto&& i : in ) {
+                    auto&& [from, _] = i->getNodePair();
+                    for ( auto&& o : out ) {
+                        auto&& [_, to] = o->getNodePair();
+
+                        auto e =
+                            std::make_shared<CXXGraph::DirectedEdge<detail::cfg::CFG::N>>(cfg.g.getEdgeSet().size(),
+                                                                                          from, to);
+                        cfg.g.addEdge(std::move(e));
+                    }
+                }
+
+                // Remove existing edges to node.
+                for ( auto&& s : {in, out} )
+                    for ( auto&& e : s )
+                        cfg.g.removeEdge(e->getId());
+
+                cfg.g.removeNode(n->getUserId());
+            }
+        };
+
         auto cfg = detail::cfg::CFG(body);
         cfg.populate_reachable_expressions();
+
+        auto xs = cfg.unreachable_statements();
+        for ( auto&& x : xs )
+            remove_node(cfg, x, "statement result unused");
 
         // FIXME(bbannier): Make this a proper debug stream.
         if ( rt::getenv("HILTI_DEBUG_DUMP_CFG").has_value() ) {
@@ -1461,34 +1515,9 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             if ( unreachable_nodes.empty() )
                 break;
 
-            for ( auto&& n : unreachable_nodes ) {
-                const auto& data = n->getData();
-
-                Node* dead = nullptr;
-
-                if ( data->isA<Statement>() && data->hasParent() )
-                    dead = data;
-
-                else if ( data->isA<Expression>() ) {
-                    auto* p = data->parent();
-
-                    while ( p && ! p->isA<Statement>() )
-                        p = p->parent();
-
-                    if ( p && p->hasParent() )
-                        dead = p;
-                }
-
-                if ( dead ) {
-                    // Edit AST.
-                    removeNode(dead, "unreachable code");
-
-                    // Make equivalen edit to control flow graph.
-                    for ( auto&& e : cfg.g.outEdges(n) )
-                        cfg.g.removeEdge(e->getId());
-                    cfg.g.removeNode(n->getUserId());
-                }
-            }
+            // Remove unreachable control flow branches.
+            for ( auto&& n : unreachable_nodes )
+                remove_node(cfg, n.get(), "unreachable code");
         }
     }
 

@@ -2,9 +2,13 @@
 
 #include "hilti/compiler/detail/cfg.h"
 
+#include <CXXGraph/Node/Node_decl.h>
+
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 #include <optional>
+#include <unordered_map>
 #include <utility>
 
 #include <hilti/ast/declaration.h>
@@ -64,6 +68,37 @@ bool operator<(const Node& a, const Node& b) {
         return hasher(a.print()) < hasher(b.print());
     }
 }
+
+// We cannot use `inEdges` since it is completely broken for directed graphs,
+// https://github.com/ZigRazor/CXXGraph/issues/406.
+CXXGraph::T_EdgeSet<CFG::N> inEdges(const CXXGraph::Graph<CFG::N>& g, const CXXGraph::Node<CFG::N>* n) {
+    CXXGraph::T_EdgeSet<CFG::N> in;
+
+    for ( auto&& e : g.getEdgeSet() ) {
+        auto&& [_, to] = e->getNodePair();
+
+        if ( to.get() == n )
+            in.insert(e);
+    }
+
+    return in;
+}
+
+// We cannot use `outEdges` since it is completely broken for directed graphs,
+// https://github.com/ZigRazor/CXXGraph/issues/406.
+CXXGraph::T_EdgeSet<CFG::N> outEdges(const CXXGraph::Graph<CFG::N>& g, const CXXGraph::Node<CFG::N>* n) {
+    CXXGraph::T_EdgeSet<CFG::N> out;
+
+    for ( auto&& e : g.getEdgeSet() ) {
+        auto&& [from, _] = e->getNodePair();
+
+        if ( from.get() == n )
+            out.insert(e);
+    }
+
+    return out;
+}
+
 
 CFG::CFG(const N& root)
     : begin(get_or_add_node(create_meta_node<Start>())), end(get_or_add_node(create_meta_node<End>())) {
@@ -209,7 +244,7 @@ void CFG::add_edge(NodeP from, NodeP to) {
     if ( ! from || ! to )
         return;
 
-    if ( const auto& xs = g.outEdges(from);
+    if ( const auto& xs = outEdges(g, from.get());
          xs.end() != std::find_if(xs.begin(), xs.end(), [&](const auto& e) { return e->getNodePair().second == to; }) )
         return;
     else {
@@ -341,28 +376,13 @@ std::string CFG::dot() const {
     return ss.str();
 }
 
-// We cannot use `inEdges` since it is completely broken for directed graphs,
-// https://github.com/ZigRazor/CXXGraph/issues/406.
-CXXGraph::T_EdgeSet<CFG::N> inEdges(const CXXGraph::Graph<CFG::N>& g, const CFG::NodeP& n) {
-    CXXGraph::T_EdgeSet<CFG::N> in;
-
-    for ( auto&& e : g.getEdgeSet() ) {
-        auto&& [_, to] = e->getNodePair();
-
-        if ( to == n )
-            in.insert(e);
-    }
-
-    return in;
-}
-
 CXXGraph::T_NodeSet<CFG::N> CFG::unreachable_nodes() const {
     auto xs = nodes();
 
     CXXGraph::T_NodeSet<N> result;
     for ( auto&& n : xs ) {
         auto&& data = n->getData();
-        if ( data && ! data->isA<MetaNode>() && inEdges(g, n).empty() )
+        if ( data && ! data->isA<MetaNode>() && inEdges(g, n.get()).empty() )
             result.insert(n);
     }
 
@@ -396,6 +416,12 @@ struct DataflowVisitor : visitor::PreOrder {
         else if ( auto* return_ = parent->tryAs<statement::Return>() )
             // Simply flows a value but does not generate or kill any.
             transfer.use.insert(&decl);
+
+        // FIXME(bbannier): record uses in other statements.
+        // else {
+        //     std::cerr << "NOPE use " << x.parent()->print() << ' ' << (x.parent() == root->getData()) << '\n';
+        //     transfer.use.insert(&decl);
+        // }
 
         if ( parent != root->getData() )
             getTransfer(*parent, decl, transfer);
@@ -473,7 +499,7 @@ void CFG::populate_reachable_expressions() {
             auto& out = reachability->out;
 
             // The in set is the union of all incoming nodes.
-            for ( const auto& e : inEdges(g, n) ) {
+            for ( const auto& e : inEdges(g, n.get()) ) {
                 const auto& [from, _] = e->getNodePair();
 
                 const auto& from_ = dataflow.at(from.get()).reachability->out; // Must already exist.
@@ -508,6 +534,34 @@ void CFG::populate_reachable_expressions() {
         if ( ! changed )
             break;
     }
+}
+
+std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
+    // This can only be called after reachability information has been populated.
+    assert(! dataflow.empty());
+    assert(dataflow.begin()->second.reachability);
+
+    std::unordered_map<const CXXGraph::Node<N>*, uint64_t> uses;
+
+    for ( auto& [node, transfer] : dataflow ) {
+        for ( auto&& o : transfer.reachability->out )
+            uses[o]; // Insert if not present.
+
+        for ( auto&& u : transfer.use ) {
+            // FIXME(bbannier): uses has decls, but we do not seem to find them here so we miss uses.
+            if ( auto it =
+                     std::find_if(uses.begin(), uses.end(), [&](const auto& n) { return n.first->getData() == u; });
+                 it != uses.end() )
+                ++it->second;
+        }
+    }
+    std::vector<const CXXGraph::Node<CFG::N>*> result;
+    for ( auto&& [n, uses] : uses ) {
+        if ( uses == 0 )
+            result.push_back(n);
+    }
+
+    return result;
 }
 
 } // namespace detail::cfg
