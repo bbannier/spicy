@@ -59,14 +59,3 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cxxgraph)
 add_library(CXXGraph INTERFACE)
 target_include_directories(CXXGraph SYSTEM INTERFACE ${cxxgraph_SOURCE_DIR}/include)
-
-set(BOOST_INCLUDE_LIBRARIES graph)
-set(BOOST_ENABLE_CMAKE ON)
-include(FetchContent)
-FetchContent_Declare(
-  Boost
-  URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.gz
-  URL_MD5 1a84c4e387f491dedc0ece83c64bc815
-  DOWNLOAD_EXTRACT_TIMESTAMP ON
-)
-FetchContent_MakeAvailable(Boost)
