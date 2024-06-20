@@ -54,7 +54,7 @@ include(FetchContent)
 FetchContent_Declare(
     cxxgraph
     GIT_REPOSITORY https://github.com/ZigRazor/CXXGraph.git
-    GIT_TAG v3.1.0
+    GIT_TAG v4.0.0
 )
 FetchContent_MakeAvailable(cxxgraph)
 add_library(CXXGraph INTERFACE)
