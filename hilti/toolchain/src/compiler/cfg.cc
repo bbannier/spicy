@@ -417,11 +417,30 @@ struct DataflowVisitor : visitor::PreOrder {
             // Simply flows a value but does not generate or kill any.
             transfer.use.insert(&decl);
 
-        // FIXME(bbannier): record uses in other statements.
-        // else {
-        //     std::cerr << "NOPE use " << x.parent()->print() << ' ' << (x.parent() == root->getData()) << '\n';
-        //     transfer.use.insert(&decl);
-        // }
+        else {
+            // A visitor which marks all names under it as used.
+            struct UseAll : visitor::PreOrder {
+                using Uses = decltype(transfer.use);
+                Uses& use;
+                UseAll(Uses& use_) : use(use_) {}
+
+                // void operator()(Node* n) override {
+                //     // std::cerr << "NOPE0 " << n->print() << " ### " << n->typename_() << '\n';
+                // }
+
+                void operator()(expression::Name* n) override {
+                    // std::cerr << "NOPE " << n->print() << " ||| " << n->parent()->print() << " ||| ";
+                    if ( auto* decl = n->resolvedDeclaration() ) {
+                        // std::cerr << decl->print();
+                        use.insert(decl);
+                    }
+                    // std::cerr << "\n";
+                }
+            };
+            // visitor::visit(UseAll(transfer.use), const_cast<Declaration*>(&decl));
+            visitor::visit(UseAll(transfer.use), parent);
+        }
+
 
         if ( parent != root->getData() )
             getTransfer(*parent, decl, transfer);
@@ -541,17 +560,37 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
     assert(! dataflow.empty());
     assert(dataflow.begin()->second.reachability);
 
+    for ( auto& [node, transfer] : dataflow ) {
+        for ( auto& o : transfer.reachability->out ) {
+        }
+    }
+
     std::unordered_map<const CXXGraph::Node<N>*, uint64_t> uses;
 
     for ( auto& [node, transfer] : dataflow ) {
-        for ( auto&& o : transfer.reachability->out )
+        // FIXME(bbannier): remove
+        if ( node->getData()->isA<MetaNode>() )
+            continue;
+
+        std::cerr << "NOPE ########################################## " << node->getData()->print() << '\n';
+        for ( auto&& o : transfer.reachability->in ) {
+            std::cerr << "NOPE IN " << o->getData()->print() << " ### " << o->getData()->typename_() << '\n';
             uses[o]; // Insert if not present.
+        }
+
+        assert(dataflow.count(node));
+        auto&& xx = dataflow.at(node);
+        std::cerr << "NOPE DATAFLOW GEN " << xx.gen.size() << ' ';
+        for ( auto&& [x, _] : xx.gen )
+            std::cerr << x->print() << ' ';
+        std::cerr << '\n';
 
         for ( auto&& u : transfer.use ) {
-            // FIXME(bbannier): uses has decls, but we do not seem to find them here so we miss uses.
-            if ( auto it =
-                     std::find_if(uses.begin(), uses.end(), [&](const auto& n) { return n.first->getData() == u; });
-                 it != uses.end() )
+            std::cerr << "NOPE TRANSFER USE " << u->print() << " ### " << u->typename_() << '\n';
+            const auto it =
+                std::find_if(uses.begin(), uses.end(), [&](const auto& n) { return n.first->getData() == u; });
+
+            if ( it != uses.end() )
                 ++it->second;
         }
     }
