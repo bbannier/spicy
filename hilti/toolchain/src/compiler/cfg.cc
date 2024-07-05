@@ -426,7 +426,7 @@ struct DataflowVisitor : visitor::PreOrder {
             transfer.use.insert(decl);
 
         else {
-            std::cerr << "NOPE visiting " << stmt->print() << " ### " << stmt->typename_() << '\n';
+            // All other nodes use the current decl, and are marked as unremovable.
             transfer.keep = true;
             transfer.use.insert(decl);
             std::cerr << "##########################################\n";
