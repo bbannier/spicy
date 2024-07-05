@@ -410,10 +410,28 @@ struct DataflowVisitor : visitor::PreOrder {
         }
 
         if ( auto* assign = stmt->tryAs<expression::Assign>() ) {
-            if ( assign->source() == name )
-                transfer.use.insert(decl);
+            // Figure out which side of the assignment this name is on.
+            auto side = std::optional<Side>();
+            Node* x = name;
+            do {
+                if ( x == assign->target() ) {
+                    side = Side::LHS;
+                    break;
+                }
 
-            if ( assign->target() == name )
+                if ( x == assign->source() ) {
+                    side = Side::RHS;
+                    break;
+                }
+
+                x = x->parent();
+            } while ( x && x != root->getData() );
+            assert(side);
+
+            // Depending on which side the name was record a `gen` or `use`.
+            if ( side == Side::RHS )
+                transfer.use.insert(decl);
+            else if ( side == Side::LHS )
                 transfer.gen[decl] = root;
         }
 
