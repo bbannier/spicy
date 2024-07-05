@@ -562,8 +562,6 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
                 auto&& in_ = t.reachability->in;
                 if ( in_.find(node) != in_.end() )
                     ++uses[n];
-                }
-                std::cerr << '\n';
             }
         }
     }
