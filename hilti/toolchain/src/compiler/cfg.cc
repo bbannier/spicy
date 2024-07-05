@@ -417,8 +417,7 @@ struct DataflowVisitor : visitor::PreOrder {
                 transfer.gen[decl] = root;
         }
 
-        else if ( auto* declaration = stmt->tryAs<statement::Declaration>() ) {
-            std::cerr << " NOPE decl\n";
+        else if ( auto* declaration = stmt->tryAs<statement::Declaration>() )
             // Outputs declared in matcher for `statement::Declaration`.
             transfer.use.insert(decl);
         }
