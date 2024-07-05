@@ -410,7 +410,6 @@ struct DataflowVisitor : visitor::PreOrder {
             return;
 
         if ( auto* assign = stmt->tryAs<expression::Assign>() ) {
-            std::cerr << " NOPE assign " << assign->print() << '\n';
             if ( assign->source() == name )
                 transfer.use.insert(decl);
 
