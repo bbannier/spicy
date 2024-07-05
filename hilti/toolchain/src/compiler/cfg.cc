@@ -420,7 +420,6 @@ struct DataflowVisitor : visitor::PreOrder {
         else if ( auto* declaration = stmt->tryAs<statement::Declaration>() )
             // Outputs declared in matcher for `statement::Declaration`.
             transfer.use.insert(decl);
-        }
 
         else if ( auto* return_ = stmt->tryAs<statement::Return>() ) {
             std::cerr << " NOPE return\n";
