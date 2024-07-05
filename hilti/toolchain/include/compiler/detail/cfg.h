@@ -66,6 +66,8 @@ struct Transfer {
     std::unordered_map<const Node*, const CXXGraph::Node<Node*>*> gen;
     std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> kill;
 
+    bool keep = false; // Whether this node should be kept.
+
     std::optional<Reachability> reachability;
 };
 

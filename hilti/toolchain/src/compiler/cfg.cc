@@ -335,7 +335,9 @@ std::string CFG::dot() const {
                 return util::fmt("reach: { in: [%s] out: [%s] }", to_str(r->in), to_str(r->out));
             }();
 
-            xlabel = util::fmt("xlabel=\"%s\"", util::join({use, gen, kill, reachability}, " "));
+            auto keep = [&]() -> std::string { return transfer.keep ? "keep" : ""; }();
+
+            xlabel = util::fmt("xlabel=\"%s\"", util::join({use, gen, kill, reachability, keep}, " "));
         }
 
         if ( auto&& meta = data->tryAs<MetaNode>() ) {
@@ -395,60 +397,45 @@ struct DataflowVisitor : visitor::PreOrder {
     const CXXGraph::Node<CFG::N>* root = nullptr;
     Transfer transfer;
 
-    void getTransfer(const Node& x, const Declaration& decl, Transfer& transfer) const {
-        auto* parent = x.parent();
+    void operator()(expression::Name* name) override {
+        auto* stmt = root->getData();
+        // If the statement was a simple `Expression` unwrap it to get the more specific node.
+        if ( stmt->isA<statement::Expression>() ) {
+            if ( auto* child = stmt->child(0) )
+                stmt = child;
+        }
 
-        if ( ! parent )
+        auto* decl = name->resolvedDeclaration();
+        if ( ! decl )
             return;
 
-        if ( auto* assign = parent->tryAs<expression::Assign>() ) {
-            if ( assign->source() == &x )
-                transfer.use.insert(&decl);
+        if ( auto* assign = stmt->tryAs<expression::Assign>() ) {
+            std::cerr << " NOPE assign " << assign->print() << '\n';
+            if ( assign->source() == name )
+                transfer.use.insert(decl);
 
-            if ( assign->target() == &x )
-                transfer.gen[&decl] = root;
+            if ( assign->target() == name )
+                transfer.gen[decl] = root;
         }
 
-        else if ( auto* declaration = parent->tryAs<statement::Declaration>() )
+        else if ( auto* declaration = stmt->tryAs<statement::Declaration>() ) {
+            std::cerr << " NOPE decl\n";
             // Outputs declared in matcher for `statement::Declaration`.
-            transfer.use.insert(&decl);
+            transfer.use.insert(decl);
+        }
 
-        else if ( auto* return_ = parent->tryAs<statement::Return>() )
+        else if ( auto* return_ = stmt->tryAs<statement::Return>() ) {
+            std::cerr << " NOPE return\n";
             // Simply flows a value but does not generate or kill any.
-            transfer.use.insert(&decl);
+            transfer.use.insert(decl);
+        }
 
         else {
-            // A visitor which marks all names under it as used.
-            struct UseAll : visitor::PreOrder {
-                using Uses = decltype(transfer.use);
-                Uses& use;
-                UseAll(Uses& use_) : use(use_) {}
-
-                // void operator()(Node* n) override {
-                //     // std::cerr << "NOPE0 " << n->print() << " ### " << n->typename_() << '\n';
-                // }
-
-                void operator()(expression::Name* n) override {
-                    // std::cerr << "NOPE " << n->print() << " ||| " << n->parent()->print() << " ||| ";
-                    if ( auto* decl = n->resolvedDeclaration() ) {
-                        // std::cerr << decl->print();
-                        use.insert(decl);
-                    }
-                    // std::cerr << "\n";
-                }
-            };
-            // visitor::visit(UseAll(transfer.use), const_cast<Declaration*>(&decl));
-            visitor::visit(UseAll(transfer.use), parent);
+            std::cerr << "NOPE visiting " << stmt->print() << " ### " << stmt->typename_() << '\n';
+            transfer.keep = true;
+            transfer.use.insert(decl);
+            std::cerr << "##########################################\n";
         }
-
-
-        if ( parent != root->getData() )
-            getTransfer(*parent, decl, transfer);
-    }
-
-    void operator()(expression::Name* x) override {
-        if ( auto* decl = x->resolvedDeclaration() )
-            getTransfer(*x, *decl, transfer);
     }
 
     void operator()(statement::Declaration* x) override { transfer.gen[x->declaration()] = root; }
@@ -560,44 +547,46 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
     assert(! dataflow.empty());
     assert(dataflow.begin()->second.reachability);
 
-    for ( auto& [node, transfer] : dataflow ) {
-        for ( auto& o : transfer.reachability->out ) {
-        }
-    }
-
     std::unordered_map<const CXXGraph::Node<N>*, uint64_t> uses;
 
-    for ( auto& [node, transfer] : dataflow ) {
-        // FIXME(bbannier): remove
-        if ( node->getData()->isA<MetaNode>() )
+    // Loop over all nodes.
+    for ( auto& [n, transfer] : dataflow ) {
+        if ( n->getData()->isA<MetaNode>() )
             continue;
 
-        std::cerr << "NOPE ########################################## " << node->getData()->print() << '\n';
-        for ( auto&& o : transfer.reachability->in ) {
-            std::cerr << "NOPE IN " << o->getData()->print() << " ### " << o->getData()->typename_() << '\n';
-            uses[o]; // Insert if not present.
-        }
+        (void)uses[n]; // Record statement if not already known.
 
-        assert(dataflow.count(node));
-        auto&& xx = dataflow.at(node);
-        std::cerr << "NOPE DATAFLOW GEN " << xx.gen.size() << ' ';
-        for ( auto&& [x, _] : xx.gen )
-            std::cerr << x->print() << ' ';
-        std::cerr << '\n';
+        std::cerr << "NOPE working on: " << n->getData()->print() << '\n';
 
-        for ( auto&& u : transfer.use ) {
-            std::cerr << "NOPE TRANSFER USE " << u->print() << " ### " << u->typename_() << '\n';
-            const auto it =
-                std::find_if(uses.begin(), uses.end(), [&](const auto& n) { return n.first->getData() == u; });
+        // For each update to a declaration generated by a node ...
+        for ( auto&& [decl, node] : transfer.gen ) {
+            // Search for nodes making use of the statement.
+            for ( auto&& [n_, t] : dataflow ) {
+                // First filter by nodes using the decl.
+                if ( ! t.use.count(decl) )
+                    continue;
 
-            if ( it != uses.end() )
-                ++it->second;
+                // If an update is used and in the `in` set of a node it is used.
+                auto&& in_ = t.reachability->in;
+                std::cerr << "NOPE searching for: " << node->getData()->print() << ' ';
+                if ( in_.find(node) != in_.end() ) {
+                    std::cerr << ", found in " << n_->getData()->print();
+                    ++uses[n];
+                }
+                std::cerr << '\n';
+            }
         }
     }
+
     std::vector<const CXXGraph::Node<CFG::N>*> result;
     for ( auto&& [n, uses] : uses ) {
-        if ( uses == 0 )
-            result.push_back(n);
+        if ( uses > 0 )
+            continue;
+
+        if ( dataflow.at(n).keep )
+            continue;
+
+        result.push_back(n);
     }
 
     return result;

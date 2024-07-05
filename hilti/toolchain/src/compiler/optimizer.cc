@@ -1493,7 +1493,9 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         auto cfg = detail::cfg::CFG(body);
         cfg.populate_reachable_expressions();
 
+        std::cerr << "NOPE computing unreachable statements\n";
         auto xs = cfg.unreachable_statements();
+        // FIXME(bbannier): HERE!!!11
         for ( auto&& x : xs )
             remove_node(cfg, x, "statement result unused");
 
