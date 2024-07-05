@@ -560,9 +560,7 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
 
                 // If an update is used and in the `in` set of a node it is used.
                 auto&& in_ = t.reachability->in;
-                std::cerr << "NOPE searching for: " << node->getData()->print() << ' ';
-                if ( in_.find(node) != in_.end() ) {
-                    std::cerr << ", found in " << n_->getData()->print();
+                if ( in_.find(node) != in_.end() )
                     ++uses[n];
                 }
                 std::cerr << '\n';
