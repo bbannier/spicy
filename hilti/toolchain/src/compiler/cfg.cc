@@ -398,16 +398,16 @@ struct DataflowVisitor : visitor::PreOrder {
     Transfer transfer;
 
     void operator()(expression::Name* name) override {
+        auto* decl = name->resolvedDeclaration();
+        if ( ! decl )
+            return;
+
         auto* stmt = root->getData();
         // If the statement was a simple `Expression` unwrap it to get the more specific node.
         if ( stmt->isA<statement::Expression>() ) {
             if ( auto* child = stmt->child(0) )
                 stmt = child;
         }
-
-        auto* decl = name->resolvedDeclaration();
-        if ( ! decl )
-            return;
 
         if ( auto* assign = stmt->tryAs<expression::Assign>() ) {
             if ( assign->source() == name )
