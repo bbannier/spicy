@@ -444,8 +444,6 @@ struct DataflowVisitor : visitor::PreOrder {
             transfer.use.insert(decl);
             transfer.keep = true;
         }
-
-        else {
             // All other nodes use the current decl, and are marked as unremovable.
             transfer.keep = true;
             transfer.use.insert(decl);
