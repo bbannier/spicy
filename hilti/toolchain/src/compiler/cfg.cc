@@ -442,6 +442,8 @@ struct DataflowVisitor : visitor::PreOrder {
         else if ( auto* return_ = stmt->tryAs<statement::Return>() ) {
             // Simply flows a value but does not generate or kill any.
             transfer.use.insert(decl);
+            transfer.keep = true;
+        }
 
         else {
             // All other nodes use the current decl, and are marked as unremovable.
