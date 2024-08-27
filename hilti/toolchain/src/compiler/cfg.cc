@@ -397,6 +397,8 @@ struct DataflowVisitor : visitor::PreOrder {
     const CXXGraph::Node<CFG::N>* root = nullptr;
     Transfer transfer;
 
+    void operator()(statement::Return* return_) override { transfer.keep = true; }
+
     void operator()(expression::Name* name) override {
         auto* decl = name->resolvedDeclaration();
         if ( ! decl )
@@ -439,11 +441,11 @@ struct DataflowVisitor : visitor::PreOrder {
             // Outputs declared in matcher for `statement::Declaration`.
             transfer.use.insert(decl);
 
-        else if ( auto* return_ = stmt->tryAs<statement::Return>() ) {
-            // Simply flows a value but does not generate or kill any.
         else if ( auto* return_ = stmt->tryAs<statement::Return>() )
-            transfer.keep = true;
-        }
+            // Simply flows a value but does not generate or kill any.
+            transfer.use.insert(decl);
+
+        else {
             // All other nodes use the current decl, and are marked as unremovable.
             transfer.keep = true;
             transfer.use.insert(decl);
