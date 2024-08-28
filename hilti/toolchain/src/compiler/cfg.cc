@@ -397,7 +397,7 @@ struct DataflowVisitor : visitor::PreOrder {
     const CXXGraph::Node<CFG::N>* root = nullptr;
     Transfer transfer;
 
-    void operator()(statement::Return* return_) override { transfer.keep = true; }
+    void operator()(statement::Return*) override { transfer.keep = true; }
 
     void operator()(expression::Name* name) override {
         auto* decl = name->resolvedDeclaration();
