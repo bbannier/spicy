@@ -430,10 +430,11 @@ struct DataflowVisitor : visitor::PreOrder {
             } while ( x && x != root->getData() );
             assert(side);
 
-            // Depending on which side the name was record a `gen` or `use`.
-            if ( side == Side::RHS )
-                transfer.use.insert(decl);
-            else if ( side == Side::LHS )
+            // A use on either side uses the declaration.
+            transfer.use.insert(decl);
+
+            // A LHS use generates a new value.
+            if ( side == Side::LHS )
                 transfer.gen[decl] = root;
         }
 
