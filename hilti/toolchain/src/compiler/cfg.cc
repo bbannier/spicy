@@ -399,6 +399,12 @@ struct DataflowVisitor : visitor::PreOrder {
 
     void operator()(statement::Return*) override { transfer.keep = true; }
 
+    void operator()(Expression* expression) override {
+        // If the top-level CFG node is an expression we are looking at an expression for control flow -- keep it.
+        if ( expression == root->getData() )
+            transfer.keep = true;
+    }
+
     void operator()(expression::Name* name) override {
         auto* decl = name->resolvedDeclaration();
         if ( ! decl )
