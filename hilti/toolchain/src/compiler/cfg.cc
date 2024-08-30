@@ -124,7 +124,7 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
     auto last = std::find_if(stmts.begin(), stmts.end(), [](auto&& c) {
         return c && (c->template isA<statement::Return>() || c->template isA<statement::Throw>() ||
                      c->template isA<statement::Continue>());
-    });
+                     c->template isA<statement::Continue>() || c->template isA<statement::Break>());
     const bool has_dead_flow = last != stmts.end();
     if ( has_dead_flow )
         last = std::next(last);
