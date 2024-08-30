@@ -18,6 +18,7 @@
 #include <hilti/ast/node.h>
 #include <hilti/ast/statement.h>
 #include <hilti/ast/statements/block.h>
+#include <hilti/ast/statements/continue.h>
 #include <hilti/ast/statements/declaration.h>
 #include <hilti/ast/statements/expression.h>
 #include <hilti/ast/statements/if.h>
