@@ -153,8 +153,8 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
             parent = add_return(parent, throw_->expression());
 
         else if ( c->isA<statement::Continue>() )
-            // `continue` statements only add flow, but no data.
-            parent = add_return(parent, nullptr);
+        else if ( c->isA<statement::Continue>() || c->isA<statement::Break>() )
+            // `continue`/`break` statements only add flow, but no data.
 
         else {
             auto cc = get_or_add_node(c);
