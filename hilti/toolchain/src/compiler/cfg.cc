@@ -152,7 +152,7 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
         else if ( auto&& throw_ = c->tryAs<statement::Throw>() )
             parent = add_return(parent, throw_->expression());
 
-        else if ( auto&& continue_ = c->tryAs<statement::Continue>() )
+        else if ( c->isA<statement::Continue>() )
             // `continue` statements only add flow, but no data.
             parent = add_return(parent, nullptr);
 
