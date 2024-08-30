@@ -91,6 +91,7 @@ public:
     void add_edge(NodeP from, NodeP to);
 
     NodeP add_block(NodeP parent, const Nodes& stmts);
+    NodeP add_for(NodeP parent, const statement::For& for_);
     NodeP add_while(NodeP parent, const statement::While& while_);
     NodeP add_if(NodeP parent, const statement::If& if_);
     NodeP add_try_catch(const NodeP& parent, const statement::Try& try_);

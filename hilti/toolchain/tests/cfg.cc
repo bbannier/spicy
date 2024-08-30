@@ -189,6 +189,8 @@ struct TestBuilder : public hilti::ExtendedBuilderTemplate<hilti::Builder> {
     using hilti::ExtendedBuilderTemplate<hilti::Builder>::ExtendedBuilderTemplate;
 };
 
+// FIXME(bbannier): add test case for `for`.
+
 TEST_CASE("while") {
     auto ctx = std::make_unique<hilti::ASTContext>(nullptr);
     auto builder = TestBuilder(ctx.get());

@@ -21,6 +21,7 @@
 #include <hilti/ast/statements/continue.h>
 #include <hilti/ast/statements/declaration.h>
 #include <hilti/ast/statements/expression.h>
+#include <hilti/ast/statements/for.h>
 #include <hilti/ast/statements/if.h>
 #include <hilti/ast/statements/return.h>
 #include <hilti/ast/statements/throw.h>
@@ -135,6 +136,9 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
         if ( auto&& while_ = c->tryAs<statement::While>() )
             parent = add_while(parent, *while_);
 
+        else if ( auto&& for_ = c->tryAs<statement::For>() )
+            parent = add_for(parent, *for_);
+
         else if ( auto&& if_ = c->tryAs<statement::If>() )
             parent = add_if(parent, *if_);
 
@@ -172,6 +176,19 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
     }
 
     return parent;
+}
+
+CFG::NodeP CFG::add_for(NodeP parent, const statement::For& for_) {
+    auto&& sequence = get_or_add_node(for_.sequence());
+    add_edge(std::move(parent), sequence);
+
+    auto&& local = get_or_add_node(for_.local());
+    add_edge(sequence, local);
+
+    auto body_end = add_block(std::move(local), for_.body()->children());
+    add_edge(body_end, sequence);
+
+    return sequence;
 }
 
 CFG::NodeP CFG::add_while(NodeP parent, const statement::While& while_) {
