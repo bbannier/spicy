@@ -572,6 +572,10 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
 
     // Loop over all nodes.
     for ( auto& [n, transfer] : dataflow ) {
+        // FIXME(bbannier): Figure out why data can be nil.
+        if ( ! n || ! n->getData() )
+            continue;
+
         if ( n->getData()->isA<MetaNode>() )
             continue;
 
