@@ -422,6 +422,7 @@ struct DataflowVisitor : visitor::PreOrder {
     Transfer transfer;
 
     void operator()(statement::Return*) override { transfer.keep = true; }
+    void operator()(statement::Assert*) override { transfer.keep = true; }
 
     void operator()(Expression* expression) override {
         // If the top-level CFG node is an expression we are looking at an expression for control flow -- keep it.
