@@ -120,7 +120,8 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
     // After this block `last` is the last reachable statement, either end of
     // children or a control flow statement.
     auto last = std::find_if(stmts.begin(), stmts.end(), [](auto&& c) {
-        return c && (c->template isA<statement::Return>() || c->template isA<statement::Throw>());
+        return c && (c->template isA<statement::Return>() || c->template isA<statement::Throw>() ||
+                     c->template isA<statement::Continue>());
     });
     const bool has_dead_flow = last != stmts.end();
     if ( has_dead_flow )
@@ -145,6 +146,10 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
 
         else if ( auto&& throw_ = c->tryAs<statement::Throw>() )
             parent = add_return(parent, throw_->expression());
+
+        else if ( auto&& continue_ = c->tryAs<statement::Continue>() )
+            // `continue` statements only add flow, but no data.
+            parent = add_return(parent, nullptr);
 
         else {
             auto cc = get_or_add_node(c);
