@@ -511,7 +511,7 @@ struct DataflowVisitor : visitor::PreOrder {
         }
 
         else if ( auto* declaration = stmt->tryAs<statement::Declaration>() )
-            // Outputs declared in matcher for `statement::Declaration`.
+            // Names in declaration statements appear on the RHS.
             transfer.use.insert(decl);
 
         else if ( auto* declaration = stmt->tryAs<declaration::GlobalVariable>() )
