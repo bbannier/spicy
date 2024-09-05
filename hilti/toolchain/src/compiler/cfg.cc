@@ -519,6 +519,7 @@ struct DataflowVisitor : visitor::PreOrder {
 
 void CFG::populate_dataflow() {
     auto visit_node = [](const CXXGraph::Node<N>* n) -> Transfer {
+    void operator()(declaration::GlobalVariable* x) override { transfer.gen[x] = root; }
         if ( auto x = n->getData()->tryAs<MetaNode>() )
             return {};
 
