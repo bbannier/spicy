@@ -78,7 +78,6 @@ public:
 
     CFG(const N& root);
 
-
     template<typename T, typename = std::enable_if_t<std::is_base_of_v<MetaNode, T>>>
     N create_meta_node() {
         auto n = std::make_unique<T>();
