@@ -503,6 +503,10 @@ void CFG::populate_dataflow() {
 
     // Populate uses and the gen sets.
     for ( auto&& n : g.getNodeSet() ) {
+        else if ( auto* declaration = stmt->tryAs<declaration::GlobalVariable>() )
+            // Outputs declared in matcher for `declaration::GlobalVariable`.
+            transfer.use.insert(decl);
+
         if ( n->getData() )
             dataflow[n.get()] = visit_node(n.get());
     }
