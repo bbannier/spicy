@@ -89,6 +89,7 @@ public:
     NodeP get_or_add_node(const N& n);
     void add_edge(NodeP from, NodeP to);
 
+    NodeP add_globals(NodeP parent, const Node& root);
     NodeP add_block(NodeP parent, const Nodes& stmts);
     NodeP add_for(NodeP parent, const statement::For& for_);
     NodeP add_while(NodeP parent, const statement::While& while_);

@@ -110,8 +110,35 @@ CFG::CFG(const N& root)
     : begin(get_or_add_node(create_meta_node<Start>())), end(get_or_add_node(create_meta_node<End>())) {
     assert(root && root->isA<statement::Block>() && "only building from blocks currently supported");
 
+    begin = add_globals(begin, *root);
     auto last = add_block(begin, root->children());
     add_edge(last, end);
+}
+
+CFG::NodeP CFG::add_globals(NodeP parent, const Node& root) {
+    auto* p = root.parent();
+    if ( ! p )
+        return parent;
+
+    auto* mod = p->tryAs<declaration::Module>();
+    if ( ! mod )
+        return parent;
+
+    // A global variables with an init statement since they are effectively statements.
+    for ( auto* decl : mod->declarations() ) {
+        auto* global = decl->tryAs<declaration::GlobalVariable>();
+        if ( ! global )
+            continue;
+
+        if ( ! global->init() )
+            continue;
+
+        auto stmt = get_or_add_node(global);
+        add_edge(parent, stmt);
+        parent = std::move(stmt);
+    }
+
+    return parent;
 }
 
 CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
