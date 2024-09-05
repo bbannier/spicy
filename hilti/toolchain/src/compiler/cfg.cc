@@ -336,7 +336,10 @@ std::string CFG::dot() const {
                     return rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true);
                 });
                 std::sort(xs.begin(), xs.end());
-                return util::fmt("use: [%s]", util::join(xs, ", "));
+                if ( ! xs.empty() )
+                    return util::fmt("use: [%s]", util::join(xs, ", "));
+                else
+                    return std::string();
             }();
 
             auto gen = [&]() {
@@ -347,7 +350,10 @@ std::string CFG::dot() const {
                                      rt::escapeUTF8(node->getData()->print(), true));
                 });
                 std::sort(xs.begin(), xs.end());
-                return util::fmt("gen: [%s]", util::join(xs, ", "));
+                if ( ! xs.empty() )
+                    return util::fmt("gen: [%s]", util::join(xs, ", "));
+                else
+                    return std::string();
             }();
 
             auto kill = [&]() {
@@ -370,7 +376,10 @@ std::string CFG::dot() const {
                                          ", "));
                 });
                 std::sort(xs.begin(), xs.end());
-                return util::fmt("kill: [%s]", util::join(xs, " "));
+                if ( ! xs.empty() )
+                    return util::fmt("kill: [%s]", util::join(xs, " "));
+                else
+                    return std::string();
             }();
 
             auto reachability = [&]() -> std::string {
