@@ -551,7 +551,6 @@ void CFG::populate_dataflow() {
             for ( auto&& [d, ns] : gens ) {
                 auto x = transfer.gen.find(d);
     void operator()(declaration::GlobalVariable* x) override { transfer.gen[x] = root; }
-                // Only kill gens also generated in this node.
                 if ( x == transfer.gen.end() )
                     continue;
 
