@@ -400,7 +400,9 @@ std::string CFG::dot() const {
 
             auto keep = [&]() -> std::string { return transfer.keep ? "keep" : ""; }();
 
-            xlabel = util::fmt("xlabel=\"%s\"", util::join({use, gen, kill, reachability, keep}, " "));
+            xlabel = util::fmt("xlabel=\"%s\"", util::join(util::filter(std::vector{use, gen, kill, reachability, keep},
+                                                                        [](auto&& x) { return ! x.empty(); }),
+                                                           " "));
         }
 
         if ( auto&& meta = data->tryAs<MetaNode>() ) {
