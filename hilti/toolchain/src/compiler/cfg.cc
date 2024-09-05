@@ -519,11 +519,11 @@ struct DataflowVisitor : visitor::PreOrder {
     }
 
     void operator()(statement::Declaration* x) override { transfer.gen[x->declaration()] = root; }
+    void operator()(declaration::GlobalVariable* x) override { transfer.gen[x] = root; }
 };
 
 void CFG::populate_dataflow() {
     auto visit_node = [](const CXXGraph::Node<N>* n) -> Transfer {
-    void operator()(declaration::GlobalVariable* x) override { transfer.gen[x] = root; }
         if ( auto x = n->getData()->tryAs<MetaNode>() )
             return {};
 
@@ -551,7 +551,7 @@ void CFG::populate_dataflow() {
 
             for ( auto&& [d, ns] : gens ) {
                 auto x = transfer.gen.find(d);
-    void operator()(declaration::GlobalVariable* x) override { transfer.gen[x] = root; }
+                // Only kill gens also generated in this node.
                 if ( x == transfer.gen.end() )
                     continue;
 
