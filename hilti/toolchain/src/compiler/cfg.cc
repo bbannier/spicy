@@ -363,17 +363,17 @@ std::string CFG::dot() const {
 
                     return util::fmt("%s: [%s]",
                                      rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true),
-                                     util::join(
-                                         [&]() {
-                                             auto xs = util::transformToVector(nodes, [](auto&& x) {
-                                                 return rt::escapeUTF8(x->getData()->print(), true);
-                                             });
+                                     util::join(util::filter(
+                                                    [&]() {
+                                                        auto xs = util::transformToVector(nodes, [](auto&& x) {
+                                                            return rt::escapeUTF8(x->getData()->print(), true);
+                                                        });
 
-                                             std::sort(xs.begin(), xs.end());
-                                             return xs;
-                                         }(),
-
-                                         ", "));
+                                                        std::sort(xs.begin(), xs.end());
+                                                        return xs;
+                                                    }(),
+                                                    [](auto&& x) { return ! x.empty(); }),
+                                                ", "));
                 });
                 std::sort(xs.begin(), xs.end());
                 if ( ! xs.empty() )
