@@ -518,7 +518,7 @@ struct DataflowVisitor : visitor::PreOrder {
             // Names in the global declaration appear on the RHS.
             transfer.use.insert(decl);
 
-        else if ( auto* return_ = stmt->tryAs<statement::Return>() )
+        else if ( stmt->isA<statement::Return>() )
             // Simply flows a value but does not generate or kill any.
             transfer.use.insert(decl);
 
