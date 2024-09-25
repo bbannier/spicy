@@ -510,7 +510,7 @@ struct DataflowVisitor : visitor::PreOrder {
                 transfer.gen[decl] = root;
         }
 
-        else if ( auto* declaration = stmt->tryAs<statement::Declaration>() )
+        else if ( stmt->isA<statement::Declaration>() )
             // Names in declaration statements appear on the RHS.
             transfer.use.insert(decl);
 
