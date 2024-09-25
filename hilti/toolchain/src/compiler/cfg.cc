@@ -5,6 +5,7 @@
 #include <CXXGraph/Node/Node_decl.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <iterator>
 #include <optional>
@@ -34,6 +35,12 @@
 #include <hilti/ast/type.h>
 #include <hilti/ast/visitor.h>
 #include <hilti/base/util.h>
+#include <hilti/hilti/ast/types/bytes.h>
+#include <hilti/hilti/ast/types/list.h>
+#include <hilti/hilti/ast/types/map.h>
+#include <hilti/hilti/ast/types/set.h>
+#include <hilti/hilti/ast/types/stream.h>
+#include <hilti/hilti/ast/types/vector.h>
 
 namespace hilti {
 std::istream& operator>>(std::istream&, Node*) { util::cannotBeReached(); }
@@ -73,6 +80,18 @@ bool operator<(const Node& a, const Node& b) {
         auto hasher = std::hash<std::string>();
         return hasher(a.print()) < hasher(b.print());
     }
+}
+
+// Helper function to detect whether values of a type can alias their inputs.
+static bool is_aliasing_type(const UnqualifiedType& type) {
+    // TODO(bbannier): Make this part of e.g., `UnqualifiedType` instead of a hardcoded list of types here?
+    return type.isA<type::stream::View>() ||     //
+           type.isA<type::bytes::Iterator>() ||  //
+           type.isA<type::list::Iterator>() ||   //
+           type.isA<type::map::Iterator>() ||    //
+           type.isA<type::set::Iterator>() ||    //
+           type.isA<type::stream::Iterator>() || //
+           type.isA<type::vector::Iterator>();
 }
 
 // We cannot use `inEdges` since it is completely broken for directed graphs,
@@ -398,11 +417,23 @@ std::string CFG::dot() const {
                 return util::fmt("reach: { in: [%s] out: [%s] }", to_str(r->in), to_str(r->out));
             }();
 
+            auto aliases = [&]() {
+                auto xs = util::transformToVector(transfer.aliases, [](auto* decl) {
+                    return rt::escapeUTF8(decl->template as<const hilti::Declaration>()->id(), true);
+                });
+                std::sort(xs.begin(), xs.end());
+                if ( ! xs.empty() )
+                    return util::fmt("aliases: [%s]", util::join(xs, ", "));
+                else
+                    return std::string();
+            }();
+
             auto keep = [&]() -> std::string { return transfer.keep ? "keep" : ""; }();
 
-            xlabel = util::fmt("xlabel=\"%s\"", util::join(util::filter(std::vector{use, gen, kill, reachability, keep},
-                                                                        [](auto&& x) { return ! x.empty(); }),
-                                                           " "));
+            xlabel = util::fmt("xlabel=\"%s\"",
+                               util::join(util::filter(std::vector{use, gen, kill, reachability, aliases, keep},
+                                                       [](auto&& x) { return ! x.empty(); }),
+                                          " "));
         }
 
         if ( auto&& meta = data->tryAs<MetaNode>() ) {
@@ -514,9 +545,17 @@ struct DataflowVisitor : visitor::PreOrder {
             // Names in declaration statements appear on the RHS.
             transfer.use.insert(decl);
 
-        else if ( auto* declaration = stmt->tryAs<declaration::GlobalVariable>() )
+        else if ( auto* global = stmt->tryAs<declaration::GlobalVariable>() ) {
             // Names in the global declaration appear on the RHS.
             transfer.use.insert(decl);
+
+            // FIXME(bbannier): handle local declarations as well?
+
+            if ( auto* type = global->type()->type() ) {
+                if ( is_aliasing_type(*type) )
+                    transfer.aliases.insert(decl);
+            }
+        }
 
         else if ( stmt->isA<statement::Return>() )
             // Simply flows a value but does not generate or kill any.
@@ -534,6 +573,7 @@ struct DataflowVisitor : visitor::PreOrder {
 };
 
 void CFG::populate_dataflow() {
+    // FIXME(bbannier): inline this below.
     auto visit_node = [](const CXXGraph::Node<N>* n) -> Transfer {
         if ( n->getData()->isA<MetaNode>() )
             return {};
@@ -548,6 +588,59 @@ void CFG::populate_dataflow() {
     for ( auto&& n : g.getNodeSet() ) {
         if ( n->getData() )
             dataflow[n.get()] = visit_node(n.get());
+    }
+
+    { // Encode aliasing information.
+
+        auto find_node = [&](const hilti::Node* const n) -> const CXXGraph::Node<N>* {
+            // Cache to prevent repeatedly computing graph node ID.
+            std::map<decltype(n), std::string> id_cache;
+            std::string* id = nullptr;
+            if ( auto it = id_cache.find(n); it != id_cache.end() )
+                id = &it->second;
+            else {
+                auto id_ = node_id(n);
+                auto [i, _] = id_cache.insert({n, id_});
+                id = &i->second;
+            }
+            assert(id);
+
+            auto x = g.getNode(*id);
+            if ( x )
+                return x.value().get();
+
+            return nullptr;
+        };
+
+        // First make aliasing symmetric: to handle the case of e.g.,
+        // references aliasing is stored symmetrically, i.e., if `a` aliases
+        // `b`, `b` will also alias `a`.
+        for ( auto&& [n, transfer] : dataflow ) {
+            for ( auto* alias : transfer.aliases ) {
+                auto* stmt = find_node(alias);
+                if ( ! stmt || ! dataflow.count(stmt) ) {
+                    // Could not find node declaring aliased name.
+                    // FIXME(bbannier): is this an error?
+                    util::detail::internalError(util::fmt(R"(could not find CFG node for "%s" aliased in "%s")",
+                                                          alias->print(), n->getData()->print()));
+                    continue;
+                }
+
+                dataflow.at(stmt).aliases.insert(n->getData());
+            }
+        }
+
+        // Now mark aliased nodes as used.
+        for ( auto&& [n, transfer] : dataflow ) {
+            for ( auto* use : transfer.use ) {
+                auto* stmt = find_node(use);
+                if ( ! stmt || ! dataflow.count(stmt) )
+                    continue;
+
+                for ( auto* alias : dataflow.at(stmt).aliases )
+                    transfer.use.insert(alias);
+            }
+        }
     }
 
     { // Populate the kill sets.

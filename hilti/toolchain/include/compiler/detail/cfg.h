@@ -65,6 +65,7 @@ struct Transfer {
     std::unordered_set<const Node*> use;
     std::unordered_map<const Node*, const CXXGraph::Node<Node*>*> gen;
     std::unordered_map<const Node*, std::unordered_set<const CXXGraph::Node<Node*>*>> kill;
+    std::unordered_set<const Node*> aliases;
 
     bool keep = false; // Whether this node should be kept.
 

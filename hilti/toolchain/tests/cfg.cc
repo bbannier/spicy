@@ -655,4 +655,16 @@ TEST_CASE("throw") {
     CHECK_EQ(it, edges.end());
 }
 
+// FIXME(bbannier): implement a test.
+TEST_CASE("aliasing" * doctest::skip()) {
+    auto ctx = std::make_unique<hilti::ASTContext>(nullptr);
+    auto builder = hilti::Builder(ctx.get());
+
+    auto x = builder.declarationGlobalVariable("x", builder.qualifiedType(builder.typeBytes(), Constness::Mutable),
+                                               builder.expression(builder.ctorBytes("xyz")));
+    builder.call("begin", {builder.id(x->id())});
+
+    CHECK_EQ(builder.block()->children().size(), 0);
+}
+
 TEST_SUITE_END();
