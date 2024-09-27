@@ -570,7 +570,19 @@ struct DataflowVisitor : visitor::PreOrder {
     }
 
     void operator()(statement::Declaration* x) override { transfer.gen[x->declaration()] = root; }
+
     void operator()(declaration::GlobalVariable* x) override { transfer.gen[x] = root; }
+
+    void operator()(declaration::LocalVariable* x) override {
+        transfer.gen[x] = root;
+
+        // Keep locals of struct types with finalizer since it might have side effects.
+        //
+        // TODO(bbannier): Consider dropping even these if we can prove that
+        // the finalizer has no side effects.
+        if ( auto* s = x->type()->type()->tryAs<type::Struct>(); s && s->field("~finally") )
+            transfer.keep = true;
+    }
 };
 
 void CFG::populate_dataflow() {
