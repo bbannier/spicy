@@ -33,6 +33,7 @@
 #include <hilti/ast/statements/try.h>
 #include <hilti/ast/statements/while.h>
 #include <hilti/ast/type.h>
+#include <hilti/ast/types/struct.h>
 #include <hilti/ast/visitor.h>
 #include <hilti/base/util.h>
 #include <hilti/hilti/ast/types/bytes.h>
