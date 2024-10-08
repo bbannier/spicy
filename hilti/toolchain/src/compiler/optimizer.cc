@@ -1439,57 +1439,55 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         return isModified();
     }
 
-    void visit_body(Statement* body) {
-        auto remove_node = [&](detail::cfg::CFG& cfg, const CXXGraph::Node<detail::cfg::CFG::N>* n,
-                               const std::string& msg = {}) {
-            auto* data = n->getData();
-            assert(data);
+    void remove_node(detail::cfg::CFG& cfg, const CXXGraph::Node<detail::cfg::CFG::N>* n, const std::string& msg = {}) {
+        auto* data = n->getData();
+        assert(data);
 
-            Node* dead = nullptr;
+        Node* dead = nullptr;
 
-            if ( data->isA<Statement>() && data->hasParent() )
-                dead = data;
+        if ( data->isA<Statement>() && data->hasParent() )
+            dead = data;
 
-            else if ( data->isA<Expression>() ) {
-                auto* p = data->parent();
+        else if ( data->isA<Expression>() ) {
+            auto* p = data->parent();
 
-                while ( p && ! p->isA<Statement>() )
-                    p = p->parent();
+            while ( p && ! p->isA<Statement>() )
+                p = p->parent();
 
-                if ( p && p->hasParent() )
-                    dead = p;
-            }
+            if ( p && p->hasParent() )
+                dead = p;
+        }
 
-            if ( dead ) {
-                // Edit AST.
-                removeNode(data, msg);
+        if ( dead ) {
+            // Edit AST.
+            removeNode(data, msg);
 
-                // Make equivalent edit to control flow graph.
-                auto out = detail::cfg::outEdges(cfg.g, n);
-                auto in = detail::cfg::inEdges(cfg.g, n);
+            // Make equivalent edit to control flow graph.
+            auto out = detail::cfg::outEdges(cfg.g, n);
+            auto in = detail::cfg::inEdges(cfg.g, n);
 
-                // Create new edges between incoming and outgoing nodes.
-                for ( auto&& i : in ) {
-                    auto&& [from, _] = i->getNodePair();
-                    for ( auto&& o : out ) {
-                        auto&& [_, to] = o->getNodePair();
+            // Create new edges between incoming and outgoing nodes.
+            for ( auto&& i : in ) {
+                auto&& [from, _] = i->getNodePair();
+                for ( auto&& o : out ) {
+                    auto&& [_, to] = o->getNodePair();
 
-                        auto e =
-                            std::make_shared<CXXGraph::DirectedEdge<detail::cfg::CFG::N>>(cfg.g.getEdgeSet().size(),
-                                                                                          from, to);
-                        cfg.g.addEdge(std::move(e));
-                    }
+                    auto e = std::make_shared<CXXGraph::DirectedEdge<detail::cfg::CFG::N>>(cfg.g.getEdgeSet().size(),
+                                                                                           from, to);
+                    cfg.g.addEdge(std::move(e));
                 }
-
-                // Remove existing edges to node.
-                for ( auto&& s : {in, out} )
-                    for ( auto&& e : s )
-                        cfg.g.removeEdge(e->getId());
-
-                cfg.g.removeNode(n->getUserId());
             }
-        };
 
+            // Remove existing edges to node.
+            for ( auto&& s : {in, out} )
+                for ( auto&& e : s )
+                    cfg.g.removeEdge(e->getId());
+
+            cfg.g.removeNode(n->getUserId());
+        }
+    }
+
+    void visit_body(Statement* body) {
         auto cfg = detail::cfg::CFG(body);
         cfg.populate_reachable_expressions();
 
