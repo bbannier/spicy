@@ -1487,8 +1487,8 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         }
     }
 
-    void visit_body(Statement* body) {
-        auto cfg = detail::cfg::CFG(body);
+    void visit_node(Node* n) {
+        auto cfg = detail::cfg::CFG(n);
         cfg.populate_reachable_expressions();
 
         for ( auto&& x : cfg.unreachable_statements() )
