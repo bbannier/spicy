@@ -1497,11 +1497,11 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         // FIXME(bbannier): Make this a proper debug stream.
         if ( rt::getenv("HILTI_DEBUG_DUMP_CFG").has_value() ) {
             // Fallback scope identifier is just a hash of the body.
-            std::string scope = std::to_string(std::hash<std::string>{}(body->print()));
+            std::string scope = std::to_string(std::hash<std::string>{}(n->print()));
 
-            if ( auto* fn = body->parent()->tryAs<Function>() )
+            if ( auto* fn = n->parent()->tryAs<Function>() )
                 scope = util::fmt("Function %s", fn->id());
-            else if ( auto* mod = body->parent()->tryAs<declaration::Module>() )
+            else if ( auto* mod = n->parent()->tryAs<declaration::Module>() )
                 scope = util::fmt("Module %s", mod->id());
 
             std::cerr << "# " << scope << '\n' << cfg.dot() << '\n';
