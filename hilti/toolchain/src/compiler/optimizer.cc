@@ -1520,14 +1520,14 @@ struct FunctionBodyVisitor : OptimizerVisitor {
 
     void operator()(declaration::Function* f) override {
         if ( auto&& body = f->function()->body() )
-            visit_body(body);
+            visit_node(body);
     }
 
     void operator()(declaration::Module* m) override {
         OptimizerVisitor::operator()(m);
 
         if ( auto&& body = m->statements() )
-            visit_body(body);
+            visit_node(body);
     }
 };
 
