@@ -13,6 +13,7 @@
 
 #include <hilti/ast/ast-context.h>
 #include <hilti/ast/node.h>
+#include <hilti/ast/operators/function.h>
 
 #include <CXXGraph/CXXGraph.hpp>
 
@@ -99,6 +100,7 @@ public:
     NodeP add_if(NodeP parent, const statement::If& if_);
     NodeP add_try_catch(const NodeP& parent, const statement::Try& try_);
     NodeP add_return(const NodeP& parent, const N& expression);
+    NodeP add_call(NodeP parent, operator_::function::Call* call);
 
     const auto& edges() const { return g.getEdgeSet(); }
     auto nodes() const { return g.getNodeSet(); }

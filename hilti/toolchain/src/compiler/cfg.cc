@@ -12,11 +12,16 @@
 #include <unordered_map>
 #include <utility>
 
+#include <hilti/ast/ctors/tuple.h>
 #include <hilti/ast/declaration.h>
+#include <hilti/ast/declarations/function.h>
 #include <hilti/ast/declarations/global-variable.h>
 #include <hilti/ast/declarations/local-variable.h>
 #include <hilti/ast/declarations/module.h>
+#include <hilti/ast/declarations/parameter.h>
+#include <hilti/ast/expression.h>
 #include <hilti/ast/expressions/assign.h>
+#include <hilti/ast/expressions/ctor.h>
 #include <hilti/ast/expressions/name.h>
 #include <hilti/ast/node.h>
 #include <hilti/ast/statement.h>
@@ -206,6 +211,9 @@ CFG::NodeP CFG::add_block(NodeP parent, const Nodes& stmts) {
             // `continue`/`break` statements only add flow, but no data.
             parent = add_return(parent, nullptr);
 
+        else if ( auto&& call = c->tryAs<operator_::function::Call>() )
+            parent = add_call(parent, call);
+
         else {
             auto cc = get_or_add_node(c);
 
@@ -302,6 +310,12 @@ CFG::NodeP CFG::add_return(const NodeP& parent, const N& expression) {
     }
 
     return parent;
+}
+
+CFG::NodeP CFG::add_call(NodeP parent, operator_::function::Call* call) {
+    auto c = get_or_add_node(call);
+    add_edge(std::move(parent), c);
+    return c;
 }
 
 std::shared_ptr<const CXXGraph::Node<CFG::N>> CFG::get_or_add_node(const N& n) {
@@ -496,6 +510,41 @@ struct DataflowVisitor : visitor::PreOrder {
 
     void operator()(statement::Return*) override { transfer.keep = true; }
     void operator()(statement::Assert*) override { transfer.keep = true; }
+
+    void operator()(operator_::function::Call* call) override {
+        auto* fun = call->op0()->as<expression::Name>();
+        auto* decl = fun->resolvedDeclaration();
+        assert(decl); // Input should be fully resolved.
+
+        const auto& formal_args = decl->as<declaration::Function>()->function()->ftype()->parameters();
+
+        const auto& args = call->op1()->as<expression::Ctor>()->ctor()->as<ctor::Tuple>()->value();
+        assert(args.size() == formal_args.size()); // The call should match the signature.
+
+        for ( size_t i = 0; i < formal_args.size(); ++i ) {
+            auto&& formal_arg = formal_args[i];
+            auto&& arg = args[i];
+
+            switch ( formal_arg->kind() ) {
+                case parameter::Kind::Unknown: [[fallthrough]];
+                case parameter::Kind::Copy: [[fallthrough]];
+                case parameter::Kind::In: break;
+
+                case parameter::Kind::InOut: {
+                    auto* name = arg->tryAs<expression::Name>();
+                    if ( ! name )
+                        break;
+
+                    auto* decl = name->resolvedDeclaration();
+                    if ( ! decl )
+                        break;
+
+                    transfer.gen[decl] = root;
+                    break;
+                };
+            };
+        }
+    }
 
     void operator()(Expression* expression) override {
         // If the top-level CFG node is an expression we are looking at an expression for control flow -- keep it.
