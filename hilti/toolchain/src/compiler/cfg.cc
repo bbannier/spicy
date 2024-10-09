@@ -802,8 +802,19 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
         if ( ! n || ! n->getData() )
             continue;
 
-        if ( n->getData()->isA<MetaNode>() )
-            continue;
+        // If an operation on an `inout` parameter is visible at the end of the flow, mark it as used.
+        if ( n->getData()->isA<End>() ) {
+            assert(dataflow.count(n));
+            // For each incoming statement ...
+            for ( auto&& in : transfer.reachability->in ) {
+                assert(dataflow.count(in));
+                // If the statement generated an update to an `inout` parameter ...
+                for ( auto&& [n_, _] : dataflow.at(in).gen )
+                    if ( auto&& p = n_->tryAs<declaration::Parameter>(); p && p->kind() == parameter::Kind::InOut ) {
+                        ++uses[in];
+                    }
+            }
+        }
 
         (void)uses[n]; // Record statement if not already known.
 
