@@ -37,6 +37,7 @@
 #include <hilti/ast/statements/throw.h>
 #include <hilti/ast/statements/try.h>
 #include <hilti/ast/statements/while.h>
+#include <hilti/ast/statements/yield.h>
 #include <hilti/ast/type.h>
 #include <hilti/ast/types/struct.h>
 #include <hilti/ast/visitor.h>
@@ -508,8 +509,9 @@ struct DataflowVisitor : visitor::PreOrder {
     const CXXGraph::Node<CFG::N>* root = nullptr;
     Transfer transfer;
 
-    void operator()(statement::Return*) override { transfer.keep = true; }
     void operator()(statement::Assert*) override { transfer.keep = true; }
+    void operator()(statement::Return*) override { transfer.keep = true; }
+    void operator()(statement::Yield*) override { transfer.keep = true; }
 
     void operator()(operator_::function::Call* call) override {
         auto* fun = call->op0()->as<expression::Name>();
