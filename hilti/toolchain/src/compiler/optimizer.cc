@@ -1460,7 +1460,7 @@ struct FunctionBodyVisitor : OptimizerVisitor {
 
         if ( dead ) {
             // Edit AST.
-            removeNode(data, msg);
+            removeNode(dead, msg);
 
             // Make equivalent edit to control flow graph.
             auto out = detail::cfg::outEdges(cfg.g, n);
