@@ -546,6 +546,10 @@ struct DataflowVisitor : visitor::PreOrder {
                 };
             };
         }
+
+        // Since we do not know whether the called function is pure always keep it.
+        // TODO(bbannier): remove calls to pure functions.
+        transfer.keep = true;
     }
 
     void operator()(Expression* expression) override {
