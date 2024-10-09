@@ -808,9 +808,9 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
         if ( ! n || ! n->getData() )
             continue;
 
-        // If an operation on an `inout` parameter is visible at the end of the flow, mark it as used.
         if ( n->getData()->isA<End>() ) {
             assert(dataflow.count(n));
+            // If we saw an operation an `inout` parameter at the end of the flow, mark the parameter as used.
             // For each incoming statement ...
             for ( auto&& in : transfer.reachability->in ) {
                 assert(dataflow.count(in));
