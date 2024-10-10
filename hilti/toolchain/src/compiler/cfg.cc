@@ -514,6 +514,7 @@ struct DataflowVisitor : visitor::PreOrder {
     void operator()(statement::Assert*) override { transfer.keep = true; }
     void operator()(statement::Comment*) override { transfer.keep = true; }
     void operator()(statement::SetLocation*) override { transfer.keep = true; }
+    void operator()(statement::Throw*) override { transfer.keep = true; }
     void operator()(statement::Return*) override { transfer.keep = true; }
     void operator()(statement::Yield*) override { transfer.keep = true; }
 
