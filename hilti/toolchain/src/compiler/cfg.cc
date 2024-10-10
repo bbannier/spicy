@@ -28,12 +28,14 @@
 #include <hilti/ast/statements/assert.h>
 #include <hilti/ast/statements/block.h>
 #include <hilti/ast/statements/break.h>
+#include <hilti/ast/statements/comment.h>
 #include <hilti/ast/statements/continue.h>
 #include <hilti/ast/statements/declaration.h>
 #include <hilti/ast/statements/expression.h>
 #include <hilti/ast/statements/for.h>
 #include <hilti/ast/statements/if.h>
 #include <hilti/ast/statements/return.h>
+#include <hilti/ast/statements/set_location.h>
 #include <hilti/ast/statements/throw.h>
 #include <hilti/ast/statements/try.h>
 #include <hilti/ast/statements/while.h>
@@ -510,6 +512,8 @@ struct DataflowVisitor : visitor::PreOrder {
     Transfer transfer;
 
     void operator()(statement::Assert*) override { transfer.keep = true; }
+    void operator()(statement::Comment*) override { transfer.keep = true; }
+    void operator()(statement::SetLocation*) override { transfer.keep = true; }
     void operator()(statement::Return*) override { transfer.keep = true; }
     void operator()(statement::Yield*) override { transfer.keep = true; }
 
