@@ -14,6 +14,7 @@
 
 #include <hilti/ast/ctors/tuple.h>
 #include <hilti/ast/declaration.h>
+#include <hilti/ast/declarations/expression.h>
 #include <hilti/ast/declarations/function.h>
 #include <hilti/ast/declarations/global-variable.h>
 #include <hilti/ast/declarations/local-variable.h>
@@ -22,6 +23,7 @@
 #include <hilti/ast/expression.h>
 #include <hilti/ast/expressions/assign.h>
 #include <hilti/ast/expressions/ctor.h>
+#include <hilti/ast/expressions/keyword.h>
 #include <hilti/ast/expressions/name.h>
 #include <hilti/ast/node.h>
 #include <hilti/ast/statement.h>
@@ -815,7 +817,8 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
 
         // Check whether we want to declare any of the statements used. We currently do this for
         // - `inout` parameters since their result is can be seen after the function has ended,
-        // - globals since they could be used elsewhere without us being able to see it.
+        // - globals since they could be used elsewhere without us being able to see it,
+        // - `self` expression since they live on beyond the current block.
         if ( n->getData()->isA<End>() ) {
             assert(dataflow.count(n));
             // If we saw an operation an `inout` parameter at the end of the flow, mark the parameter as used.
@@ -830,6 +833,12 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
                     else if ( auto&& p = n_->tryAs<declaration::Parameter>();
                               p && p->kind() == parameter::Kind::InOut ) {
                         ++uses[in];
+                    }
+
+                    else if ( auto* expr = n_->tryAs<declaration::Expression>() ) {
+                        if ( auto* keyword = expr->expression()->tryAs<expression::Keyword>();
+                             keyword && keyword->kind() == expression::keyword::Kind::Self )
+                            ++uses[in];
                     }
                 }
             }
