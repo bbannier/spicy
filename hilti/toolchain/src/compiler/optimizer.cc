@@ -1439,7 +1439,7 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         return isModified();
     }
 
-    void remove_node(detail::cfg::CFG& cfg, const CXXGraph::Node<detail::cfg::CFG::N>* n, const std::string& msg = {}) {
+    bool remove_node(detail::cfg::CFG& cfg, const CXXGraph::Node<detail::cfg::CFG::N>* n, const std::string& msg = {}) {
         auto* data = n->getData();
         assert(data);
 
@@ -1484,7 +1484,11 @@ struct FunctionBodyVisitor : OptimizerVisitor {
                     cfg.g.removeEdge(e->getId());
 
             cfg.g.removeNode(n->getUserId());
+
+            return true;
         }
+
+        return false;
     }
 
     void visit_node(Node* n) {
