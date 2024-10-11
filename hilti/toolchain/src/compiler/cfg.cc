@@ -826,7 +826,8 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
                 for ( auto&& [n_, _] : dataflow.at(in).gen ) {
                     if ( n_->isA<declaration::GlobalVariable>() )
                         ++uses[in];
-                    if ( auto&& p = n_->tryAs<declaration::Parameter>(); p && p->kind() == parameter::Kind::InOut ) {
+                    else if ( auto&& p = n_->tryAs<declaration::Parameter>();
+                              p && p->kind() == parameter::Kind::InOut ) {
                         ++uses[in];
                     }
                 }
