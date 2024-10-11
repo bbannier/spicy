@@ -1517,8 +1517,12 @@ struct FunctionBodyVisitor : OptimizerVisitor {
                 break;
 
             // Remove unreachable control flow branches.
+            bool modified = false;
             for ( auto&& n : unreachable_nodes )
-                remove_node(cfg, n.get(), "unreachable code");
+                modified |= remove_node(cfg, n.get(), "unreachable code");
+
+            if ( ! modified )
+                break;
         }
     }
 
