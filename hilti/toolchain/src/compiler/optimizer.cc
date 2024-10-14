@@ -1499,7 +1499,7 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             remove_node(cfg, x, "statement result unused");
 
         // FIXME(bbannier): Make this a proper debug stream.
-        if ( rt::getenv("HILTI_DEBUG_DUMP_CFG").has_value() ) {
+        if ( rt::getenv("HILTI_DEBUG_DUMP_CFG") == "1" ) {
             // Fallback scope identifier is just a hash of the body.
             std::string scope = std::to_string(std::hash<std::string>{}(n->print()));
 
