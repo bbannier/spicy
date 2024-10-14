@@ -864,6 +864,9 @@ std::vector<const CXXGraph::Node<CFG::N>*> CFG::unreachable_statements() const {
 
     std::vector<const CXXGraph::Node<CFG::N>*> result;
     for ( auto&& [n, uses] : uses ) {
+        if ( n->getData()->isA<MetaNode>() )
+            continue;
+
         if ( uses > 0 )
             continue;
 
