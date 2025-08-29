@@ -1,0 +1,30 @@
+# @TEST-EXEC: HILTI_OPTIMIZER_ENABLE_CFG=1 hiltic -dj %INPUT -D optimizer -D cfg-initial >output 2>&1
+# @TEST-EXEC: btest-diff output
+
+module Test {
+
+import hilti;
+
+type S = struct {
+    uint<64> i;
+
+    method void print() {
+        hilti::print(self.i);
+    }
+
+    method void f();
+} &on-heap;
+
+method void S::f() {
+    self.print();
+    local strong_ref<S> ref = self;
+    ref.i = 1;
+    self.print();
+    ref.i = 2;
+    self.print();
+}
+
+global S s = [$i = 0];
+s.f();
+
+}
