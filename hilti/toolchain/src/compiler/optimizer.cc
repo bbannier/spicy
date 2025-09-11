@@ -8,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -17,6 +18,7 @@
 #include <hilti/ast/ctors/default.h>
 #include <hilti/ast/declaration.h>
 #include <hilti/ast/declarations/constant.h>
+#include <hilti/ast/declarations/expression.h>
 #include <hilti/ast/declarations/function.h>
 #include <hilti/ast/declarations/global-variable.h>
 #include <hilti/ast/declarations/imported-module.h>
@@ -2270,6 +2272,10 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             if ( modified )
                 break;
 
+            modified = unusedInitializations(cfg);
+            if ( modified )
+                break;
+
             auto unreachable_nodes = unreachableNodes(cfg);
 
             // Remove unreachable control flow branches.
@@ -2293,6 +2299,8 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         if ( auto* body = m->statements() )
             visitNode(body);
     }
+
+    bool unusedInitializations(const detail::cfg::CFG& cfg);
 };
 
 std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG& cfg) const {
@@ -2381,6 +2389,71 @@ std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG&
     }
 
     return result;
+}
+
+bool FunctionBodyVisitor::unusedInitializations(const detail::cfg::CFG& cfg) {
+    std::unordered_map<Declaration*, std::vector<detail::cfg::GraphNode>> decl_users;
+
+    for ( const auto& [n, transfer] : cfg.dataflow() ) {
+        if ( transfer.write.size() > 1 )
+            continue;
+
+        for ( auto* decl : transfer.read ) {
+            if ( decl->isA<declaration::Field>() )
+                continue;
+
+            if ( transfer.write.contains(decl) )
+                decl_users[decl].push_back(n);
+        }
+    }
+
+    bool modified = false;
+
+    for ( const auto& [decl, users] : decl_users ) {
+        if ( users.size() != 1 )
+            continue;
+
+        const auto* use = users.front()->tryAs<statement::Expression>();
+        if ( ! use )
+            continue;
+
+        // FIXME(bbannier): work on more stuff as well???
+        auto* local = decl->tryAs<declaration::LocalVariable>();
+        if ( ! local )
+            continue;
+
+        // For structs all fields alias the full struct; ignore them here.
+        if ( local->type()->type()->isA<type::Struct>() )
+            continue;
+
+        auto* assign = use->expression()->tryAs<expression::Assign>();
+        if ( ! assign )
+            // FIXME(bbannier): what else could we work on?
+            continue;
+
+        std::set<Node*> exprs;
+        std::function<void(const Node*)> references = [&](const Node* n) {
+            for ( auto* c : n->children() ) {
+                if ( auto* name = c->tryAs<expression::Name>(); name && name->id() == decl->id() ) {
+                    exprs.insert(c);
+                    continue;
+                }
+
+                references(c);
+            }
+        };
+        references(assign->source());
+
+        if ( exprs.size() != 1 )
+            // FIXME(bbannier): could handle multiple instances of constants.
+            continue;
+
+        auto* val = local->init() ? local->init() : builder()->default_(local->type()->type());
+        replaceNode(*exprs.begin(), val, "inlining expression");
+        modified = true;
+    }
+
+    return modified;
 }
 
 std::unordered_set<Node*> FunctionBodyVisitor::unreachableNodes(const detail::cfg::CFG& cfg) const {
