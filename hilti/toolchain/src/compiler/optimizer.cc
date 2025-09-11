@@ -2431,25 +2431,19 @@ bool FunctionBodyVisitor::unusedInitializations(const detail::cfg::CFG& cfg) {
             // FIXME(bbannier): what else could we work on?
             continue;
 
-        std::set<Node*> exprs;
-        std::function<void(const Node*)> references = [&](const Node* n) {
-            for ( auto* c : n->children() ) {
-                if ( auto* name = c->tryAs<expression::Name>(); name && name->id() == decl->id() ) {
-                    exprs.insert(c);
-                    continue;
-                }
+        struct NameVisitor : visitor::PostOrder {
+            std::set<Node*> names;
+            void operator()(expression::Name* n) override { names.insert(n); }
+        } v;
 
-                references(c);
-            }
-        };
-        references(assign->source());
+        visitor::visit(v, assign->source());
 
-        if ( exprs.size() != 1 )
+        if ( v.names.size() != 1 )
             // FIXME(bbannier): could handle multiple instances of constants.
             continue;
 
         auto* val = local->init() ? local->init() : builder()->default_(local->type()->type());
-        replaceNode(*exprs.begin(), val, "inlining expression");
+        replaceNode(*v.names.begin(), val, "inlining expression");
         modified = true;
     }
 
