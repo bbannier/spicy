@@ -2272,16 +2272,22 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             if ( modified )
                 break;
 
-            modified = unusedInitializations(cfg);
-            if ( modified )
-                break;
-
             auto unreachable_nodes = unreachableNodes(cfg);
 
             // Remove unreachable control flow branches.
             // NOLINTNEXTLINE(bugprone-nondeterministic-pointer-iteration-order)
             for ( auto* n : unreachable_nodes )
                 modified |= remove(cfg, n, "unreachable code");
+            if ( modified )
+                break;
+
+            modified |= unusedInitializations(cfg);
+            if ( modified )
+                break;
+
+            modified |= flattenBlocks(cfg, n);
+            if ( modified )
+                break;
 
             if ( ! modified )
                 break;
@@ -2301,6 +2307,8 @@ struct FunctionBodyVisitor : OptimizerVisitor {
     }
 
     bool unusedInitializations(const detail::cfg::CFG& cfg);
+
+    bool flattenBlocks(const detail::cfg::CFG& cfg, Node* n);
 };
 
 std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG& cfg) const {
@@ -2448,6 +2456,91 @@ bool FunctionBodyVisitor::unusedInitializations(const detail::cfg::CFG& cfg) {
     }
 
     return modified;
+}
+
+bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
+    struct BlockSelector : visitor::PostOrder {
+        statement::Block* block = nullptr;
+
+        void operator()(statement::Block* b) override {
+            // Only work at a single block at a time.
+            if ( block )
+                return;
+
+            auto* parent = b->parent()->tryAs<statement::Block>();
+            if ( ! parent )
+                return;
+
+            struct LocalSelector : visitor::PostOrder {
+                std::set<declaration::LocalVariable*> locals;
+                void operator()(declaration::LocalVariable* v) override { locals.insert(v); }
+            } v;
+
+            visitor::visit(v, b);
+
+            for ( auto* l : v.locals ) {
+                // Find a name which does clash with an existing name in parent scope.
+                ID id = l->id();
+                while ( parent->scope()->lookup(id) )
+                    id = ID(id.str() + "_");
+
+                // No name clash with parent scope, nothing to do.
+                if ( id == l->id() )
+                    continue;
+
+                // Rename all references to declaration.
+                struct ReferenceRenamer : visitor::PostOrder {
+                    ReferenceRenamer(Declaration* decl, const ID& new_id) : decl(decl), new_id(new_id) {}
+
+                    Declaration* decl = nullptr;
+                    const ID& new_id;
+
+                    void operator()(expression::Name* name) override {
+                        if ( name->id() != decl->id() )
+                            return;
+
+                        name->setID(new_id);
+                    }
+                };
+
+                visitor::visit(ReferenceRenamer(l, id), b);
+
+                // Rename declaration.
+                auto fqid = id.relativeTo(l->fullyQualifiedID().sub(-1));
+                auto cid = id.relativeTo(l->canonicalID().sub(-1));
+
+                l->setID(id);
+                l->setFullyQualifiedID(fqid);
+                l->setCanonicalID(cid);
+            }
+
+            std::cerr << "NOPE worked on block " << b << '\n';
+            block = b;
+        }
+    } v;
+
+    // visitor::visit(v, n);
+
+    // If we detected any block its identifiers have already been rewritten to
+    // not clash with the parent scope. Now fold its contents into the parent.
+    if ( auto* block = v.block ) {
+        auto* parent = block->parent();
+
+        auto contents = parent->children();
+        parent->clearChildren();
+
+        for ( auto* c : contents ) {
+            if ( c == block )
+                parent->addChildren(context(), block->children());
+
+            else
+                parent->addChild(context(), c);
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 std::unordered_set<Node*> FunctionBodyVisitor::unreachableNodes(const detail::cfg::CFG& cfg) const {
