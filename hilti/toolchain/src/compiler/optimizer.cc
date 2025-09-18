@@ -1247,119 +1247,6 @@ struct ConstantPropagationVisitor : OptimizerVisitor {
     }
 };
 
-struct FlattenBlockVisitor : OptimizerVisitor {
-    using OptimizerVisitor::OptimizerVisitor;
-
-    bool pruneUses(Node* node) override { return {}; }
-
-    void operator()(declaration::Function* f) override {
-        if ( auto* body = f->function()->body() )
-            visitNode(body);
-    }
-
-    void operator()(declaration::Module* m) override {
-        if ( auto* body = m->statements() )
-            visitNode(body);
-    }
-
-
-    bool visitNode(Node* n) {
-        struct BlockSelector : visitor::MutatingPostOrder {
-            BlockSelector(Builder* builder) : visitor::MutatingPostOrder(builder, logging::debug::Optimizer) {}
-
-            statement::Block* block = nullptr;
-
-            void operator()(statement::Block* b) override {
-                // Only work at a single block at a time.
-                if ( block )
-                    return;
-
-                auto* parent = b->parent()->tryAs<statement::Block>();
-                if ( ! parent )
-                    return;
-
-                struct LocalSelector : visitor::PostOrder {
-                    std::set<declaration::LocalVariable*> locals;
-                    void operator()(declaration::LocalVariable* v) override { locals.insert(v); }
-                } v;
-
-                visitor::visit(v, b);
-
-                for ( auto* l : v.locals ) {
-                    // Find a name which does clash with an existing name in parent scope.
-                    ID id = l->id();
-                    while ( parent->scope()->lookup(id) )
-                        id = ID(id.str() + "_");
-
-                    // No name clash with parent scope, nothing to do.
-                    if ( id == l->id() )
-                        continue;
-
-                    // Rename all references to declaration.
-                    struct Renamer : visitor::MutatingPostOrder {
-                        Renamer(Builder* builder, Declaration* decl, const ID& new_id)
-                            : visitor::MutatingPostOrder(builder, logging::debug::Optimizer),
-                              decl(decl),
-                              new_id(new_id) {}
-
-                        Declaration* decl = nullptr;
-                        const ID& new_id;
-
-                        void operator()(expression::Name* name) override {
-                            if ( name->id() != decl->id() )
-                                return;
-
-                            recordChange(name, util::fmt(R"([%s] renaming reference "%s" -> "%s")",
-                                                         name->meta().location(), name->id(), new_id));
-                            name->setID(new_id);
-                        }
-                    };
-
-                    visitor::visit(Renamer(builder(), l, id), b);
-
-                    // Rename declaration.
-                    recordChange(l, util::fmt(R"(renaming declaration "%s" -> "%s")", l->id(), id));
-                    auto fqid = id.relativeTo(l->fullyQualifiedID().sub(-1));
-                    auto cid = id.relativeTo(l->canonicalID().sub(-1));
-
-                    l->setID(id);
-                    l->setFullyQualifiedID(fqid);
-                    l->setCanonicalID(cid);
-                }
-
-                block = b;
-            }
-        } v(builder());
-
-        visitor::visit(v, n);
-
-        // If we detected any block its identifiers have already been rewritten to
-        // not clash with the parent scope. Now fold its contents into the parent.
-        if ( auto* block = v.block ) {
-            auto* parent = block->parent();
-
-            auto contents = parent->children();
-            parent->clearChildren();
-
-            for ( auto* c : contents ) {
-                if ( c == block )
-                    parent->addChildren(context(), block->children());
-
-                else
-                    parent->addChild(context(), c);
-            }
-
-            // Clear cached information which might become outdated due to edits.
-            auto v = hilti::visitor::PreOrder();
-            for ( auto* n : hilti::visitor::range(v, n, {}) )
-                n->clearScope();
-            return true;
-        }
-
-        return false;
-    }
-};
-
 /**
  * Visitor running on the final, optimized AST to perform additional peephole
  * optimizations. Will run repeatedly until it performs no further changes.
@@ -2329,7 +2216,6 @@ struct FunctionBodyVisitor : OptimizerVisitor {
     std::vector<Node*> unusedStatements(const detail::cfg::CFG& cfg) const;
 
     bool pruneUses(Node* node) override {
-        std::cerr << "NOPE FunctionBodyVisitor pruneUses\n";
         visitor::visit(*this, node);
         return isModified();
     }
@@ -2422,7 +2308,7 @@ struct FunctionBodyVisitor : OptimizerVisitor {
 
     bool unusedInitializations(const detail::cfg::CFG& cfg);
 
-    bool flattenBlocks(detail::cfg::CFG& cfg, Node* n);
+    bool flattenBlocks(const detail::cfg::CFG& cfg, Node* n);
 };
 
 std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG& cfg) const {
@@ -2572,8 +2458,7 @@ bool FunctionBodyVisitor::unusedInitializations(const detail::cfg::CFG& cfg) {
     return modified;
 }
 
-bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
-    return false;
+bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
     struct BlockSelector : visitor::PostOrder {
         statement::Block* block = nullptr;
 
@@ -2604,8 +2489,8 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
                     continue;
 
                 // Rename all references to declaration.
-                struct Renamer : visitor::PostOrder {
-                    Renamer(Declaration* decl, const ID& new_id) : decl(decl), new_id(new_id) {}
+                struct ReferenceRenamer : visitor::PostOrder {
+                    ReferenceRenamer(Declaration* decl, const ID& new_id) : decl(decl), new_id(new_id) {}
 
                     Declaration* decl = nullptr;
                     const ID& new_id;
@@ -2614,17 +2499,13 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
                         if ( name->id() != decl->id() )
                             return;
 
-                        HILTI_DEBUG(logging::debug::Optimizer, util::fmt("[%s] renaming reference \"%s\" -> \"%s\"",
-                                                                         name->meta().location(), name->id(), new_id));
                         name->setID(new_id);
                     }
                 };
 
-                visitor::visit(Renamer(l, id), b);
+                visitor::visit(ReferenceRenamer(l, id), b);
 
                 // Rename declaration.
-                HILTI_DEBUG(logging::debug::Optimizer,
-                            util::fmt("[%s] renaming declaration \"%s\" -> \"%s\"", l->meta().location(), l->id(), id));
                 auto fqid = id.relativeTo(l->fullyQualifiedID().sub(-1));
                 auto cid = id.relativeTo(l->canonicalID().sub(-1));
 
@@ -2638,7 +2519,7 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
         }
     } v;
 
-    visitor::visit(v, n);
+    // visitor::visit(v, n);
 
     // If we detected any block its identifiers have already been rewritten to
     // not clash with the parent scope. Now fold its contents into the parent.
@@ -2655,12 +2536,7 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
             else
                 parent->addChild(context(), c);
         }
-        cfg = detail::cfg::CFG(n); // FIXME(bbannier): drop.
 
-        // Clear cached information which might become outdated due to edits.
-        auto v = hilti::visitor::PreOrder();
-        for ( auto* n : hilti::visitor::range(v, n, {}) )
-            n->clearScope();
         return true;
     }
 
