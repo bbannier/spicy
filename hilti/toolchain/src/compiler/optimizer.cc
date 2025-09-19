@@ -2522,7 +2522,7 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
         }
     } v;
 
-    // visitor::visit(v, n);
+    visitor::visit(v, n);
 
     // If we detected any block its identifiers have already been rewritten to
     // not clash with the parent scope. Now fold its contents into the parent.
