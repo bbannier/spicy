@@ -2499,10 +2499,8 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                     const ID& new_id;
 
                     void operator()(expression::Name* name) override {
-                        if ( name->id() != decl->id() )
-                            return;
-
-                        name->setID(new_id);
+                        if ( name->id() == decl->id() )
+                            name->setID(new_id);
                     }
                 };
 
