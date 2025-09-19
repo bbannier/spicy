@@ -2479,9 +2479,12 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             visitor::visit(v, b);
 
             for ( auto* l : v.locals ) {
-                // Find a name which does clash with an existing name in parent scope.
+                auto* p = l->parent();
+                assert(p);
+
+                // Find a name which does not clash with an existing name in parent scope.
                 ID id = l->id();
-                while ( parent->scope()->lookup(id) )
+                while ( p->scope()->lookup(id) )
                     id = ID(id.str() + "_");
 
                 // No name clash with parent scope, nothing to do.
