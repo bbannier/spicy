@@ -2502,8 +2502,12 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                     const ID& new_id;
 
                     void operator()(expression::Name* name) override {
-                        if ( name->id() == decl->id() )
+                        if ( name->id() == decl->id() ) {
+                            recordChange(name, util::fmt(R"(renaming reference "%s" -> "%s")", name->id(), new_id));
                             name->setID(new_id);
+                            // name->setFullyQualifiedID(new_id);
+                            name->clearResolvedDeclarationIndex(context());
+                        }
                     }
                 };
 
