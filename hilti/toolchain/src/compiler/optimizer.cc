@@ -2511,7 +2511,7 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                     }
                 };
 
-                visitor::visit(ReferenceRenamer(l, id), b);
+                visitor::visit(ReferenceRenamer(l, id, builder()), b);
 
                 // Rename declaration.
                 auto fqid = id.relativeTo(l->fullyQualifiedID().sub(-1));
