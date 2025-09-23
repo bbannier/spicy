@@ -2521,7 +2521,9 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                 l->setFullyQualifiedID(fqid);
                 l->setCanonicalID(cid);
 
-            // FIXME(bbannier): run resolver.
+                if ( auto* scope = l->scope() )
+                    scope->clear();
+            }
 
             std::cerr << "NOPE worked on block " << b << '\n';
             block = b;
