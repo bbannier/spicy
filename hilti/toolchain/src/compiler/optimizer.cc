@@ -2520,7 +2520,6 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                 l->setID(id);
                 l->setFullyQualifiedID(fqid);
                 l->setCanonicalID(cid);
-            }
 
             // FIXME(bbannier): run resolver.
 
