@@ -2535,6 +2535,13 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
     // If we detected any block its identifiers have already been rewritten to
     // not clash with the parent scope. Now fold its contents into the parent.
     if ( auto* block = v.block ) {
+        // FIXME(bbannier): run resolver.
+        std::cerr << "NOPE START resolving block " << block << '\n';
+        if ( auto* scope = block->scope() )
+            scope->clear();
+        detail::resolver::resolve(builder(), block->parent());
+        std::cerr << "NOPE END resolving block " << block << '\n';
+
         auto* parent = block->parent();
 
         auto contents = parent->children();
