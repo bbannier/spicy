@@ -2528,7 +2528,7 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             std::cerr << "NOPE worked on block " << b << '\n';
             block = b;
         }
-    } v;
+    } v(builder());
 
     visitor::visit(v, n);
 
