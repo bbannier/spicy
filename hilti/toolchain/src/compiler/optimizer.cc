@@ -14,6 +14,7 @@
 
 #include <hilti/rt/util.h>
 
+#include <hilti/ast/ast-context.h>
 #include <hilti/ast/builder/builder.h>
 #include <hilti/ast/ctors/default.h>
 #include <hilti/ast/declaration.h>
@@ -53,6 +54,7 @@
 #include <hilti/base/timing.h>
 #include <hilti/base/util.h>
 #include <hilti/compiler/detail/cfg.h>
+#include <hilti/compiler/detail/resolver.h>
 
 namespace hilti {
 
