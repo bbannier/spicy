@@ -2459,7 +2459,9 @@ bool FunctionBodyVisitor::unusedInitializations(const detail::cfg::CFG& cfg) {
 }
 
 bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
-    struct BlockSelector : visitor::PostOrder {
+    struct BlockSelector : visitor::MutatingPostOrder {
+        BlockSelector(Builder* builder) : visitor::MutatingPostOrder(builder, logging::debug::Optimizer) {}
+
         statement::Block* block = nullptr;
 
         void operator()(statement::Block* b) override {
@@ -2492,8 +2494,9 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                     continue;
 
                 // Rename all references to declaration.
-                struct ReferenceRenamer : visitor::PostOrder {
-                    ReferenceRenamer(Declaration* decl, const ID& new_id) : decl(decl), new_id(new_id) {}
+                struct ReferenceRenamer : visitor::MutatingPostOrder {
+                    ReferenceRenamer(Declaration* decl, const ID& new_id, Builder* builder)
+                        : visitor::MutatingPostOrder(builder, logging::debug::Optimizer), decl(decl), new_id(new_id) {}
 
                     Declaration* decl = nullptr;
                     const ID& new_id;
