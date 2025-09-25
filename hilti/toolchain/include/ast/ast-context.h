@@ -415,7 +415,7 @@ public:
     void clear();
 
     // FIXME(bbannier): document.
-    Result<Nothing> resolve(Builder* builder, const Plugin& plugin);
+    Result<Nothing> resolve(Builder* builder, const Plugin& plugin, bool run_gc = true);
 
 private:
     // The following methods implement the corresponding phases of AST processing.
@@ -426,7 +426,7 @@ private:
     Result<Nothing> _init(Builder* builder, const Plugin& plugin);
     Result<Nothing> _buildScopes(Builder* builder, const Plugin& plugin);
     Result<Nothing> _clearState(Builder* builder, const Plugin& plugin);
-    Result<Nothing> _resolve(Builder* builder, const Plugin& plugin);
+    Result<Nothing> _resolve(Builder* builder, const Plugin& plugin, bool run_gc = true);
     Result<Nothing> _resolveUnresolvedNodes(bool* modified, Builder* builder, const Plugin& plugin);
     Result<Nothing> _resolveRoot(bool* modified, Builder* builder, const Plugin& plugin);
     Result<Nothing> _validate(Builder* builder, const Plugin& plugin, bool pre_resolver);

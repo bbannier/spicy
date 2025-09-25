@@ -55,6 +55,7 @@
 #include <hilti/base/util.h>
 #include <hilti/compiler/detail/cfg.h>
 #include <hilti/compiler/detail/resolver.h>
+#include <hilti/compiler/plugin.h>
 
 namespace hilti {
 
@@ -2464,13 +2465,9 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
     struct BlockSelector : visitor::MutatingPostOrder {
         BlockSelector(Builder* builder) : visitor::MutatingPostOrder(builder, logging::debug::Optimizer) {}
 
-        statement::Block* block = nullptr;
+        std::vector<statement::Block*> blocks;
 
         void operator()(statement::Block* b) override {
-            // Only work at a single block at a time.
-            if ( block )
-                return;
-
             auto* parent = b->parent()->tryAs<statement::Block>();
             if ( ! parent )
                 return;
@@ -2528,20 +2525,23 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             }
 
             std::cerr << "NOPE worked on block " << b << '\n';
-            block = b;
+            blocks.push_back(b);
         }
     } v(builder());
 
     visitor::visit(v, n);
 
+    context()->resolve(builder(), plugin::registry().hiltiPlugin(), false);
+
     // If we detected any block its identifiers have already been rewritten to
     // not clash with the parent scope. Now fold its contents into the parent.
-    if ( auto* block = v.block ) {
+    for ( auto* block : v.blocks ) {
         // FIXME(bbannier): run resolver.
         std::cerr << "NOPE START resolving block " << block << '\n';
-        if ( auto* scope = block->scope() )
-            scope->clear();
-        detail::resolver::resolve(builder(), block->parent());
+        // if ( auto* scope = block->scope() )
+        //     scope->clear();
+
+        // detail::resolver::resolve(builder(), block->parent());
         std::cerr << "NOPE END resolving block " << block << '\n';
 
         auto* parent = block->parent();
