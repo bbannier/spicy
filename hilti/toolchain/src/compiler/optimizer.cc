@@ -2281,17 +2281,14 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             // NOLINTNEXTLINE(bugprone-nondeterministic-pointer-iteration-order)
             for ( auto* n : unreachable_nodes )
                 modified |= remove(cfg, n, "unreachable code");
-            if ( modified )
+            if ( ! modified )
                 break;
 
             modified |= unusedInitializations(cfg);
-            if ( modified )
+            if ( ! modified )
                 break;
 
             modified |= flattenBlocks(cfg, n);
-            if ( modified )
-                break;
-
             if ( ! modified )
                 break;
         }
