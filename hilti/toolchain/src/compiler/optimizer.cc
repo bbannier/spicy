@@ -2414,6 +2414,10 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             if ( ! parent )
                 return;
 
+            // Do not attempt to fold blocks into module scope since we cannot declare locals there.
+            if ( auto* p = parent->parent(); p && p->isA<declaration::Module>() )
+                return;
+
             std::set<declaration::LocalVariable*> locals;
             for ( auto* decl : b->childrenOfType<statement::Declaration>() ) {
                 if ( auto* local = decl->declaration()->tryAs<declaration::LocalVariable>() )
