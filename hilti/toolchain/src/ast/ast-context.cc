@@ -250,9 +250,9 @@ void ASTContext::clear() {
     // retained pointers around still.
 }
 
-Result<Nothing> ASTContext::resolve(Builder* builder, const Plugin& plugin, bool run_gc) {
+Result<Nothing> ASTContext::resolve(Builder* builder, const Plugin& plugin) {
     while ( true ) {
-        if ( auto rc = _resolve(builder, plugin, run_gc); ! rc )
+        if ( auto rc = _resolve(builder, plugin); ! rc )
             return rc;
 
         if ( _driver->hookNewASTPostCompilation(plugin, _root) ) {
@@ -719,7 +719,7 @@ Result<Nothing> ASTContext::_resolveRoot(bool* modified, Builder* builder, const
     return runHook(modified, plugin, &Plugin::ast_resolve, "resolving AST", builder, _root);
 }
 
-Result<Nothing> ASTContext::_resolve(Builder* builder, const Plugin& plugin, bool run_gc) {
+Result<Nothing> ASTContext::_resolve(Builder* builder, const Plugin& plugin) {
     HILTI_DEBUG(logging::debug::Compiler, fmt("resolving units with plugin %s", plugin.component))
 
     logging::DebugPushIndent _(logging::debug::Compiler);
@@ -745,8 +745,7 @@ Result<Nothing> ASTContext::_resolve(Builder* builder, const Plugin& plugin, boo
         if ( auto rc = _resolveRoot(&modified, builder, plugin); ! rc )
             return rc;
 
-        if ( run_gc )
-            garbageCollect();
+        garbageCollect();
 
         _saveIterationAST(plugin, "AST after resolving", round);
 

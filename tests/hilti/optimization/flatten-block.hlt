@@ -6,23 +6,24 @@ module foo {
 
 import hilti;
 
-# CHECK: expression::Name "my_stop" -> expression::Ctor "False" (inlining expression)
-
 # CHECK: function bool fn
 function bool fn() {
     local bool my_stop = False;
+    # CHECK: local uint<8> x = 0;
     local uint<8> x = 0;
     x = x + 1;
 
-    # CHECK-NOT: my_stop || True;
     {
-        local uint<8> x = 0;
+        # CHECK: local uint<8> x_ = 1;
+        local uint<8> x = 1;
         x = x + 1;
 
+        # CHECK: local uint<8> y = x_ + 1;
         local uint<8> y = x + 1;
 
         {
-            local uint<8> y = x + 1;
+            # CHECK: local uint<8> y_ = x_ + 2;
+            local uint<8> y = x + 2;
             hilti::print(y, True);
         }
 
@@ -35,4 +36,3 @@ function bool fn() {
 fn();
 
 }
-

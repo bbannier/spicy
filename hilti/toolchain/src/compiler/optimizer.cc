@@ -2281,14 +2281,13 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             // NOLINTNEXTLINE(bugprone-nondeterministic-pointer-iteration-order)
             for ( auto* n : unreachable_nodes )
                 modified |= remove(cfg, n, "unreachable code");
-            if ( ! modified )
-                break;
-
-            modified |= unusedInitializations(cfg);
-            if ( ! modified )
+            if ( modified )
                 break;
 
             modified |= flattenBlocks(cfg, n);
+            if ( modified )
+                break;
+
             if ( ! modified )
                 break;
         }
@@ -2305,8 +2304,6 @@ struct FunctionBodyVisitor : OptimizerVisitor {
         if ( auto* body = m->statements() )
             visitNode(body);
     }
-
-    bool unusedInitializations(const detail::cfg::CFG& cfg);
 
     bool flattenBlocks(const detail::cfg::CFG& cfg, Node* n);
 };
@@ -2399,90 +2396,35 @@ std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG&
     return result;
 }
 
-bool FunctionBodyVisitor::unusedInitializations(const detail::cfg::CFG& cfg) {
-    std::unordered_map<Declaration*, std::vector<detail::cfg::GraphNode>> decl_users;
-
-    for ( const auto& [n, transfer] : cfg.dataflow() ) {
-        if ( transfer.write.size() > 1 )
-            continue;
-
-        for ( auto* decl : transfer.read ) {
-            if ( decl->isA<declaration::Field>() )
-                continue;
-
-            if ( transfer.write.contains(decl) )
-                decl_users[decl].push_back(n);
-        }
-    }
-
-    bool modified = false;
-
-    for ( const auto& [decl, users] : decl_users ) {
-        if ( users.size() != 1 )
-            continue;
-
-        const auto* use = users.front()->tryAs<statement::Expression>();
-        if ( ! use )
-            continue;
-
-        // FIXME(bbannier): work on more stuff as well???
-        auto* local = decl->tryAs<declaration::LocalVariable>();
-        if ( ! local )
-            continue;
-
-        // For structs all fields alias the full struct; ignore them here.
-        if ( local->type()->type()->isA<type::Struct>() )
-            continue;
-
-        auto* assign = use->expression()->tryAs<expression::Assign>();
-        if ( ! assign )
-            // FIXME(bbannier): what else could we work on?
-            continue;
-
-        struct NameVisitor : visitor::PostOrder {
-            std::set<Node*> names;
-            void operator()(expression::Name* n) override { names.insert(n); }
-        } v;
-
-        visitor::visit(v, assign->source());
-
-        if ( v.names.size() != 1 )
-            // FIXME(bbannier): could handle multiple instances of constants.
-            continue;
-
-        auto* val = local->init() ? local->init() : builder()->default_(local->type()->type());
-        replaceNode(*v.names.begin(), val, "inlining expression");
-        modified = true;
-    }
-
-    return modified;
-}
-
 bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
     struct BlockSelector : visitor::MutatingPostOrder {
-        BlockSelector(Builder* builder) : visitor::MutatingPostOrder(builder, logging::debug::Optimizer) {}
+        BlockSelector(Builder* builder, bool& modified)
+            : visitor::MutatingPostOrder(builder, logging::debug::Optimizer), modified(modified) {}
 
-        std::vector<statement::Block*> blocks;
+        statement::Block* block = nullptr;
+        bool& modified;
 
         void operator()(statement::Block* b) override {
+            // Only work at a single block at a time since only check for name
+            // collisions, and renaming might introduce a new collision.
+            if ( block )
+                return;
+
             auto* parent = b->parent()->tryAs<statement::Block>();
             if ( ! parent )
                 return;
 
-            struct LocalSelector : visitor::PostOrder {
-                std::set<declaration::LocalVariable*> locals;
-                void operator()(declaration::LocalVariable* v) override { locals.insert(v); }
-            } v;
+            std::set<declaration::LocalVariable*> locals;
+            for ( auto* decl : b->childrenOfType<statement::Declaration>() ) {
+                if ( auto* local = decl->declaration()->tryAs<declaration::LocalVariable>() )
+                    locals.insert(local);
+            }
 
-            visitor::visit(v, b);
-
-            for ( auto* l : v.locals ) {
-                auto* p = l->parent();
-                assert(p);
-
-                // Find a name which does not clash with an existing name in parent scope.
+            for ( auto* l : locals ) {
+                // Find a name which does not clash with an existing name in
+                // the current block.
                 ID id = l->id();
-                while ( p->scope()->lookup(id) )
+                while ( parent->scope()->has(id) )
                     id = ID(id.str() + "_");
 
                 // No name clash with parent scope, nothing to do.
@@ -2491,73 +2433,91 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
 
                 // Rename all references to declaration.
                 struct ReferenceRenamer : visitor::MutatingPostOrder {
-                    ReferenceRenamer(Declaration* decl, const ID& new_id, Builder* builder)
-                        : visitor::MutatingPostOrder(builder, logging::debug::Optimizer), decl(decl), new_id(new_id) {}
+                    ReferenceRenamer(Declaration* decl, const ID& new_id, Builder* builder, bool& modified)
+                        : visitor::MutatingPostOrder(builder, logging::debug::Optimizer),
+                          decl(decl),
+                          new_id(new_id),
+                          modified(modified) {}
 
                     Declaration* decl = nullptr;
                     const ID& new_id;
+                    bool& modified;
 
                     void operator()(expression::Name* name) override {
                         if ( name->id() == decl->id() ) {
                             recordChange(name, util::fmt(R"(renaming reference "%s" -> "%s")", name->id(), new_id));
                             name->setID(new_id);
-                            // name->setFullyQualifiedID(new_id);
+                            name->setFullyQualifiedID(new_id);
                             name->clearResolvedDeclarationIndex(context());
+
+                            modified = true;
                         }
                     }
                 };
 
-                visitor::visit(ReferenceRenamer(l, id, builder()), b);
+                visitor::visit(ReferenceRenamer(l, id, builder(), modified), b);
 
                 // Rename declaration.
                 auto fqid = id.relativeTo(l->fullyQualifiedID().sub(-1));
                 auto cid = id.relativeTo(l->canonicalID().sub(-1));
 
+                auto old_id = l->id();
+
+                HILTI_DEBUG(logging::debug::Optimizer, util::fmt("NOPE working on block %s: %s", b, b->print()));
+                recordChange(l, util::fmt(R"(renaming declaration "%s" -> "%s")", old_id, id));
+
                 l->setID(id);
                 l->setFullyQualifiedID(fqid);
                 l->setCanonicalID(cid);
+                modified = true;
 
                 if ( auto* scope = l->scope() )
                     scope->clear();
             }
 
-            std::cerr << "NOPE worked on block " << b << '\n';
-            blocks.push_back(b);
+            HILTI_DEBUG(logging::debug::Optimizer, util::fmt("NOPE working on block %s", b));
+            block = b;
         }
-    } v(builder());
+    };
 
-    visitor::visit(v, n);
+    bool modified = false;
+    do {
+        modified = false;
 
-    context()->resolve(builder(), plugin::registry().hiltiPlugin(), false);
+        auto v = BlockSelector(builder(), modified);
+        visitor::visit(v, n);
 
-    // If we detected any block its identifiers have already been rewritten to
-    // not clash with the parent scope. Now fold its contents into the parent.
-    for ( auto* block : v.blocks ) {
-        // FIXME(bbannier): run resolver.
-        std::cerr << "NOPE START resolving block " << block << '\n';
-        // if ( auto* scope = block->scope() )
-        //     scope->clear();
+        // If we detected any block its identifiers have already been rewritten to
+        // not clash with the parent scope. Now fold its contents into the
+        // parent. We do not copy the block over, so it is effectively deleted.
+        if ( auto* block = v.block ) {
+            auto* parent = block->parent();
 
-        // detail::resolver::resolve(builder(), block->parent());
-        std::cerr << "NOPE END resolving block " << block << '\n';
+            auto contents = parent->children();
+            parent->clearChildren();
 
-        auto* parent = block->parent();
+            modified |= ! contents.empty();
 
-        auto contents = parent->children();
-        parent->clearChildren();
+            for ( auto* c : contents ) {
+                if ( c == block )
+                    parent->addChildren(context(), block->children());
 
-        for ( auto* c : contents ) {
-            if ( c == block )
-                parent->addChildren(context(), block->children());
-
-            else
-                parent->addChild(context(), c);
+                else
+                    parent->addChild(context(), c);
+            }
         }
 
-        return true;
-    }
+        // FIXME(bbannier): default-init variables hitting a scope end.
 
-    return false;
+        // Refill nested scopes and reresolve symbols after edits.
+        auto vv = hilti::visitor::PreOrder();
+        for ( auto* n : hilti::visitor::range(vv, n, {}) )
+            n->clearScope();
+
+        context()->resolve(builder(), plugin::registry().hiltiPlugin());
+    } while ( modified );
+
+    return modified;
 }
 
 std::unordered_set<Node*> FunctionBodyVisitor::unreachableNodes(const detail::cfg::CFG& cfg) const {

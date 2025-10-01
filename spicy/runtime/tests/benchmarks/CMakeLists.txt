@@ -14,7 +14,7 @@ endif ()
 if (BUILD_TOOLCHAIN)
     add_custom_command(
         OUTPUT ${_generated_sources}
-        COMMAND spicyc -x ${CMAKE_CURRENT_BINARY_DIR}/Benchmark "${BENCH_SOURCES}"
+        COMMAND spicyc -x ${CMAKE_CURRENT_BINARY_DIR}/Benchmark "${BENCH_SOURCES}" -D optimizer
         DEPENDS spicyc ${BENCH_SOURCES}
         COMMENT "Generating C++ code for Benchmark")
 
