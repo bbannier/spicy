@@ -2463,7 +2463,6 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
 
                 auto old_id = l->id();
 
-                HILTI_DEBUG(logging::debug::Optimizer, util::fmt("NOPE working on block %s: %s", b, b->print()));
                 recordChange(l, util::fmt(R"(renaming declaration "%s" -> "%s")", old_id, id));
 
                 l->setID(id);
@@ -2475,7 +2474,6 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
                     scope->clear();
             }
 
-            HILTI_DEBUG(logging::debug::Optimizer, util::fmt("NOPE working on block %s", b));
             block = b;
         }
     };
