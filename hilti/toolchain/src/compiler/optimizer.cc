@@ -2483,6 +2483,7 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
     };
 
     bool modified = false;
+    bool any_modification = false;
     do {
         modified = false;
 
@@ -2493,6 +2494,7 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
         // not clash with the parent scope. Now fold its contents into the
         // parent. We do not copy the block over, so it is effectively deleted.
         if ( auto* block = v.block ) {
+            HILTI_DEBUG(logging::debug::Optimizer, util::fmt("flattening block %s", block->print()));
             auto* parent = block->parent();
 
             auto contents = parent->children();
@@ -2509,6 +2511,9 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             }
         }
 
+        else
+            continue;
+
         // FIXME(bbannier): default-init variables hitting a scope end.
 
         // Refill nested scopes and reresolve symbols after edits.
@@ -2517,9 +2522,11 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             n->clearScope();
 
         context()->resolve(builder(), plugin::registry().hiltiPlugin());
+
+        any_modification = true;
     } while ( modified );
 
-    return modified;
+    return any_modification;
 }
 
 std::unordered_set<Node*> FunctionBodyVisitor::unreachableNodes(const detail::cfg::CFG& cfg) const {
