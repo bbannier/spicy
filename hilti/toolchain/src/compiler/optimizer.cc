@@ -2498,16 +2498,31 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             auto* parent = block->parent();
 
             auto contents = parent->children();
-            parent->clearChildren();
 
-            modified |= ! contents.empty();
+            if ( ! contents.empty() ) {
+                parent->clearChildren();
 
-            for ( auto* c : contents ) {
-                if ( c == block )
-                    parent->addChildren(context(), block->children());
+                // FIXME(bbannier): default-init variables hitting a scope end.
+                auto successors = cfg.graph().neighborsDownstream((*contents.rbegin())->identity());
+                assert(successors.size() == 1);
+                const auto* scope_end = cfg.graph().getNode(successors.front());
+                assert(scope_end);
+                assert((*scope_end)->isA<detail::cfg::End>());
+                const auto& transfer = cfg.dataflow().at(*scope_end);
+                for ( auto&& [a, xx] : transfer.kill ) {
+                    if ( auto* local = a->tryAs<declaration::LocalVariable>() )
+                        builder()->addAssign(a->id(), builder()->default_(local->type()->type()));
+                }
 
-                else
-                    parent->addChild(context(), c);
+                for ( auto* c : contents ) {
+                    if ( c == block )
+                        parent->addChildren(context(), block->children());
+
+                    else
+                        parent->addChild(context(), c);
+                }
+
+                modified = true;
             }
         }
 
