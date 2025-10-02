@@ -2526,11 +2526,6 @@ bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
             }
         }
 
-        else
-            continue;
-
-        // FIXME(bbannier): default-init variables hitting a scope end.
-
         // Refill nested scopes and reresolve symbols after edits.
         auto vv = hilti::visitor::PreOrder();
         for ( auto* n : hilti::visitor::range(vv, n, {}) )
