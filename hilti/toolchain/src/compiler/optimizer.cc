@@ -2535,12 +2535,14 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
         for ( auto* n : hilti::visitor::range(vv, n, {}) )
             n->clearScope();
 
-        context()->resolve(builder(), plugin::registry().hiltiPlugin());
+        // FIXME(etyp): Disabling GC one-off here doesn't even seem to fix it.
+        context()->resolve(builder(), plugin::registry().hiltiPlugin(), false);
 
-        any_modification = true;
+        cfg = detail::cfg::CFG(n);
+
     } while ( modified );
 
-    return any_modification;
+    return ever_modified;
 }
 
 std::unordered_set<Node*> FunctionBodyVisitor::unreachableNodes(const detail::cfg::CFG& cfg) const {
