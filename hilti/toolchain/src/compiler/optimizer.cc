@@ -2534,8 +2534,7 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
         for ( auto* n : hilti::visitor::range(vv, n, {}) )
             n->clearScope();
 
-        // FIXME(etyp): Disabling GC one-off here doesn't even seem to fix it.
-        context()->resolve(builder(), plugin::registry().hiltiPlugin(), false);
+        context()->resolve(builder(), plugin::registry().hiltiPlugin());
 
         cfg = detail::cfg::CFG(n);
 
