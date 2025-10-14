@@ -2503,18 +2503,20 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
                 parent->clearChildren();
 
                 // Variables declared in the block would have previously gone
-                // out of scope. Overwrite them to force any aliases also see
-                // receive an update.
+                // out of scope. Overwrite them to force any aliases to also
+                // see an update.
                 auto successors = cfg.graph().neighborsDownstream((*contents.rbegin())->identity());
-                assert(successors.size() == 1);
-                const auto* scope_end = cfg.graph().getNode(successors.front());
-                assert(scope_end);
-                assert((*scope_end)->isA<detail::cfg::End>());
-                const auto& transfer = cfg.dataflow().at(*scope_end);
-                for ( auto&& [a, xx] : transfer.kill ) {
-                    if ( auto* local = a->tryAs<declaration::LocalVariable>() )
-                        block->addChild(context(), builder()->assign(builder()->id(a->id()),
-                                                                     builder()->default_(local->type()->type())));
+                assert(successors.size() <= 1);
+                if ( ! successors.empty() ) {
+                    const auto* scope_end = cfg.graph().getNode(successors.front());
+                    assert(scope_end);
+                    assert((*scope_end)->isA<detail::cfg::End>());
+                    const auto& transfer = cfg.dataflow().at(*scope_end);
+                    for ( auto&& [a, xx] : transfer.kill ) {
+                        if ( auto* local = a->tryAs<declaration::LocalVariable>() )
+                            block->addChild(context(), builder()->assign(builder()->id(a->id()),
+                                                                         builder()->default_(local->type()->type())));
+                    }
                 }
 
                 for ( auto* c : contents ) {
