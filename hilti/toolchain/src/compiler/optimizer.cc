@@ -2505,7 +2505,8 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
                 // Variables declared in the block would have previously gone
                 // out of scope. Overwrite them to force any aliases to also
                 // see an update.
-                auto successors = cfg.graph().neighborsDownstream((*contents.rbegin())->identity());
+                const auto& successors = cfg.graph().neighborsDownstream((*contents.rbegin())->identity());
+                // A block should have at most one child, the statement following it.
                 assert(successors.size() <= 1);
                 if ( ! successors.empty() ) {
                     const auto* scope_end = cfg.graph().getNode(successors.front());
