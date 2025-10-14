@@ -2396,7 +2396,7 @@ std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG&
     return result;
 }
 
-bool FunctionBodyVisitor::flattenBlocks(const detail::cfg::CFG& cfg, Node* n) {
+bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
     struct BlockSelector : visitor::MutatingPostOrder {
         BlockSelector(Builder* builder, bool& modified)
             : visitor::MutatingPostOrder(builder, logging::debug::Optimizer), modified(modified) {}
