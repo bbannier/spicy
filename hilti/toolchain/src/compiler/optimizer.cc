@@ -2502,7 +2502,9 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
             if ( ! contents.empty() ) {
                 parent->clearChildren();
 
-                // FIXME(bbannier): default-init variables hitting a scope end.
+                // Variables declared in the block would have previously gone
+                // out of scope. Overwrite them to force any aliases also see
+                // receive an update.
                 auto successors = cfg.graph().neighborsDownstream((*contents.rbegin())->identity());
                 assert(successors.size() == 1);
                 const auto* scope_end = cfg.graph().getNode(successors.front());
@@ -2511,7 +2513,8 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
                 const auto& transfer = cfg.dataflow().at(*scope_end);
                 for ( auto&& [a, xx] : transfer.kill ) {
                     if ( auto* local = a->tryAs<declaration::LocalVariable>() )
-                        builder()->addAssign(a->id(), builder()->default_(local->type()->type()));
+                        block->addChild(context(), builder()->assign(builder()->id(a->id()),
+                                                                     builder()->default_(local->type()->type())));
                 }
 
                 for ( auto* c : contents ) {
@@ -2523,6 +2526,7 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
                 }
 
                 modified = true;
+                ever_modified |= modified;
             }
         }
 
