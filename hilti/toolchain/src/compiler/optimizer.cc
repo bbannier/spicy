@@ -2305,7 +2305,7 @@ struct FunctionBodyVisitor : OptimizerVisitor {
             visitNode(body);
     }
 
-    bool flattenBlocks(const detail::cfg::CFG& cfg, Node* n);
+    bool flattenBlocks(detail::cfg::CFG& cfg, Node* n);
 };
 
 std::vector<Node*> FunctionBodyVisitor::unusedStatements(const detail::cfg::CFG& cfg) const {
