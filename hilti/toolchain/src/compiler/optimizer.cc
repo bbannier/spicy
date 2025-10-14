@@ -2483,7 +2483,7 @@ bool FunctionBodyVisitor::flattenBlocks(detail::cfg::CFG& cfg, Node* n) {
     };
 
     bool modified = false;
-    bool any_modification = false;
+    bool ever_modified = false;
     do {
         modified = false;
 
