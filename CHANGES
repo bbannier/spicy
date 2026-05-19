@@ -1,3 +1,59 @@
+1.17.0-dev.15 | 2026-05-18 16:01:42 +0200
+
+  * Fix potential nullptr dereference in remove-unused-fields pass. (Benjamin Bannier, Corelight)
+
+    This was introduced in 79d44f786c so needs to be backported to
+    release/1.16.
+
+1.17.0-dev.13 | 2026-05-13 15:04:46 +0200
+
+  * GH-1829: Switch back to upstream version of 3rdparty/SafeInt. (Benjamin Bannier, Corelight)
+
+    We moved to our own fork of SafeInt because of #1829. It looks like
+    upstream has fixed enough for us to switch back to them. It might be
+    that more related changes are incoming, but we can follow up on them
+    separately.
+
+1.17.0-dev.11 | 2026-05-12 15:25:29 -0400
+
+  * Prefer worklist algorithm to fixed point iteration. (Evan Typanski, Corelight)
+
+    Talked with Gemini to get the worklist idea
+
+    When aliasing, we know which nodes will need their aliases recalculated.
+    Use that info to create a worklist, rather than unconditionally running
+    another N^2 times.
+
+  * GH-2258: Fix transitive aliases. (Evan Typanski, Corelight)
+
+    Fixes #2258
+
+    Consider a program where a has two direct aliases: b and p. Then, b has
+    an alias c. p and c must alias, or else writes to p might be removed.
+    This forces that by unioning alias sets until convergence.
+
+    There are other ways to ensure aliases are unioned (see: union-find) but
+    this is the simplest way, albeit a little slow.
+
+1.17.0-dev.3 | 2026-05-11 17:08:26 +0200
+
+  * Bump visualstudio2022buildtools to 117.14.29 in CI (Benjamin Bannier, Corelight)
+
+  * Add ccache to Windows CI. (Benjamin Bannier, Corelight)
+
+  * Start of v1.17.0 development. (Benjamin Bannier, Corelight)
+
+1.16.0 | 2026-05-05 15:04:16 +0200
+
+1.16.0-dev.173 | 2026-05-05 15:04:03 +0200
+
+  * GH-2351: Fix logic in duplicate switch case detection. (Benjamin Bannier, Corelight)
+
+    This patch fixes jumbled logic in the duplicate switch case detection
+    which we were running into for some not foldable case conditions.
+
+    Closes #2351.
+
 1.16.0-dev.171 | 2026-04-24 18:00:46 +0200
 
   * Remove unnecessary string allocation. (Benjamin Bannier, Corelight)
