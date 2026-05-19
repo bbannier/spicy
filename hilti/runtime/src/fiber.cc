@@ -149,7 +149,7 @@ void __fiber_switch_trampoline(void* argsp) {
     //
     // At this point, the fiber being switched to owns the shared stack.
     if ( to->_type == detail::Fiber::Type::SharedStack ) {
-        if ( ::fiber_stack(to->_fiber.get()) == nullptr ) {
+        if ( ! ::fiber_stack(to->_fiber.get()) ) {
             auto* shared_stack = context::detail::get()->fiber.shared_stack.get();
             ::fiber_init(to->_fiber.get(), shared_stack->stack, shared_stack->stack_size, fiber_bottom_abort, to);
             void* dummy_args; // not used, but need a non-null pointer
