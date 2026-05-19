@@ -271,7 +271,8 @@ detail::Fiber::Fiber(Type type) : _type(type), _fiber(std::make_unique<::Fiber>(
             // is checked in __fiber_run_trampoline where the fiber will be
             // delayed initialized and the __fiber_run_trampoline() placed on
             // the stack.
-            ::memset(_fiber.get(), '\0', sizeof(*_fiber));
+            assert(_fiber.get());
+            _fiber->stack = nullptr;
 
 #ifdef HILTI_HAVE_ASAN
             _asan.stack = context::detail::get()->fiber.shared_stack->stack;
